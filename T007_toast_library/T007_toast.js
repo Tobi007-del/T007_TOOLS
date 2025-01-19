@@ -1,3 +1,11 @@
+(function loadStyleSheet(src) {
+    let link = document.createElement("link")
+    link.href = src
+    link.rel = "stylesheet"
+
+    document.body.append(link)
+})("/T007_TOOLS/T007_toast_library/T007_toast.css")
+
 const DEFAULT_OPTIONS = {
     autoClose: 5000,
     position: "top-right",
