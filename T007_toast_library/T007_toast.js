@@ -37,7 +37,7 @@ switch (type) {
             script.src = src
 
             script.onload = () => resolve(script)
-            script.onerror = () =>  reject(new Error(`Load error for TMG JavaScript file`))
+            script.onerror = () =>  reject(new Error(`Load error for T007 Toast JavaScript file`))
 
             document.body.append(script)
         })
@@ -51,7 +51,7 @@ switch (type) {
     
             link.onload = () => resolve(link)
 
-            link.onerror = () =>  reject(new Error(`Load error for TMG CSSStylesheet`))
+            link.onerror = () =>  reject(new Error(`Load error for T007 Toast CSSStylesheet`))
     
             document.head.append(link)
         })
@@ -213,9 +213,7 @@ class t007Toast {
     handleSlideAway(e) {
         const x = e.clientX ?? e.changedTouches[0].clientX
         if (this.#lastX > 0) {
-            if (this.options.position.includes("left")) {
-                if (x - this.#lastX < -this.#slideAwayOffset) this.remove()
-            } else if (x - this.#lastX > this.#slideAwayOffset) this.remove() 
+            if (Math.abs(x - this.#lastX) > this.#slideAwayOffset) this.remove() 
         } 
     }    
     /**
