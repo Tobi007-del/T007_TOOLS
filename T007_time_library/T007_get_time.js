@@ -1,8 +1,7 @@
 (function(env) {
-    var init = function(keyword){
+    let init = function(keyword){
         return new getTime(keyword)[keyword]
     }
-
     class getTime {
         constructor(keyword) {
             this.date = new Date()
