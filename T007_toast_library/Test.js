@@ -5,11 +5,11 @@ const positions = ["top-right", "top-left", "top-center", "bottom-right", "botto
 
 document.querySelector("button").addEventListener("click", () => {
     Toast({
+        position: positions[Math.floor(Math.random() * positions.length)],
         data: {
             type: "info",
             image: "../assets/images/my_profile_s.jpeg",
-            body: "Hello, I'm Tobi007",
-            position: positions[Math.floor(Math.random() * positions.length)],
+            body: "Hello, I'm Tobi007"
         }
     })
 }
