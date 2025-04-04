@@ -5,7 +5,7 @@ const DEFAULT_OPTIONS = {
     onClose: () => {}, 
     canClose: true,
     closeOnClick: false,
-    closeOnSlide: true,
+    dragToClose: true,
     showProgress: true,
     pauseOnHover: true,
     pauseOnFocusLoss: true,
@@ -16,7 +16,7 @@ TOAST_DURATIONS = {
     success: 2500,
     error: 4500,
     warning: 3500,
-    info: 3500 // default
+    info: 4000 // default
 },
 TOAST_VIBRATIONS = {
     success: [100, 50, 100], // Short double buzz
@@ -29,7 +29,7 @@ let _STYLE_CACHE = {},
 _SCRIPT_CACHE = {},
 _ACTIVE_TOASTS = [];
 
-(function loadResource(src, type) {
+function loadResource(src, type) {
 switch (type) {
     case "script":
         _SCRIPT_CACHE[src] = _SCRIPT_CACHE[src] || new Promise(function (resolve, reject) {
@@ -58,8 +58,12 @@ switch (type) {
     
         return _STYLE_CACHE[src]
 }
-})("/T007_TOOLS/T007_toast_library/T007_toast.css")
+}
+loadResource("/T007_TOOLS/T007_toast_library/T007_toast.css")
 
+function clamp(min, amount, max) {
+    return Math.min(Math.max(amount, min), max)
+}
 
 export default function Toast(options) {
     return new t007Toast(options)
@@ -67,20 +71,23 @@ export default function Toast(options) {
 
 class t007Toast {
     #toastElem
-    #lastX = 0
     #autoCloseInterval
     #progressInterval
     #timeVisible = 0
     #autoClose
     #vibrate
-    #slideAwayOffset = 20
     #isPaused = false
     #unpause 
     #pause
     #visiblityChange
     #shouldUnPause
+    #pointerStartX
+    #pointerDeltaX
+    #pointerRAF
+    #pointerTicker = false
 
     constructor(options) {
+        this.bindMethods()
         _ACTIVE_TOASTS.push(this)
         this.options = {...DEFAULT_OPTIONS, ...options}
         this.#toastElem = document.createElement("div")
@@ -91,6 +98,12 @@ class t007Toast {
         this.#visiblityChange = () => this.#shouldUnPause = document.visibilityState === "visible"
         this.update(this.options)
     }
+
+    bindMethods() {
+        for (const method of Object.getOwnPropertyNames(Object.getPrototypeOf(this))) {
+            if (method !== "constructor" && typeof Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), method).value === "function") this[method] = this[method].bind(this)
+        }
+    }    
 
     /**
      * @param {boolean | string} value
@@ -182,7 +195,7 @@ class t007Toast {
             </span>
             <button title="Close" type="button" class="toast-cancel-button">&times;</button> 
         `
-        this.#toastElem.querySelector(".toast-cancel-button").addEventListener("click", this.remove.bind(this))
+        this.#toastElem.querySelector(".toast-cancel-button").addEventListener("click", this.remove)
     }
 
     /**
@@ -196,26 +209,69 @@ class t007Toast {
      * @param {boolean} value
      */
     set closeOnClick(value) {
-        value ? this.#toastElem.addEventListener("click", this.remove.bind(this)) : this.#toastElem.removeEventListener("click", this.remove.bind(this))
+        value ? this.#toastElem.addEventListener("click", this.remove) : this.#toastElem.removeEventListener("click", this.remove)
     }
 
     /**
      * @param {boolean} value
      */
-    set closeOnSlide(value) {
-        value ? this.#toastElem.addEventListener('touchmove', this.handleSlideAway.bind(this), {passive: true}) : this.#toastElem.removeEventListener('touchmove', this.handleSlideAway.bind(this), {passive: true}) 
-        this.#toastElem.addEventListener('touchstart', e => this.#lastX = e.targetTouches[0].clientX, {passive: true})
+    set dragToClose(value) {
+        if (value) {
+            this.#toastElem.addEventListener('touchstart', this.handleToastPointerStart, {passive: false})
+            this.#toastElem.addEventListener('touchend', this.handleToastPointerEnd)
+        } else {
+            this.#toastElem.removeEventListener('touchstart', this.handleToastPointerStart, {passive: false})
+            this.#toastElem.removeEventListener('touchend', this.handleToastPointerEnd)
+        }        
+    }
+
+     /**
+     * @param {object} options
+     */
+    handleToastPointerStart(e) {
+        if (e.touches?.length > 1) return
+        e.stopImmediatePropagation()
+        this.#pointerStartX = e.clientX ?? e.targetTouches[0]?.clientX
+        this.#pointerTicker = false
+        this.#toastElem.addEventListener('touchmove', this.handleToastPointerMove, {passive: false})
+        this.#isPaused = true
     }
     
     /**
      * @param {object} options
      */
-    handleSlideAway(e) {
-        const x = e.clientX ?? e.changedTouches[0].clientX
-        if (this.#lastX > 0) {
-            if (Math.abs(x - this.#lastX) > this.#slideAwayOffset) this.remove() 
-        } 
+    handleToastPointerMove(e) {
+        e.preventDefault()
+        e.stopImmediatePropagation()
+        if (this.#pointerTicker) return
+        this.#pointerRAF = requestAnimationFrame(() => {
+            let x = e.clientX ?? e.targetTouches[0]?.clientX
+            this.#pointerDeltaX = x - this.#pointerStartX
+            this.#toastElem.style.setProperty("transition", "none", "important")
+            this.#toastElem.style.setProperty("transform", `translateX(${this.#pointerDeltaX}px)`, "important")
+            this.#toastElem.style.setProperty("opacity", clamp(0, 1 - (Math.abs(this.#pointerDeltaX) / this.#toastElem.offsetWidth), 1), "important")
+            this.#pointerTicker = false
+        })
+        this.#pointerTicker = true
     }    
+
+    /**
+     * @param {object} options
+     */
+    handleToastPointerEnd() {
+        cancelAnimationFrame(this.#pointerRAF)
+        if (Math.abs(this.#pointerDeltaX) > (this.#toastElem.offsetWidth*0.4)) {
+            this.remove("instant")
+            return
+        } 
+        this.#pointerTicker = false
+        this.#toastElem.removeEventListener('touchmove', this.handleToastPointerMove, {passive: false})
+        this.#toastElem.style.removeProperty("transition")
+        this.#toastElem.style.removeProperty("transform")
+        this.#toastElem.style.removeProperty("opacity")
+        this.#isPaused = false
+    }    
+
     /**
      * @param {boolean} value
      */
@@ -305,8 +361,8 @@ class t007Toast {
     cleanUpToast() {
         const container = this.#toastElem.parentElement
         this.#toastElem.remove()
-        if (container.hasChildNodes()) return 
-        container.remove()
+        if (container?.hasChildNodes()) return 
+        container?.remove()
     }
 
     remove(manner = "smooth") {

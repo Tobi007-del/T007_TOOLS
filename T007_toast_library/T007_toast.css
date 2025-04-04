@@ -23,6 +23,11 @@
     --t007-toast-x-color: red;
 }
 
+:root {
+    --t007-current-drag-x: 0;
+    --t007-current-drag-opacity: 1;
+}
+
 @keyframes xSlideBounceIn {
     from { transform: translateX(var(--t-from)); } 
     50% { transform: translateX(var(--t-bounce)); } 
@@ -96,6 +101,8 @@
     -webkit-backdrop-filter: blur(var(--t007-toast-background-blur));
     backdrop-filter: blur(var(--t007-toast-background-blur));
     overflow: hidden;
+    transition: transform 300ms ease, opacity 300ms ease;
+    will-change: transform, opacity;
     animation-timing-function: var(--t007-toast-timing-function);
     animation-fill-mode: forwards;
     animation-duration: var(--t007-toast-transition);
@@ -187,7 +194,6 @@
     height: var(--t007-toast-image-height);
     border-radius: var(--t007-toast-image-border-radius);
     overflow: hidden;
-    background: black;
 }
 
 .toast-image-wrapper:not(:has(.toast-image)) {
