@@ -2,8 +2,7 @@ import Toast from "./T007_toast.js"
 
 //just testing all possible positions
 const positions = ["top-right", "top-left", "top-center", "bottom-right", "bottom-left", "bottom-center", "center-right", "center-left", "center-center"]
-
-document.querySelector("button").addEventListener("click", () => {
+window.showToast = function showToast() {
     Toast({
         position: positions[Math.floor(Math.random() * positions.length)],
         data: {
@@ -13,7 +12,6 @@ document.querySelector("button").addEventListener("click", () => {
         }
     })
 }
-)
 
 Toast({
     position: "top-right",

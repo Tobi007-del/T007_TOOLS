@@ -51,7 +51,7 @@ switch (type) {
     
             link.onload = () => resolve(link)
 
-            link.onerror = () =>  reject(new Error(`Load error for T007 Toast CSSStylesheet`))
+            link.onerror = () =>  reject(new Error(`Load error for T007 Toast CSS Stylesheet`))
     
             document.head.append(link)
         })

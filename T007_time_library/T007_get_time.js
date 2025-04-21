@@ -10,12 +10,10 @@
 
         now() {
             let hours = this.date.getHours() % 12
-            let ampm = this.date.getHours() <= 12 ? 'AM' : 'PM'
-            let minutes = this.date.getMinutes()
-            let seconds = this.date.getSeconds()
+            let ampm = this.date.getHours() < 12 ? 'AM' : 'PM'
+            let minutes = this.date.getMinutes().toString().padStart(2, '0')
+            let seconds = this.date.getSeconds().toString().padStart(2, '0')
             hours = hours ? hours : 12
-            minutes = minutes < 10 ? '0' + minutes : minutes
-            seconds = seconds < 10 ? '0' + seconds : seconds
             return hours + ':' + minutes + ':' + seconds + ' ' + ampm
         }
 
@@ -46,6 +44,3 @@
     env.getTime = init
     // module.exports = init
 })(typeof window === "undefined" ? global : window)
-
-
-console.log(getTime("now"))

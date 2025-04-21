@@ -1,10 +1,9 @@
 if (typeof window === "undefined") {
-    var getTime = require('./T007_getTime')
-    getTime = global.getTime
-    console.log(getTime('now'))
+    require('./T007_getTime')
+    console.log(global.getTime('now'))
 } else {
     const timeDiv = document.querySelector(".time")
-    document.addEventListener("DOMContentLoaded", () => setInterval(() => timeDiv.innerText = `${getTime('now')}`, 1000))    
+    setInterval(() => timeDiv.innerText = `${window.getTime('now')}`, 1000)
 }
 
 
