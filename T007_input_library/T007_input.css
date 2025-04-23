@@ -1,0 +1,453 @@
+:where(:root) {
+    --i-font-family: inherit;
+    --i-font-size: 1rem;
+    --i-height: 3.5rem;
+    --i-checkmark-color: white;
+    --i-checkbox-background: whitesmoke;
+    --i-checkbox-checked-background: dodgerblue;
+    --i-checkbox-border-color: #707070;
+    --i-checkbox-checked-border-color: black;
+    --i-radio-color: dodgerblue;
+    --i-radio-background: whitesmoke;
+    --i-radio-checked-background: whitesmoke;
+    --i-radio-border-color: #707070;
+    --i-radio-checked-border-color: dodgerblue;
+    --i-normal-color: rgba(0, 0, 0, 0.45);
+    --i-focus-color: black;
+    --i-success-color: green;
+    --i-error-color: #b00020;
+    --p-meter-color-weak: #b81a0a;
+    --p-meter-color-fair: #f68b1e;
+    --p-meter-color-strong: #0a8b1e;
+    --p-meter-color-very-strong: #39FF14;
+}
+
+.field,
+.field *,
+.field *::after,
+.field *::before {
+    box-sizing: border-box;
+    font-family: var(--i-font-family);
+    transition-property: transform, filter, background, background-color, color, border-color, right, left, top, bottom, width, height;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+}
+
+.field {
+    --i-current-color: var(--i-normal-color);
+    width: 100%;
+    max-width: 100%;
+    padding-top: 1rem;
+    -webkit-font-smoothing: antialiased;
+}
+
+.field:where(:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) {
+    --i-current-color: var(--i-focus-color);
+}
+
+.field.success {
+    --i-current-color: var(--i-success-color);
+}
+
+.field.error {
+    --i-current-color: var(--i-error-color);
+}
+
+.input-field {
+    position: relative;
+    min-width: 3rem;
+    height: var(--i-height);
+    width: 100%;
+    padding: 1rem;
+    border-radius: .25rem;
+    display: inline-flex;
+    align-items: baseline;
+}
+
+.input-field:has(textarea) {
+    min-height: fit-content;
+}
+
+.input-field:has(.input-icon) {
+    padding-right: 0;
+}
+
+.input-outline {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    pointer-events: none;
+    text-align: left;
+}
+
+.input-outline>* {
+    height: 100%;
+    border-color: var(--i-current-color) !important;
+    pointer-events: none;
+}
+
+.field:has(.input:focus) .input-outline>* {
+    border-width: .125rem !important;
+}
+
+.input-outline-leading {
+    width: 0.75rem;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: .25rem;
+    border-bottom-right-radius: 0;
+    border-left: 1px solid;
+    border-right: none;
+}
+
+.input-outline-trailing {
+    flex: 1;
+    border-top-left-radius: 0;
+    border-top-right-radius: .25rem;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: .25rem;
+    border-left: none;
+    border-right: 1px solid;
+}
+
+.input-outline-leading,
+.input-outline-trailing {
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+}
+
+.input-outline-notch {
+    position: relative;
+    width: auto;
+    max-width: calc(100% - .75rem);
+    flex: 0 0 auto;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+}
+
+.field:has(.input-icon) .input-outline-notch {
+    max-width: calc(100% - 3.75rem);
+}
+
+.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))) .input-outline-notch,
+.field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-outline-notch {
+    border-top: none;
+}
+
+.field:not(:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])), .input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"]))) .input-outline-notch {
+    width: auto !important;
+}
+
+.input-floating-label {
+    color: var(--i-current-color);
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    top: calc(var(--i-height) / 2);
+    transform: translateY(-50%);
+    font-weight: 400;
+    font-size: var(--i-font-size);
+    line-height: 1.15rem;
+    transform-origin: left top;
+    white-space: nowrap;
+    will-change: transform;
+}
+
+.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))) .input-floating-label,
+.field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-floating-label {
+    transform: translateY(-2.1rem) scale(0.75);
+    left: .25rem;
+    right: auto;
+    max-width: 133%;
+}
+
+.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))) .input-floating-label.shake,
+.field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-floating-label.shake {
+    transition: 100ms ease;
+    transform: translateY(-2.1rem) translateX(.25rem) scale(0.75);
+}
+
+.input {
+    border: none;
+    background: none;
+    color: var(--i-current-color);
+    caret-color: var(--i-current-color);
+    border-radius: 0;
+    font-size: var(--i-font-size);
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.input:not(select) {
+    appearance: none;
+}
+
+.input::placeholder {
+    color: currentColor;
+    opacity: 0.55;
+}
+
+:where(.input)::file-selector-button {
+    border: none;
+    font-family: inherit;
+    font-weight: bold;
+    background: var(--i-focus-color);
+    font-size: calc(var(--i-font-size)/1.25);
+    margin-right: 0.65rem;
+    color: dodgerblue;
+    padding: 0.25rem;
+    border: thin solid grey;
+    border-radius: 0.18rem;
+    cursor: pointer;
+    transition: 200ms ease;
+}
+
+:where(.input)::file-selector-button:is(:hover, :focus-visible) {
+    background: dodgerblue;
+    color: var(--i-focus-color);
+}
+
+.input:focus {
+    outline: none;
+}
+
+/* .field:has(.input:-webkit-autofill) .input-outline > * {
+    background-color: var(--current-theme-inverse-transparent-color);
+} */
+
+.input:-webkit-autofill {
+    transition: background-color 50000000s ease-in-out 0s !important;
+    -webkit-text-fill-color: var(--i-current-color) !important;
+}
+
+.input-icon {
+    background: none;
+    border: none;
+    padding: 0.75rem;
+    align-self: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.field:has(input[type="password"]) .input-password-visible-icon,
+.field:has(input[type="text"]) .input-password-hidden-icon {
+    display: none;
+}
+
+.helper-line {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+    padding-inline: 1rem;
+    height: 1rem;
+}
+
+.helper-text::before {
+    content: "";
+    position: relative;
+    top: 0;
+    left: 0;
+    display: block;
+    height: .2rem;
+}
+
+.helper-text {
+    position: absolute;
+    font-size: 0.75rem;
+    color: var(--i-current-color);
+    line-height: normal;
+    opacity: 0;
+}
+
+.helper-text.info,
+.helper-text.show {
+    opacity: 1;
+}
+
+.helper-line:has(.helper-text.show) .helper-text.info {
+    opacity: 0;
+}
+
+.password-meter {
+    --p-meter-current-color: var(--p-meter-color-weak);
+    display: none;
+    margin-top: .75rem;
+}
+
+.field:has(.input:is([type="password"], [type="text"]):is([data-filled], :-webkit-autofill, :not(:placeholder-shown))) .password-meter {
+    display: block;
+}
+
+.password-meter[data-strength-level="2"] {
+    --p-meter-current-color: var(--p-meter-color-fair);
+}
+
+.password-meter[data-strength-level="3"] {
+    --p-meter-current-color: var(--p-meter-color-strong);
+}
+
+.password-meter[data-strength-level="4"] {
+    --p-meter-current-color: var(--p-meter-color-very-strong);
+}
+
+.password-meter::after {
+    content: "";
+    position: relative;
+    bottom: 0;
+    display: block;
+    text-align: right;
+    font-size: 0.75rem;
+    margin-top: .75rem;
+    color: var(--p-meter-current-color);
+    line-height: normal;
+}
+
+.password-meter[data-strength-level="1"]::after {
+    content: "Weak";
+}
+
+.password-meter[data-strength-level="2"]::after {
+    content: "Fair";
+}
+
+.password-meter[data-strength-level="3"]::after {
+    content: "Strong";
+}
+
+.password-meter[data-strength-level="4"]::after {
+    content: "Very Strong";
+}
+
+.password-strength-meter {
+    display: flex;
+}
+
+.password-strength-meter>div {
+    flex: 1;
+    margin-right: .25rem;
+    height: .225rem;
+}
+
+.password-meter[data-strength-level="1"] .p-weak,
+.password-meter[data-strength-level="2"] :is(.p-weak, .p-fair),
+.password-meter[data-strength-level="3"] :is(.p-weak, .p-fair, .p-strong),
+.password-meter[data-strength-level="4"] :is(.p-weak, .p-fair, .p-strong, .p-very-strong) {
+    background-color: var(--p-meter-current-color);
+}
+
+.checkbox-group,
+.radio-group {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.checkbox-input-field,
+.radio-input-field {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.checkbox-label,
+.radio-label {
+    color: var(--i-current-color);
+}
+
+:is(.checkbox-input-field,
+    .radio-input-field):hover {
+    filter: brightness(95%);
+}
+
+.checkbox-box,
+.radio-box {
+    position: relative;
+    width: .85rem;
+    height: .85rem;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.checkbox-box {
+    background: var(--i-checkbox-background);
+    border-color: var(--i-checkbox-border-color);
+}
+
+.radio-box {
+    background: var(--i-radio-background);
+    border-color: var(--i-radio-border-color);
+}
+
+.checkbox-box {
+    border-radius: 0.2rem;
+}
+
+.radio-box {
+    border-radius: 50%;
+}
+
+.field:has(.input[type="checkbox"]:checked) .checkbox-box {
+    background: var(--i-checkbox-checked-background);
+    border-color: var(--i-checkbox-checked-border-color);
+}
+
+.field:has(.input[type="radio"]:checked) .radio-box {
+    background: var(--i-radio-checked-background);
+    border-color: var(--i-radio-checked-border-color);
+}
+
+.field.error :is(.checkbox-input-field .checkbox-box, .radio-input-field .radio-box) {
+    border-color: var(--i-error-color);
+}
+
+.checkbox-box::after,
+.radio-box::after {
+    content: "";
+    opacity: 0;
+    position: absolute;
+    margin: auto;
+    inset: 0;
+}
+
+.checkbox-box::after {
+    top: -10%;
+    width: 35%;
+    height: 70%;
+    border: solid var(--i-checkmark-color);
+    border-width: 0 0.125rem 0.125rem 0;
+    transform: rotate(45deg);
+}
+
+.radio-box::after {
+    width: 70%;
+    height: 70%;
+    border-radius: inherit;
+    background: var(--i-radio-color);
+}
+
+.field:has(.input[type="checkbox"]:checked) .checkbox-box::after,
+.field:has(.input[type="radio"]:checked) .radio-box::after {
+    opacity: 1;
+}
+
+.input[type="checkbox"],
+.input[type="radio"] {
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+}

@@ -1,72 +1,71 @@
-const DEFAULT_OPTIONS = {
-    autoClose: true,
-    autoClose: true,
-    position: "top-right",
-    onClose: () => {}, 
-    canClose: true,
-    closeOnClick: false,
-    dragToClose: true,
-    showProgress: true,
-    pauseOnHover: true,
-    pauseOnFocusLoss: true,
-    renotify: true,
-    vibrate: false
-},
-TOAST_DURATIONS = {
-    success: 2500,
-    error: 4500,
-    warning: 3500,
-    info: 4000 // default
-},
-TOAST_VIBRATIONS = {
-    success: [100, 50, 100], // Short double buzz
-    warning: [300, 100, 300], // Two long buzzes
-    error: [500, 200, 500], // Strong long buzz
-    info: [200] // Single short buzz
+window.TOAST_DEFAULT_OPTIONS = {
+    autoClose: window.TOAST_DEFAULT_OPTIONS?.autoClose ?? true,
+    position: window.TOAST_DEFAULT_OPTIONS?.position ?? "top-right",
+    onClose: window.TOAST_DEFAULT_OPTIONS?.onClose ?? function() {}, 
+    canClose: window.TOAST_DEFAULT_OPTIONS?.canClose ?? true,
+    closeOnClick: window.TOAST_DEFAULT_OPTIONS?.closeOnClick ?? false,
+    dragToClose: window.TOAST_DEFAULT_OPTIONS?.dragToClose ?? true,
+    showProgress: window.TOAST_DEFAULT_OPTIONS?.showProgress ?? true,
+    pauseOnHover: window.TOAST_DEFAULT_OPTIONS?.pauseOnHover ?? true,
+    pauseOnFocusLoss: window.TOAST_DEFAULT_OPTIONS?.pauseOnFocusLoss ?? true,
+    renotify: window.TOAST_DEFAULT_OPTIONS?.renotify ?? true,
+    vibrate: window.TOAST_DEFAULT_OPTIONS?.vibrate ?? false
+}
+window.TOAST_DURATIONS = {
+    success: window.TOAST_DURATIONS?.success ?? 2500,
+    error: window.TOAST_DURATIONS?.error ?? 4500,
+    warning: window.TOAST_DURATIONS?.warning ?? 3500,
+    info: window.TOAST_DURATIONS?.info ?? 4000 // default
+}
+window.TOAST_VIBRATIONS = {
+    success: window.TOAST_VIBRATIONS?.success ?? [100, 50, 100], // Short double buzz
+    warning: window.TOAST_VIBRATIONS?.warning ?? [300, 100, 300], // Two long buzzes
+    error: window.TOAST_VIBRATIONS?.error ?? [500, 200, 500], // Strong long buzz
+    info: window.TOAST_VIBRATIONS?.info ?? [200] // Single short buzz
 }
 
-let _STYLE_CACHE = {},
-_SCRIPT_CACHE = {},
-_ACTIVE_TOASTS = [];
-
-function loadResource(src, type) {
-switch (type) {
-    case "script":
-        _SCRIPT_CACHE[src] = _SCRIPT_CACHE[src] || new Promise(function (resolve, reject) {
-            let script = document.createElement("script")
+let _ACTIVE_TOASTS = []
+const _RESOURCE_CACHE = {}
+function loadResource(src, type = "style", options = {}) {
+    const { module = false, media = null, crossorigin = null, integrity = null, } = options
+    if (_RESOURCE_CACHE[src]) return _RESOURCE_CACHE[src]
+    const isLoaded = (() => {
+        if (type === "script") {
+        return [...document.scripts].some(s => s.src.includes(src))
+        } else if (type === "style") {
+        return [...document.styleSheets].some(s => s.href.includes(src))
+        }
+        return false
+    })()
+    if (isLoaded) return Promise.resolve(null) 
+    _RESOURCE_CACHE[src] = new Promise((resolve, reject) => {
+        if (type === "script") {
+            const script = document.createElement("script")
             script.src = src
-
+            if (module) script.type = "module"
+            if (crossorigin) script.crossOrigin = crossorigin
+            if (integrity) script.integrity = integrity
             script.onload = () => resolve(script)
-            script.onerror = () =>  reject(new Error(`Load error for T007 Toast JavaScript file`))
-
+            script.onerror = () => reject(new Error(`Script load error: ${src}`))
             document.body.append(script)
-        })
-
-        return _SCRIPT_CACHE[src]
-    default:
-        _STYLE_CACHE[src] = _STYLE_CACHE[src] || new Promise(function (resolve, reject) {
-            let link = document.createElement("link")
-            link.href = src
+        } else if (type === "style") {
+            const link = document.createElement("link")
             link.rel = "stylesheet"
-    
+            link.href = src
+            if (media) link.media = media
             link.onload = () => resolve(link)
-
-            link.onerror = () =>  reject(new Error(`Load error for T007 Toast CSS Stylesheet`))
-    
+            link.onerror = () => reject(new Error(`Stylesheet load error: ${src}`))
             document.head.append(link)
-        })
-    
-        return _STYLE_CACHE[src]
+        } else {
+            reject(new Error(`Unsupported type: ${type}`))
+        }
+    })
+    return _RESOURCE_CACHE[src]
 }
-}
-loadResource("/T007_TOOLS/T007_toast_library/T007_toast.css")
+loadResource(`/T007_TOOLS/T007_toast_library/T007_toast.css`)
 
 function clamp(min, amount, max) {
     return Math.min(Math.max(amount, min), max)
-}
-
-export default function Toast(options) {
-    return new t007Toast(options)
 }
 
 class t007Toast {
@@ -89,7 +88,7 @@ class t007Toast {
     constructor(options) {
         this.bindMethods()
         _ACTIVE_TOASTS.push(this)
-        this.options = {...DEFAULT_OPTIONS, ...options}
+        this.options = {...window.TOAST_DEFAULT_OPTIONS, ...options}
         this.#toastElem = document.createElement("div")
         this.#toastElem.classList.add("t007-toast")
         requestAnimationFrame(() => this.#toastElem.classList.add("toast-show"))
@@ -100,10 +99,15 @@ class t007Toast {
     }
 
     bindMethods() {
-        for (const method of Object.getOwnPropertyNames(Object.getPrototypeOf(this))) {
-            if (method !== "constructor" && typeof Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), method).value === "function") this[method] = this[method].bind(this)
+        let proto = Object.getPrototypeOf(this)
+        while (proto && proto !== Object.prototype) {
+            for (const method of Object.getOwnPropertyNames(proto)) {
+                const descriptor = Object.getOwnPropertyDescriptor(proto, method)
+                if (method !== "constructor" && descriptor && typeof descriptor.value === "function") this[method] = this[method].bind(this)
+            }
+            proto = Object.getPrototypeOf(proto)
         }
-    }    
+    } 
 
     /**
      * @param {boolean | string} value
@@ -115,10 +119,10 @@ class t007Toast {
                 case "success":
                 case "error":
                 case "warning": 
-                    value = TOAST_DURATIONS[this.options.data.type]
+                    value = window.TOAST_DURATIONS[this.options.data.type]
                     break
                 default:
-                    value = TOAST_DURATIONS.info  
+                    value = window.TOAST_DURATIONS.info  
             }
         } 
         this.#autoClose = value
@@ -330,10 +334,10 @@ class t007Toast {
                 case "success":
                 case "error":
                 case "warning": 
-                    value = TOAST_VIBRATIONS[this.options.data.type]
+                    value = window.TOAST_VIBRATIONS[this.options.data.type]
                     break
                 default:
-                    value = TOAST_VIBRATIONS.info  
+                    value = window.TOAST_VIBRATIONS.info  
             }
         }
         this.#vibrate = value
@@ -374,4 +378,8 @@ class t007Toast {
         this.onClose()
         _ACTIVE_TOASTS = _ACTIVE_TOASTS.filter(toast => toast !== this)
     }
+}
+
+export default function Toast(options) {
+    return new t007Toast(options)
 }

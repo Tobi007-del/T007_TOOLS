@@ -31,13 +31,18 @@
     --t007-cancel-button-outline-color: greenyellow;
 }
 
+.t007-dialog {
+    --i-normal-color: rgb(from var(--t007-dialog-message-color)  r g b/0.45);
+    --i-focus-color: var(--t007-dialog-message-color);
+}
+
+.t007-dialog,
 .t007-dialog *,
 .t007-dialog *::after,
 .t007-dialog *::before {
     box-sizing: border-box;
+    font-family: var(--t007-dialog-font-family);
     -webkit-tap-highlight-color: transparent;
-    margin: 0;
-    padding: 0;
 }
 
 .t007-dialog *:focus {
@@ -58,7 +63,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: inherit;
     transition: filter 200ms ease;
 }
 
@@ -72,7 +76,6 @@ body:has(.t007-dialog[open]) {
 }
 
 .t007-dialog {
-    font-family: var(--t007-dialog-font-family);
     margin: auto;
     display: flex;
     flex-direction: column;
@@ -111,6 +114,10 @@ body:has(.t007-dialog[open]) {
     max-height: var(--t007-dialog-max-content-height);
     overflow-x: hidden;
     overflow-y: auto;
+}
+
+.t007-dialog:has(.field) .t007-dialog-top-section {
+    padding-block-end: 0;
 }
 
 .t007-dialog-question {
