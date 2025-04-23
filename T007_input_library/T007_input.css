@@ -192,6 +192,10 @@
     appearance: none;
 }
 
+::picker(select) {
+    color: black;
+}
+
 .input::placeholder {
     color: currentColor;
     opacity: 0.55;
@@ -248,9 +252,6 @@
 
 .helper-line {
     position: relative;
-    display: flex;
-    justify-content: space-between;
-    text-align: center;
     padding-inline: 1rem;
     height: 1rem;
 }
@@ -268,7 +269,7 @@
     position: absolute;
     font-size: 0.75rem;
     color: var(--i-current-color);
-    line-height: normal;
+    line-height: .75rem;
     opacity: 0;
 }
 

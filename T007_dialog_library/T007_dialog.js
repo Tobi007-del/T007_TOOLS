@@ -10,6 +10,13 @@ export function Prompt(question, defaultValue, fieldOptions) {
     return new Promise(resolve => new t007PromptDialog({ question, defaultValue, fieldOptions, resolve }))
 }
 
+if (typeof window !== "undefined") {
+    window.Alert = Alert
+    window.Confirm = Confirm
+    window.Prompt = Prompt
+    console.log("%cT007 Dialogs attached to window!", "color: green")
+}
+
 const _RESOURCE_CACHE = {}
 function loadResource(src, type = "style", options = {}) {
     const { module = false, media = null, crossorigin = null, integrity = null, } = options
@@ -60,7 +67,7 @@ class dialog {
         this.dialog = document.createElement("dialog")
         this.dialog.classList.add("t007-dialog")
         document.body.append(this.dialog)
-        document.addEventListener("keyup", this.handleKeyUp)
+        document.addEventListener("keydown", this.handleKeyDown)
     } 
 
     bindMethods() {
@@ -80,7 +87,7 @@ class dialog {
     }
 
     remove() {
-        document.removeEventListener("keyup", this.handleKeyUp)
+        document.removeEventListener("keydown", this.handleKeyDown)
         this.dialog.close()
         this.dialog.remove()
     }
@@ -95,10 +102,9 @@ class dialog {
         this.resolve(false)
     }    
 
-    handleKeyUp(e) {
-        const key = e.key.toString().toLowerCase() 
-        if (document.activeElement.tagName === 'INPUT') return
-        switch(key) {
+    handleKeyDown(e) {
+        e.stopImmediatePropagation()
+        switch(e.key.toString().toLowerCase()) {
             case "escape":
                 this.cancel()
                 break
@@ -166,6 +172,8 @@ class t007PromptDialog extends dialog {
             <div class="t007-dialog-top-section">
                 <p class="t007-dialog-question">${question}</p>
             </div>
+            <form class="input-form" novalidate>
+            </form>
             <div class="t007-dialog-bottom-section">
                 <button class="t007-dialog-confirm-button" type="button" title="OK">OK</button>
                 <button class="t007-dialog-cancel-button" type="button" title="Cancel">Cancel</button>
@@ -176,19 +184,23 @@ class t007PromptDialog extends dialog {
         this.confirmBtn.addEventListener("click", this.confirm)
         this.cancelBtn.addEventListener("click", this.cancel)
 
-        this.dialog.classList.add("input-form")
         fieldOptions.value = defaultValue
+        this.form = this.dialog.querySelector("form")
         this.field = createField(fieldOptions)
         this.input = this.field.querySelector(".input")
-        this.input.addEventListener("keydown", ({ key }) => key?.toLowerCase() === "enter" && this.confirm())
-        this.dialog.insertBefore(this.field, this.dialog.querySelector(".t007-dialog-bottom-section"))
-        window.handleFormValidation(this.dialog)
+        this.form.addEventListener("submit", e => {
+            e.preventDefault()
+            e.stopImmediatePropagation()
+            this.confirm()
+        })
+        this.form.appendChild(this.field)
+        window.handleFormValidation(this.form)
     }
 
     show() {
         this.dialog.showModal()
         this.input.focus()
-        this.input.select()
+        this.input.select && typeof this.input.select === "function" && this.input.select()
     }
 
     confirm() {

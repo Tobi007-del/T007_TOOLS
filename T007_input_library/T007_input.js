@@ -1,7 +1,7 @@
 class T007_Form_Manager {
     static forms = document.getElementsByClassName("input-form")
 
-    static violationsPriority = ["valueMissing", "typeMismatch", "patternMismatch", "stepMismatch", "tooShort", "tooLong", "rangeUnderflow", "rangeOverflow", "badInput", "customError"]
+    static violationKeys = ["valueMissing", "typeMismatch", "patternMismatch", "stepMismatch", "tooShort", "tooLong", "rangeUnderflow", "rangeOverflow", "badInput", "customError"]
 
     static _RESOURCE_CACHE = {}
 
@@ -22,9 +22,9 @@ class T007_Form_Manager {
         if (window.T007FM._RESOURCE_CACHE[src]) return window.T007FM._RESOURCE_CACHE[src]
         const isLoaded = (() => {
             if (type === "script") {
-            return [...document.scripts].some(s => s.src.includes(src))
+            return Array.from(document.scripts).some(s => s.src.includes(src))
             } else if (type === "style") {
-            return [...document.styleSheets].some(s => s.href.includes(src))
+            return Array.from(document.styleSheets).some(s => s.href.includes(src))
             }
             return false
         })()
@@ -182,7 +182,6 @@ class T007_Form_Manager {
                 `<option value="${option}">${option}</option>`
             ).join('')
         }
-        window.T007FM.toggleFilled(input)
         inputField.appendChild(input)
 
         if (eyeToggler && type === 'password') {
@@ -210,14 +209,20 @@ class T007_Form_Manager {
 
         const helperLine = document.createElement('div')
         helperLine.className = 'helper-line'
+        //info helper
         if (helperText.info) {
         const infoText = document.createElement('p')
         infoText.className = 'helper-text info'
         infoText.textContent = helperText.info
         helperLine.appendChild(infoText)
         }
-        const validityKeys = ['valueMissing', 'typeMismatch', 'patternMismatch', 'tooLong', 'tooShort','rangeUnderflow', 'rangeOverflow', 'stepMismatch', 'badInput', 'customError']
-        validityKeys.forEach(key => {
+        //fallback helper
+        const el = document.createElement('p')
+        el.className = 'helper-text'
+        el.setAttribute('data-violation', "auto")
+        helperLine.appendChild(el)
+        //custom helper
+        window.T007FM.violationKeys.forEach(key => {
         if (!helperText[key]) return
         const el = document.createElement('p')
         el.className = 'helper-text'
@@ -267,7 +272,12 @@ class T007_Form_Manager {
             try {
                 e.preventDefault()
                 if (!validateFormOnClient()) return
-                if (window[`validateForm${n+1}OnServer`] && !await window[`validateForm${n+1}OnServer`]()) return 
+                if (window[`validateForm${n+1}OnServer`])
+                if (!await window[`validateForm${n+1}OnServer`]()) {
+                    toggleGlobalError(true)
+                    form.addEventListener("input", () => toggleGlobalError(false), { once: true, useCapture: true })
+                    return
+                } 
                 form.submit()
             } catch(error) {
                 console.error(error)
@@ -278,6 +288,13 @@ class T007_Form_Manager {
 
         function toggleSubmitLoader(bool) {
             form.classList.toggle("submit-loading", bool)
+        }
+
+        function toggleGlobalError(bool) {
+            Array.from(fields).forEach(field => {
+                field.classList.toggle("error", bool)
+                if (bool) field.querySelector(".input-floating-label")?.classList.add("shake")
+            })
         }
 
         function toggleError(input, bool, notify = false, force = false) {
@@ -299,9 +316,17 @@ class T007_Form_Manager {
         }
 
         function toggleHelper(input, bool) {
-            const violation = window.T007FM.violationsPriority.find(violation => input.validity[violation]) ?? "invalid"
+            const field = input.closest(".field"),
+            violation = window.T007FM.violationKeys.find(violation => input.validity[violation]) ?? "",
+            helper = field.querySelector(`.helper-text[data-violation="${violation}"]`),
+            fallbackHelper = field.querySelector(`.helper-text[data-violation="auto"]`) 
             input.closest(".field").querySelectorAll(`.helper-text:not([data-violation="${violation}"])`).forEach(helper => helper?.classList.remove("show"))
-            input.closest(".field").querySelector(`.helper-text[data-violation="${violation}"]`)?.classList.toggle("show", bool)
+            if (helper) {
+                helper.classList.toggle("show", bool)
+            } else if (fallbackHelper) {
+                fallbackHelper.textContent = input.validationMessage
+                fallbackHelper.classList.toggle("show", bool)
+            }
         }
 
         function forceRevalidate(input) {
@@ -314,7 +339,7 @@ class T007_Form_Manager {
             if (!passwordMeter) return
             const value = input.value?.trim()
             let strengthLevel = 0
-            if (value.length < Number(input.min)) strengthLevel = 1
+            if (value.length < Number(input.minLength ?? 0)) strengthLevel = 1
             else {
             if (/[a-z]/.test(value)) strengthLevel ++
             if (/[A-Z]/.test(value)) strengthLevel ++
@@ -327,15 +352,32 @@ class T007_Form_Manager {
         function validateInput(input, notify = false, force = false) {
             if (!input?.classList.contains("input")) return
             updatePasswordMeter(input)
-            let value, errorCondition, file            
+            let value, errorCondition, file, 
+            valid = input.validity?.valid         
             switch(input.name) {
+                case "password":
+                    value = input.value?.trim()
+                    if (value === "") break
+                    const confirmPasswordInput = Array.from(inputs).find(input => input.name === "confirm-password")
+                    if (!confirmPasswordInput) break
+                    const confirmPasswordValue = confirmPasswordInput?.value?.trim() 
+                    confirmPasswordInput.setCustomValidity(value !== confirmPasswordValue ? "Both passwords must match" : "")
+                    toggleError(confirmPasswordInput, value !== confirmPasswordValue, notify, force)
                 case "confirm-password":
                     value = input.value?.trim()
-                    errorCondition = value === "" || value !== [...inputs].find(input => input.name === "password")?.value?.trim()
+                    if (value === "") break
+                    const passwordInput = Array.from(inputs).find(input => input.name === "password")
+                    if (!passwordInput) break
+                    const passwordValue = passwordInput?.value?.trim()
+                    errorCondition = value !== passwordValue
+                    input.setCustomValidity(errorCondition ? "Both passwords must match" : "")
                     break     
                 case "image":
+                case "video":
                     file = input.files?.[0]
-                    errorCondition = !file ? input.required : !file.type.startsWith("image/")
+                    if (!file) break
+                    errorCondition = !file.type.startsWith(`image/${input.name}`)
+                    input.setCustomValidity(errorCondition ? `File format is not of ${input.name} type` : "")
                     break
                 case "date":
                     if (input.min) break
@@ -343,8 +385,13 @@ class T007_Form_Manager {
                     forceRevalidate(input)
                     break
             }
-            errorCondition = errorCondition ?? !input.validity?.valid
+            errorCondition = errorCondition ?? !valid
             toggleError(input, errorCondition, notify, force)
+            if (errorCondition) return
+            if (input.type === "radio")
+                Array.from(inputs)
+                ?.filter(i => i.name == input.name)
+                ?.forEach(radio => toggleError(radio, errorCondition, notify, force))
         }
 
         function validateFormOnClient() {

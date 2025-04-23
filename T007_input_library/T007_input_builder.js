@@ -70,7 +70,7 @@ function createFieldElement ( type, labelText, required, placeholder = '', optio
         <button type="button" onclick="cloneField('${id}')">➕</button>
         <button type="button" onclick="removeField('${id}')">🗑️</button>
     </div>
-    <label contenteditable="true">${labelText}</label>
+    <label class="content-label">${labelText}</label>
     ${fieldEl}
     <div class="field-preview">Preview: ${type} field</div>
     `;
@@ -88,7 +88,7 @@ window.editField = async function editField(id) {
   if (!field) return;
 
   const type = field.dataset.type;
-  const labelEl = field.querySelector("label[contenteditable]");
+  const labelEl = field.querySelector("label.content-label");
   const labelText = await Prompt("Edit label:", labelEl.textContent.trim());
   if (!labelText) return;
 
@@ -164,18 +164,12 @@ window.toggleCollapse = function toggleCollapse(btn) {
   field.dataset.collapsed = collapsed ? "false" : "true";
 }
 
-function getFieldsHTML() {
-    const formFields = [...dropZone.querySelectorAll( '.field' )];
-    const formHTML = formFields.map( field => field.outerHTML ).join( '' );
-    return formHTML
-}
-
-window.copyFormHTML = function copyFormHTML() {
-  const text = getFieldsHTML()
+window.copyExportedCode = function copyExportedCode() {
+  const text = document.getElementById( 'output' ).textContent
   if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text)
-      .then(() => Toast({ data: { type: "success", body: "HTML Copied to Clipboard" } }))
-      .catch(err => Toast({ data: { type: "error", body: "Could not copy HTML to Clipboard" } }))
+      .then(() => Toast({ data: { type: "success", body: "Exported Code Copied to Clipboard" } }))
+      .catch(err => Toast({ data: { type: "error", body: "Could not copy Exported Code to Clipboard" } }))
     } else {
       // Fallback for insecure contexts or old browsers
       const textarea = document.createElement("textarea");
@@ -187,6 +181,12 @@ window.copyFormHTML = function copyFormHTML() {
       document.execCommand("copy");
       document.body.removeChild(textarea);
     }
+}
+
+function getFieldsHTML() {
+    const formFields = [...dropZone.querySelectorAll( '.field' )];
+    const formHTML = formFields.map( field => field.outerHTML ).join( '' );
+    return formHTML
 }
 
 window.exportFormHTML = function exportFormHTML() {
@@ -247,13 +247,6 @@ window.submitForm = function submitForm() {
 }
 
 function addAutoSaveListeners(fieldEl) {
-  // Save on label edit
-  const label = fieldEl.querySelector("label[contenteditable]");
-  label?.addEventListener("input", () => {
-    label.parentElement.querySelector(".input-floating-label").textContent = label.textContent
-    saveToLocal()
-  });
-
   // Save on any input/textarea/select change
   fieldEl.querySelectorAll("input, textarea, select").forEach(input => {
     input.addEventListener("input", saveToLocal);
