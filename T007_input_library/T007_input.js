@@ -22,9 +22,9 @@ class T007_Form_Manager {
         if (window.T007FM._RESOURCE_CACHE[src]) return window.T007FM._RESOURCE_CACHE[src]
         const isLoaded = (() => {
             if (type === "script") {
-            return Array.from(document.scripts).some(s => s.src.includes(src))
+            return Array.from(document.scripts)?.some(s => s.src?.includes(src))
             } else if (type === "style") {
-            return Array.from(document.styleSheets).some(s => s.href.includes(src))
+            return Array.from(document.styleSheets)?.some(s => s.href?.includes(src))
             }
             return false
         })()

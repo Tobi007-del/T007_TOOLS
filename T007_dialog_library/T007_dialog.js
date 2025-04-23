@@ -23,9 +23,9 @@ function loadResource(src, type = "style", options = {}) {
     if (_RESOURCE_CACHE[src]) return _RESOURCE_CACHE[src]
     const isLoaded = (() => {
         if (type === "script") {
-        return [...document.scripts].some(s => s.src.includes(src))
+        return Array.from(document.scripts)?.some(s => s.src?.includes(src))
         } else if (type === "style") {
-        return [...document.styleSheets].some(s => s.href.includes(src))
+        return Array.from(document.styleSheets)?.some(s => s.href?.includes(src))
         }
         return false
     })()
