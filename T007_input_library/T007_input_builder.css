@@ -59,6 +59,7 @@ body {
 
 .form-canvas {
     flex: 3;
+    min-width: 0;
     min-height: 400px;
     display: flex;
     flex-direction: column;
@@ -125,16 +126,65 @@ body {
     border-width: 1px;
 }
 
-.output-box {
-    width: 100%;
+.output-container {
+    position: relative;
     height: 200px;
-    padding: 1rem;
     background: #eee;
-    border-radius: 8px;
-    font-family: monospace;
+    background: #1e1e1e;
+    border-radius: 5px;
     overflow: auto;
-    white-space: pre-wrap;
+}
+
+.output-container:has(.output-box[data-code=""]) .output-buttons-container {
+    display: none;
+}
+
+.output-buttons-container {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.output-button-wrapper {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    gap: 7px;
+}
+
+.output-box {
+    padding: 1rem;
+    font-family: monospace;
+    white-space: pre;
     word-break: break-word;
+    display: block;
+    color: #d4d4d4;
+}
+
+/* Highlight styles */
+/* Optional: Add hover effects for the tokens to make them interactive */
+.token:hover {
+    background-color: #3c3c3c;
+    /* Slightly lighter background on hover */
+    border-radius: 3px;
+    cursor: pointer;
+}
+.token.comment { color: #6A9955; font-style: italic; }
+.token.tag, .token.key, .token.variable { color: #569CD6; }
+.token.attr, .token.number, .token.boolean, .token.css-selector, .token.css-val { color: #e36209; }
+.token.value, .token.string { color: #CE9178; }
+.token.css-prop, .token.eq { color: #D4D4D4; }
+.token.css-keyword { color: #C586C0; }
+.token.bracket, .token.array, .token.object, .token.keyword { color: #C586C0; }
+/* Optional: Add some margin between the tokens */
+.token.key,
+.token.string,
+.token.number,
+.token.boolean {
+    margin-right: 2px;
 }
 
 .field-preview {

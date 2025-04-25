@@ -28,62 +28,21 @@
             <div class="builder-footer">
                 <button type="button" onclick="exportFormHTML()">Export HTML</button>
                 <button type="button" onclick="exportFormJSON()">Export JSON</button>
-                <button type="button" onclick="copyExportedCode()">Copy Code</button>
                 <button type="button" onclick="saveToLocal()">Save</button>
                 <button type="button" onclick="loadFromLocal()">Load</button>
                 <button type="submit" onclick="submitForm()">Submit</button>
                 <h4>Exported Code:</h4>
-                <div class="output-box" id="output"></div>
+                <div class="output-container">
+                    <div class="output-buttons-container">
+                        <div class="output-button-wrapper">
+                            <button type="button" title="Copy Code" onclick="copyExportedCode()">Copy Code</button>
+                            <button type="button" onclick="toggleWrapExportedCode()">Toggle Wrap</button>
+                        </div>
+                    </div>
+                    <div class="output-box" id="output" data-code=""></div>
+                </div>
             </div>
         </form>
-        <!-- <div class="radio-group">
-            <div class="field">
-                <label class="radio-input-field">
-                    <span class="radio-box"></span>
-                    <span class="radio-label">Rice</span>
-                    <input type="radio" name="meal" value="rice" class="input" />
-                </label>
-                <div class="helper-line">
-                    <p class="helper-text info">Please check this box</p>
-                    <p class="helper-text" data-violation="valueMissing">Box must be checked</p>
-                </div>
-            </div>
-            <div class="field">
-                <label class="radio-input-field">
-                    <span class="radio-box"></span>
-                    <span class="radio-label">Beans</span>
-                    <input type="radio" name="meal" value="beans" class="input" />
-                </label>
-                <div class="helper-line">
-                    <p class="helper-text info">Please check this box</p>
-                    <p class="helper-text" data-violation="valueMissing">Box must be checked</p>
-                </div>
-            </div>
-        </div>
-        <div class="checkbox-group">
-            <div class="field">
-                <label class="checkbox-input-field" for="remember-me">
-                    <span class="checkmark-box"></span>
-                    <span for="remember-me" class="checkbox-label">Remember me</span>
-                    <input required type="checkbox" name="remember-me" id="remember-me" class="input">
-                </label>
-                <div class="helper-line">
-                    <p class="helper-text info">Please check this box</p>
-                    <p class="helper-text" data-violation="valueMissing">Box must be checked</p>
-                </div>
-            </div>
-            <div class="field">
-                <label class="checkbox-input-field" for="dont-remember-me">
-                    <span class="checkmark-box"></span>
-                    <span for="dont-remember-me" class="checkbox-label">Remember me</span>
-                    <input required type="checkbox" name="dont-remember-me" id="dont-remember-me" class="input">
-                </label>
-                <div class="helper-line">
-                    <p class="helper-text info">Please check this box</p>
-                    <p class="helper-text" data-violation="valueMissing">Box must be checked</p>
-                </div>
-            </div>
-        </div> -->
     </div>
     <script type="module" src="T007_input_builder.js"></script>
     <script type="module" src="T007_input.js"></script>

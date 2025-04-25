@@ -1,4 +1,5 @@
 import { Alert, Confirm, Prompt } from "../T007_dialog_library/T007_dialog.js"
+import { formatHTML, highlightHTML, highlightJSON } from "../T007_input_library/T007_code_formatter.js"
 import Toast from "../T007_toast_library/T007_toast.js"
 
 window.onload = () => Toast({ data: { type: "info", image: "../assets/images/my_profile_s.jpeg", body: "This is a Form Builder to test my Custom Form Library" } })
@@ -165,7 +166,7 @@ window.toggleCollapse = function toggleCollapse(btn) {
 }
 
 window.copyExportedCode = function copyExportedCode() {
-  const text = document.getElementById( 'output' ).textContent
+  const text = document.getElementById( 'output' ).dataset.code
   if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text)
       .then(() => Toast({ data: { type: "success", body: "Exported Code Copied to Clipboard" } }))
@@ -186,11 +187,13 @@ window.copyExportedCode = function copyExportedCode() {
 function getFieldsHTML() {
     const formFields = [...dropZone.querySelectorAll( '.field' )];
     const formHTML = formFields.map( field => field.outerHTML ).join( '' );
-    return formHTML
+    return formatHTML(formHTML);
 }
 
 window.exportFormHTML = function exportFormHTML() {
-    document.getElementById( 'output' ).textContent = getFieldsHTML();
+    const HTML = getFieldsHTML();
+    document.getElementById( 'output' ).dataset.code = HTML
+    document.getElementById( 'output' ).innerHTML = highlightHTML(HTML);
     Toast({ data: { type: "success", body: "Exported HTML Code Below" } })
 }
 
@@ -215,7 +218,9 @@ window.exportFormJSON = function exportFormJSON() {
     delete datum.id;
     delete datum.collapsed;
   });
-  document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+  const json = JSON.stringify(data, null, 2);
+  document.getElementById("output").dataset.code = json;
+  document.getElementById("output").innerHTML = highlightJSON(json);
   Toast({ data: { type: "success", body: "Exported JSON Code Below" } })
 }
 
@@ -283,4 +288,10 @@ function getDragAfterElement ( container, y ) {
             return closest;
         }
     }, { offset: Number.NEGATIVE_INFINITY } ).element;
+}
+
+const outputBox = document.querySelector(".output-box")
+window.toggleWrapExportedCode = function toggleWrapExportedCode() {
+  const { whiteSpace } = getComputedStyle(outputBox)
+  outputBox.style.whiteSpace = whiteSpace === "pre" ? "pre-wrap" : "pre"
 }
