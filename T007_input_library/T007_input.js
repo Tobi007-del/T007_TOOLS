@@ -15,6 +15,8 @@ class T007_Form_Manager {
     static mountWindow() {
         window.createField = window.T007FM.createField
         window.handleFormValidation = window.T007FM.handleFormValidation
+        window.toggleFormGlobalError = window.T007FM.toggleFormGlobalError
+        window.validateFormOnClient = window.T007FM.validateFormOnClient
     }
 
     static loadResource(src, type = "style", options = {}) {
@@ -274,8 +276,8 @@ class T007_Form_Manager {
                 if (!validateFormOnClient()) return
                 if (window[`validateForm${n+1}OnServer`])
                 if (!await window[`validateForm${n+1}OnServer`]()) {
-                    toggleGlobalError(true)
-                    form.addEventListener("input", () => toggleGlobalError(false), { once: true, useCapture: true })
+                    window.T007FM.toggleFormGlobalError(form, true)
+                    form.addEventListener("input", () => window.T007FM.toggleFormGlobalError(form, false), { once: true, useCapture: true })
                     return
                 } 
                 form.submit()
@@ -288,13 +290,6 @@ class T007_Form_Manager {
 
         function toggleSubmitLoader(bool) {
             form.classList.toggle("submit-loading", bool)
-        }
-
-        function toggleGlobalError(bool) {
-            Array.from(fields).forEach(field => {
-                field.classList.toggle("error", bool)
-                if (bool) field.querySelector(".input-floating-label")?.classList.add("shake")
-            })
         }
 
         function toggleError(input, bool, notify = false, force = false) {
@@ -399,6 +394,19 @@ class T007_Form_Manager {
             return Array.from(inputs).every(input => input.validity.valid)
         }
         window[`validateForm${n+1}OnClient`] = validateFormOnClient
+    }
+
+    static toggleFormGlobalError(form, bool) {
+        form.querySelectorAll(".field").forEach(field => {
+            field.classList.toggle("error", bool)
+            if (bool) field.querySelector(".input-floating-label")?.classList.add("shake")
+        })
+    }
+
+    static validateFormOnClient(form) { 
+        const n = Array.from(window.T007FM.forms).indexOf(form)
+        if (window[`validateForm${n+1}OnClient`])
+        window[`validateForm${n+1}OnClient`]()
     }
 }
 

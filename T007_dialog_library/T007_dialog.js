@@ -204,7 +204,7 @@ class t007PromptDialog extends dialog {
     }
 
     confirm() {
-        if (!window.validateForm2OnClient()) return
+        if (!window.validateFormOnClient(this.form)) return
         this.remove()
         this.resolve(this.input.value)
     }
