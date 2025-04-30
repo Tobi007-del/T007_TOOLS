@@ -405,9 +405,8 @@ class T007_Form_Manager {
 
     static validateFormOnClient(form) { 
         const n = Array.from(window.T007FM.forms).indexOf(form)
-        console.log(n)
         if (window[`validateForm${n+1}OnClient`])
-        window[`validateForm${n+1}OnClient`]()
+        return window[`validateForm${n+1}OnClient`]()
     }
 }
 
