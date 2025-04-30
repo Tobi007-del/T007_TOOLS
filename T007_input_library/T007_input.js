@@ -9,7 +9,7 @@ class T007_Form_Manager {
         window.T007FM.mountWindow()
         window.T007FM.observeDOMForFields()
         window.T007FM.loadResource(`/T007_TOOLS/T007_input_library/T007_input.css`)
-        Array.from(window.T007FM.forms)?.forEach((form, n) => window.T007FM.handleFormValidation(form, n))
+        Array.from(window.T007FM.forms).forEach((form, n) => window.T007FM.handleFormValidation(form, n))
     }
 
     static mountWindow() {
@@ -405,6 +405,7 @@ class T007_Form_Manager {
 
     static validateFormOnClient(form) { 
         const n = Array.from(window.T007FM.forms).indexOf(form)
+        console.log(n)
         if (window[`validateForm${n+1}OnClient`])
         window[`validateForm${n+1}OnClient`]()
     }
