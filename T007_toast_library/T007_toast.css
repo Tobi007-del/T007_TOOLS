@@ -4,8 +4,8 @@
     --t007-toast-type-color: whitesmoke;
     --t007-toast-background: rgb(from black r g b/.4);
     --t007-toast-background-blur: 10px;
-    --t007-toast-transition: 250ms;
-    --t007-toast-timing-function: cubic-bezier(0.34, 1.64, 0.64, 1);
+    --t007-toast-transition-duration: 250ms;
+    --t007-toast-transition-timing-function: cubic-bezier(0.34, 1.64, 0.64, 1);
     --t007-toast-margin: 8px;
     --t007-toast-width: calc(var(--t007-toast-unit) * 20);
     --t007-toast-height: fit-content;
@@ -24,6 +24,7 @@
 }
 
 :root {
+    --t007-current-flex-direction: column;
     --t007-current-drag-x: 0;
     --t007-current-drag-opacity: 1;
 }
@@ -62,7 +63,7 @@
     margin: var(--t007-toast-margin);
     max-width: calc(100dvw - (var(--t007-toast-margin) * 2));
     display: flex;
-    flex-direction: column;
+    flex-direction: var(--t007-current-flex-direction);
     gap: .5rem;
     z-index: 2147483647;
 }
@@ -110,9 +111,9 @@
     overflow: hidden;
     transition: transform 300ms ease, opacity 300ms ease;
     will-change: transform, opacity;
-    animation-timing-function: var(--t007-toast-timing-function);
+    animation-timing-function: var(--t007-toast-transition-timing-function);
     animation-fill-mode: forwards;
-    animation-duration: var(--t007-toast-transition);
+    animation-duration: var(--t007-toast-transition-duration);
     animation-name: xSlideBounceOut;
 }
 

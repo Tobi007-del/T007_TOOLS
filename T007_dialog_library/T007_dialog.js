@@ -104,7 +104,7 @@ class dialog {
 
     handleKeyDown(e) {
         e.stopImmediatePropagation()
-        switch(e.key.toString().toLowerCase()) {
+        switch(e.key?.toString().toLowerCase()) {
             case "escape":
                 this.cancel()
                 break

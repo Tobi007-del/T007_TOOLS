@@ -41,7 +41,7 @@
     -webkit-font-smoothing: antialiased;
 }
 
-.field:where(:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) {
+.field:where(:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))))) {
     --i-current-color: var(--i-focus-color);
 }
 
@@ -133,12 +133,12 @@
     max-width: calc(100% - 3.75rem);
 }
 
-.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))) .input-outline-notch,
+.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .input-outline-notch,
 .field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-outline-notch {
     border-top: none;
 }
 
-.field:not(:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])), .input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"]))) .input-outline-notch {
+.field:not(:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))), .input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"]))) .input-outline-notch {
     width: auto !important;
 }
 
@@ -159,7 +159,7 @@
     will-change: transform;
 }
 
-.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))) .input-floating-label,
+.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .input-floating-label,
 .field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-floating-label {
     transform: translateY(-2.1rem) scale(0.75);
     left: .25rem;
@@ -167,9 +167,8 @@
     max-width: 133%;
 }
 
-.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))) .input-floating-label.shake,
+.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .input-floating-label.shake,
 .field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-floating-label.shake {
-    transition: 100ms ease;
     transform: translateY(-2.1rem) translateX(.25rem) scale(0.75);
 }
 
@@ -184,8 +183,12 @@
     width: 100%;
     min-width: 0;
     padding: 0;
-    resize: vertical;
     font-family: inherit;
+    outline: none !important;
+}
+
+.input:is(textarea) {
+    resize: vertical;
 }
 
 .input:not(select) {
@@ -196,33 +199,44 @@
     color: black;
 }
 
+.input:is([type="checkbox"], [type="radio"]) {
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
 .input::placeholder {
     color: currentColor;
     opacity: 0.55;
 }
 
-:where(.input)::file-selector-button {
-    border: none;
+:where(.input[type="file"])::file-selector-button {
     font-family: inherit;
     font-weight: bold;
-    background: var(--i-focus-color);
     font-size: calc(var(--i-font-size)/1.25);
     margin-right: 0.65rem;
-    color: dodgerblue;
-    padding: 0.25rem;
-    border: thin solid grey;
+    padding: 0.225rem;
+    border: 1px solid var(--i-current-color);
     border-radius: 0.18rem;
+    background: whitesmoke;
+    color: dodgerblue;
     cursor: pointer;
-    transition: 200ms ease;
+    transition: filter 200ms ease;
 }
 
-:where(.input)::file-selector-button:is(:hover, :focus-visible) {
-    background: dodgerblue;
-    color: var(--i-focus-color);
+:where(.input[type="file"])::file-selector-button:where(:hover, :focus-visible) {
+    filter: brightness(80%);
 }
 
-.input:focus {
-    outline: none;
+.input-field:has(.input[type="file"].image-selected) {
+    padding-block: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+:where(.input[type="file"].image-selected)::file-selector-button {
+    background: center/contain no-repeat var(--i-image-selected-src), linear-gradient(black, black), black;
+    padding: 0.725rem;
+    border: none;
 }
 
 /* .field:has(.input:-webkit-autofill) .input-outline > * {
@@ -243,6 +257,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.input-icon svg path {
+    fill: var(--i-current-color);
 }
 
 .field:has(input[type="password"]) .input-password-visible-icon,
@@ -370,8 +388,7 @@
     color: var(--i-current-color);
 }
 
-:is(.checkbox-input-field,
-    .radio-input-field):hover {
+:is(.checkbox-input-field, .radio-input-field):hover {
     filter: brightness(95%);
 }
 
@@ -444,11 +461,4 @@
 .field:has(.input[type="checkbox"]:checked) .checkbox-box::after,
 .field:has(.input[type="radio"]:checked) .radio-box::after {
     opacity: 1;
-}
-
-.input[type="checkbox"],
-.input[type="radio"] {
-    opacity: 0;
-    position: absolute;
-    pointer-events: none;
 }

@@ -12,12 +12,31 @@
             background-repeat: no-repeat;
             background-size: cover;
             font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        .info-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        .info-text {
+            color: black;
+            text-align: center;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <button type="button" title="Show Alert" onclick="showAlert()">Show Alert</button>
-    <button type="button" title="Show Confirm" onclick="showConfirm()">Show Confirm</button>
+    <div>
+        <button type="button" title="Show Alert" onclick="showAlert()">Show Alert</button>
+        <button type="button" title="Show Confirm" onclick="showConfirm()">Show Confirm</button>
+        <button type="button" title="Show Prompt" onclick="showPrompt()">Show Prompt</button>
+    </div>
+    <div class="info-wrapper">
+        <p class="info-text">You can go to the console and test out the dialogs, they work the same way as the browser default dialogs just in title case i.e window.Alert, window.Confirm, window.Prompt</p>
+    </div>
+    <p class="notice" style="position: absolute; bottom: 0; left: 50%; translate: -50%; text-align: center; font-size: 14px; font-weight: bold; margin: 0;">This is just a preview, a proper documentation will soon be available!</p>
     <script type="module" src="Test.js"></script>
 </body>
 </html>

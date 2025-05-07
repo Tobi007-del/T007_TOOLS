@@ -104,6 +104,30 @@ class T007_Form_Manager {
         floatingLabel = field.querySelector(".input-floating-label"),
         eyeOpen = field.querySelector(".input-password-visible-icon"),
         eyeClosed = field.querySelector(".input-password-hidden-icon") 
+        if (input.type === "file") input.addEventListener("input", () => {
+            const file = input.files?.[0],
+            img = new Image()
+            img.onload = () => {
+                input.style.setProperty("--i-image-selected-src", `url(${src})`)
+                input.classList.add("image-selected")
+                setTimeout(() => URL.revokeObjectURL(src), 1000)
+            }
+            img.onerror = () => {
+                input.style.removeProperty("--i-image-selected-src")
+                input.classList.remove("image-selected")
+                URL.revokeObjectURL(src)
+            }
+            let src
+            if (file?.type?.startsWith("image")) {
+                src = URL.createObjectURL(file)
+            }
+            if (!src) {
+                input.style.removeProperty("--i-image-selected-src")
+                input.classList.remove("image-selected")
+                return
+            }
+            img.src = src
+        })
         if (floatingLabel) floatingLabel.ontransitionend = () => floatingLabel.classList.remove("shake")
         if (eyeOpen && eyeClosed) eyeOpen.onclick = eyeClosed.onclick = () => window.T007FM.togglePasswordType(input)
     }
@@ -179,11 +203,7 @@ class T007_Form_Manager {
         if (min !== null) input.min = min
         if (max !== null) input.max = max
         if (step !== null) input.step = step    
-        if (options.length && type === 'select') {
-            input.innerHTML = options.map(option => 
-                `<option value="${option}">${option}</option>`
-            ).join('')
-        }
+        if (type === 'select') input.innerHTML = options.length && options.map(option => `<option value="${option}">${option}</option>`).join('')
         inputField.appendChild(input)
 
         if (eyeToggler && type === 'password') {
@@ -307,6 +327,7 @@ class T007_Form_Manager {
             if (input.value === "") {
                 field?.classList.remove("error")
                 toggleHelper(input, false) 
+                floatingLabel?.classList.remove("shake")
             }
         }
 
@@ -371,7 +392,7 @@ class T007_Form_Manager {
                 case "video":
                     file = input.files?.[0]
                     if (!file) break
-                    errorCondition = !file.type.startsWith(`image/${input.name}`)
+                    errorCondition = !file.type.startsWith(`${input.name}`)
                     input.setCustomValidity(errorCondition ? `File format is not of ${input.name} type` : "")
                     break
                 case "date":
