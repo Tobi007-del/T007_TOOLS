@@ -13,6 +13,7 @@
     --i-radio-border-color: #707070;
     --i-radio-checked-border-color: dodgerblue;
     --i-normal-color: rgba(0, 0, 0, 0.45);
+    --i-hover-color: from(var(--i-normal-color) r g b/0.65);
     --i-focus-color: black;
     --i-success-color: green;
     --i-error-color: #b00020;
@@ -39,6 +40,10 @@
     max-width: 100%;
     padding-top: 1rem;
     -webkit-font-smoothing: antialiased;
+}
+
+.field:where(:hover) {
+    --i-current-color: var(--i-hover-color);
 }
 
 .field:where(:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))))) {
@@ -216,12 +221,18 @@
     font-size: calc(var(--i-font-size)/1.25);
     margin-right: 0.65rem;
     padding: 0.225rem;
-    border: 1px solid var(--i-current-color);
+    border-top: none;
+    border-right: none;
+    border-width: 2px;
     border-radius: 0.18rem;
-    background: whitesmoke;
-    color: dodgerblue;
+    background: dodgerblue;
+    color: whitesmoke;
     cursor: pointer;
     transition: filter 200ms ease;
+}
+
+:where(.input[type="file"])::file-selector-button:where(:active) {
+    border-width: 1px;
 }
 
 :where(.input[type="file"])::file-selector-button:where(:hover, :focus-visible) {
@@ -235,6 +246,7 @@
 
 :where(.input[type="file"].image-selected)::file-selector-button {
     background: center/contain no-repeat var(--i-image-selected-src), linear-gradient(black, black), black;
+    color: transparent;
     padding: 0.725rem;
     border: none;
 }

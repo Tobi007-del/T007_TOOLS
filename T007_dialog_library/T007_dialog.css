@@ -32,7 +32,8 @@
 }
 
 .t007-dialog {
-    --i-normal-color: rgb(from var(--t007-dialog-message-color)  r g b/0.45);
+    --i-normal-color: rgb(from var(--t007-dialog-message-color) r g b/0.45);
+    --i-hover-color: rgb(from var(--t007-dialog-message-color) r g b/0.95);
     --i-focus-color: var(--t007-dialog-message-color);
 }
 

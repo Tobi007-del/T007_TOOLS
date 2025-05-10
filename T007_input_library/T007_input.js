@@ -120,6 +120,12 @@ class T007_Form_Manager {
             let src
             if (file?.type?.startsWith("image")) {
                 src = URL.createObjectURL(file)
+            } else if (file?.type?.startsWith("video")) {
+                const video = document.createElement("video"),
+                canvas = document.createElement("canvas")
+                context = canvas.getContext("2d")
+
+                video.src = URL.createObjectURL()
             }
             if (!src) {
                 input.style.removeProperty("--i-image-selected-src")
