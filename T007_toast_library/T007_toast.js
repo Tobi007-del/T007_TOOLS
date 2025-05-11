@@ -91,7 +91,7 @@ class t007Toast {
         this.options = {...window.TOAST_DEFAULT_OPTIONS, ...options}
         this.#toastElem = document.createElement("div")
         this.#toastElem.classList.add("t007-toast")
-        requestAnimationFrame(() => this.#toastElem.classList.add("toast-show"))
+        requestAnimationFrame(() => this.#toastElem.classList.add("t007-toast-show"))
         this.#unpause = () => this.#isPaused = false
         this.#pause = () => this.#isPaused = true
         this.#visiblityChange = () => this.#shouldUnPause = document.visibilityState === "visible"
@@ -186,20 +186,15 @@ class t007Toast {
         }
         this.#toastElem.innerHTML = 
         `
-            <div class="toast-image-wrapper">
-                ${
-                    image ?
-                    `
-                        <img class="toast-image" src="${image}" alt="toast-image">
-                    ` : ``
-                }
+            <div class="t007-toast-image-wrapper">
+                ${image ? `<img class="t007-toast-image" src="${image}" alt="toast-image">` : ``}
             </div>
-            <span class="toast-body">
-                <p class="toast-body-text">${body}</p>
+            <span class="t007-toast-body">
+                <p class="t007-toast-body-text">${body}</p>
             </span>
-            <button title="Close" type="button" class="toast-cancel-button">&times;</button> 
+            <button title="Close" type="button" class="t007-toast-cancel-button">&times;</button> 
         `
-        this.#toastElem.querySelector(".toast-cancel-button").addEventListener("click", this.remove)
+        this.#toastElem.querySelector(".t007-toast-cancel-button").addEventListener("click", this.remove)
     }
 
     /**
@@ -374,7 +369,7 @@ class t007Toast {
         cancelAnimationFrame(this.#progressInterval)
         if (manner === "instant") this.cleanUpToast()
         else this.#toastElem.addEventListener("animationend", () => this.cleanUpToast())
-        this.#toastElem.classList.remove("toast-show")
+        this.#toastElem.classList.remove("t007-toast-show")
         this.onClose()
         _ACTIVE_TOASTS = _ACTIVE_TOASTS.filter(toast => toast !== this)
     }

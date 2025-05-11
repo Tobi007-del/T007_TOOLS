@@ -299,8 +299,13 @@
     position: absolute;
     font-size: 0.75rem;
     color: var(--i-current-color);
-    line-height: .75rem;
+    line-height: .785rem;
     opacity: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .helper-text.info,

@@ -117,7 +117,7 @@
     animation-name: xSlideBounceOut;
 }
 
-.t007-toast.toast-show {
+.t007-toast.t007-toast-show {
     animation-name: xSlideBounceIn;
 }
 
@@ -125,7 +125,7 @@
     animation-name: ySlideBounceOut;
 }
 
-.t007-toast-container[data-position$="-center"] .t007-toast.toast-show {
+.t007-toast-container[data-position$="-center"] .t007-toast.t007-toast-show {
     animation-name: ySlideBounceIn;
 }
 
@@ -188,11 +188,11 @@
     transition: width ease;
 }
 
-.t007-toast:not(.success, .error, .warning, .info) .toast-image-wrapper:not(:has(.toast-image)) {
+.t007-toast:not(.success, .error, .warning, .info) .t007-toast-image-wrapper:not(:has(.t007-toast-image)) {
     display: none;
 }
 
-.toast-image-wrapper {
+.t007-toast-image-wrapper {
     position: relative;
     aspect-ratio: 1 / 1;
     flex-grow: 0;
@@ -204,12 +204,12 @@
     overflow: hidden;
 }
 
-.toast-image-wrapper:not(:has(.toast-image)) {
+.t007-toast-image-wrapper:not(:has(.t007-toast-image)) {
     background: transparent;
     flex-basis: calc(var(--t007-toast-icon-size) + var(--t007-toast-unit)*0.5);
 }
 
-.toast-image-wrapper::before {
+.t007-toast-image-wrapper::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -221,29 +221,29 @@
     background-size: contain;
 }
 
-.t007-toast.info .toast-image-wrapper::before {
+.t007-toast.info .t007-toast-image-wrapper::before {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%233498db"/><path fill="none" stroke="%23fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 10v6"/><circle cx="12" cy="7" r="1.5" fill="%23fff"/></svg>');
 }
 
-.t007-toast.success .toast-image-wrapper::before {
+.t007-toast.success .t007-toast-image-wrapper::before {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%2327ae60"/><path fill="none" stroke="%23fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 12l3 3l6-6"/></svg>');
 }
 
-.t007-toast.error .toast-image-wrapper::before {
+.t007-toast.error .t007-toast-image-wrapper::before {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%23e74c3c"/><path fill="%23fff" stroke="%23fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 8l8 8M16 8l-8 8"/></svg>');
 }
 
-.t007-toast.warning .toast-image-wrapper::before {
+.t007-toast.warning .t007-toast-image-wrapper::before {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23f1c40f" stroke="%23f39c12" stroke-width="2" stroke-linejoin="round" d="M12 3L2.5 20.5A2 2 0 0 0 4.5 23h15a2 2 0 0 0 2-2.5L12 3z"/><circle cx="12" cy="17" r="1.5" fill="%23fff"/><path fill="none" stroke="%23fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v6"/></svg>');
 }
 
-.toast-image-wrapper .toast-image {
+.t007-toast-image-wrapper .t007-toast-image {
     height: 100%;
     width: 100%;
     object-fit: cover;
 }
 
-.toast-body {
+.t007-toast-body {
     flex-grow: 1;
     height: fit-content;
     border-radius: calc(var(--t007-toast-unit)/5);
@@ -251,7 +251,7 @@
     overflow: hidden;
 }
 
-.toast-body-text {
+.t007-toast-body-text {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: var(--t007-toast-max-lines);
@@ -266,7 +266,7 @@
     z-index: 1;
 }
 
-.toast-cancel-button {
+.t007-toast-cancel-button {
     display: none;
     align-self: start;
     background: none;
@@ -278,12 +278,12 @@
     opacity: .6;
 }
 
-.toast-cancel-button:hover {
+.t007-toast-cancel-button:hover {
     cursor: pointer;
     opacity: 1;
 }
 
-.t007-toast.can-close .toast-cancel-button {
+.t007-toast.can-close .t007-toast-cancel-button {
     display: flex;
 }
 
