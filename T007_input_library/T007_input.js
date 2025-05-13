@@ -70,12 +70,19 @@ class T007_Form_Manager {
         })).observe(document.body, {childList: true, subtree: true})
     }
 
+    static convertFileSize(size) {
+        const units = ["B","KB","MB","GB","TB","PB","EB","ZB","YB",]
+        const exponent = Math.min(Math.floor(Math.log(size) / Math.log(1e3)), units.length - 1)
+        const approx = size / 1e3 ** exponent
+        return exponent === 0 ? `${size} byte${size>1?'s':''}` : `${approx} ${units[exponent]}`
+    }
+
     static togglePasswordType(input) {
         input.type = input.type === "password" ? "text" : "password"
     }
 
     static autoFitNotch(field) {
-        const notch = field.querySelector(".input-outline-notch")
+        const notch = field?.querySelector(".input-outline-notch")
         if (!notch) return
         const label = notch.firstElementChild
         if (!label.innerText) return
@@ -95,16 +102,27 @@ class T007_Form_Manager {
     }
 
     static toggleFilled(input) {
+        if (!input) return
         const isFilled = input.type === "checkbox" || input.type === "radio" ? input.checked : input.value !== '' || input.files?.length > 0
         input.toggleAttribute("data-filled", isFilled)
     }
 
+    static setFallbackHelper(field) {
+        const helperLine = field?.querySelector(".helper-line")
+        if (!helperLine || helperLine.querySelector(".helper-text[data-violation='auto']")) return
+        const el = document.createElement('p')
+        el.className = 'helper-text'
+        el.setAttribute('data-violation', "auto")
+        helperLine.appendChild(el)
+    }
+
     static setFieldListeners(field) {
+        if (!field) return
         const input = field.querySelector(".input"),
         floatingLabel = field.querySelector(".input-floating-label"),
         eyeOpen = field.querySelector(".input-password-visible-icon"),
         eyeClosed = field.querySelector(".input-password-hidden-icon") 
-        if (input.type === "file") input.addEventListener("input", () => {
+        if (input.type === "file") input.addEventListener("input", async () => {
             const file = input.files?.[0],
             img = new Image()
             img.onload = () => {
@@ -121,11 +139,19 @@ class T007_Form_Manager {
             if (file?.type?.startsWith("image")) {
                 src = URL.createObjectURL(file)
             } else if (file?.type?.startsWith("video")) {
-                const video = document.createElement("video"),
-                canvas = document.createElement("canvas")
-                context = canvas.getContext("2d")
-
-                video.src = URL.createObjectURL()
+                src = await new Promise(resolve => {
+                    let video = document.createElement("video"),
+                    canvas = document.createElement("canvas"),
+                    context = canvas.getContext("2d")                    
+                    video.ontimeupdate = () => {
+                        context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
+                        canvas.toBlob(blob => resolve(URL.createObjectURL(blob)))
+                        URL.revokeObjectURL(video.src)
+                        video = video.src = video.onloadedmetadata = video.ontimeupdate = null
+                    }
+                    video.onloadeddata = () => video.currentTime = 3
+                    video.src = URL.createObjectURL(file)
+                })
             }
             if (!src) {
                 input.style.removeProperty("--i-image-selected-src")
@@ -139,9 +165,10 @@ class T007_Form_Manager {
     }
 
     static setUpField(field) {
+        window.T007FM.toggleFilled(field.querySelector(".input"))
         window.T007FM.autoFitNotch(field)
+        window.T007FM.setFallbackHelper(field)
         window.T007FM.setFieldListeners(field)
-        return true
     }
 
     // Field Builder Utility
@@ -150,6 +177,7 @@ class T007_Form_Manager {
         value = '',
         id = '',
         name = '',
+        custom = '',
         label = '',
         placeholder = '',
         required = false,
@@ -157,6 +185,8 @@ class T007_Form_Manager {
         pattern = null,
         minLength = null,
         maxLength = null,
+        minSize = null,
+        maxSize = null,
         min = null,
         max = null,
         step = null,
@@ -170,6 +200,7 @@ class T007_Form_Manager {
 
         const inputField = document.createElement('label')
         inputField.className = ["checkbox", "radio"].includes(type) ? `${type}-input-field` : 'input-field'
+        if (id) inputField.htmlFor = id
         field.appendChild(inputField)
 
         if (["checkbox", "radio"].includes(type)) {
@@ -197,15 +228,17 @@ class T007_Form_Manager {
         if (['checkbox, radio'].includes(type)) input.value = label
         if (!['select', 'textarea'].includes(type)) input.type = type
         input.name = name
+        input.custom = custom && input.setAttribute("custom", custom)
         input.placeholder = placeholder
         input.autocomplete = autocomplete
         if (value) input.value = value
         if (id) input.id = id
-        if (id) input.htmFor = id
         if (required) input.required = true
         if (pattern) input.pattern = pattern
         if (minLength) input.minLength = minLength
         if (maxLength) input.maxLength = maxLength
+        if (minSize) input.minSize = minSize && input.setAttribute("minsize", minSize)
+        if (maxSize) input.maxSize = maxSize && input.setAttribute("maxsize", maxSize)
         if (min !== null) input.min = min
         if (max !== null) input.max = max
         if (step !== null) input.step = step    
@@ -240,16 +273,11 @@ class T007_Form_Manager {
         //info helper
         if (helperText.info) {
         const infoText = document.createElement('p')
-        infoText.className = 'helper-text info'
-        infoText.textContent = helperText.info
+        infoText.className = 'helper-text'
+        el.setAttribute('data-violation', "none")
         helperLine.appendChild(infoText)
         }
-        //fallback helper
-        const el = document.createElement('p')
-        el.className = 'helper-text'
-        el.setAttribute('data-violation', "auto")
-        helperLine.appendChild(el)
-        //custom helper
+        //violation helpers
         window.T007FM.violationKeys.forEach(key => {
         if (!helperText[key]) return
         const el = document.createElement('p')
@@ -339,7 +367,7 @@ class T007_Form_Manager {
 
         function toggleHelper(input, bool) {
             const field = input.closest(".field"),
-            violation = window.T007FM.violationKeys.find(violation => input.validity[violation]) ?? "",
+            violation = window.T007FM.violationKeys.find(violation => input.validity[violation] || input.Validity?.[violation]) ?? "",
             helper = field.querySelector(`.helper-text[data-violation="${violation}"]`),
             fallbackHelper = field.querySelector(`.helper-text[data-violation="auto"]`) 
             input.closest(".field").querySelectorAll(`.helper-text:not([data-violation="${violation}"])`).forEach(helper => helper?.classList.remove("show"))
@@ -372,48 +400,71 @@ class T007_Form_Manager {
         }
 
         function validateInput(input, notify = false, force = false) {
-            if (!input?.classList.contains("input")) return
+            if (form.globalError || !input?.classList.contains("input")) return
             updatePasswordMeter(input)
-            let value, errorCondition, file, 
-            valid = input.validity?.valid         
-            switch(input.name) {
+            let value, errorBool, file   
+            switch(input.type) {
+                case "file":
+                    input.Validity = input.Validity ?? {}
+                    for (const file of input.files) {
+                    if (input.accept) {
+                    const acceptedTypes = input.accept?.split(",").map(type => type.trim().replace(/\*/g, "")) ?? []
+                    errorBool = !acceptedTypes.some(type => file.type.includes(type))
+                    input.Validity.typeMismatch = errorBool
+                    input.setCustomValidity(errorBool ? `File type of '${file.type}' is not among acceptable types: '${input.accept}'` : "")
+                    if (errorBool) break                    
+                    }
+                    const max = input.maxSize ?? input.getAttribute("maxsize")
+                    if (max) {
+                    const maxSize = Number(max)
+                    errorBool = file.size > maxSize
+                    input.Validity.rangeOverflow = errorBool
+                    input.setCustomValidity(errorBool ? `File size of ${window.T007FM.convertFileSize(file.size)} exceeds the maximum of ${window.T007FM.convertFileSize(maxSize)}` : "")
+                    if (errorBool) break
+                    }
+                    const min = input.minSize ?? input.getAttribute("minsize")
+                    if (min) {
+                    const minSize = Number(min)
+                    errorBool = file.size < Number(minSize)
+                    input.Validity.rangeUnderflow = errorBool
+                    input.setCustomValidity(errorBool ? `File size of ${window.T007FM.convertFileSize(file.size)} is less than the minimum of ${window.T007FM.convertFileSize(minSize)}` : "")
+                    if (errorBool) break
+                    }
+                    }
+                    break
+            }
+            switch(input.custom ?? input.getAttribute("custom")) {
                 case "password":
                     value = input.value?.trim()
                     if (value === "") break
-                    const confirmPasswordInput = Array.from(inputs).find(input => input.name === "confirm-password")
+                    const confirmPasswordInput = Array.from(inputs).find(input => (input.custom ?? input.getAttribute("custom")) === "confirm-password")
                     if (!confirmPasswordInput) break
-                    const confirmPasswordValue = confirmPasswordInput?.value?.trim() 
-                    confirmPasswordInput.setCustomValidity(value !== confirmPasswordValue ? "Both passwords must match" : "")
+                    const confirmPasswordValue = confirmPasswordInput.value?.trim() 
+                    confirmPasswordInput.setCustomValidity(value !== confirmPasswordValue ? "Both passwords do not match" : "")
                     toggleError(confirmPasswordInput, value !== confirmPasswordValue, notify, force)
-                case "confirm-password":
+                    break
+                case "confirm_password":
                     value = input.value?.trim()
                     if (value === "") break
-                    const passwordInput = Array.from(inputs).find(input => input.name === "password")
+                    const passwordInput = Array.from(inputs).find(input => (input.custom ?? input.getAttribute("custom")) === "password")
                     if (!passwordInput) break
-                    const passwordValue = passwordInput?.value?.trim()
-                    errorCondition = value !== passwordValue
-                    input.setCustomValidity(errorCondition ? "Both passwords must match" : "")
-                    break     
-                case "image":
-                case "video":
-                    file = input.files?.[0]
-                    if (!file) break
-                    errorCondition = !file.type.startsWith(`${input.name}`)
-                    input.setCustomValidity(errorCondition ? `File format is not of ${input.name} type` : "")
+                    const passwordValue = passwordInput.value?.trim()
+                    errorBool = value !== passwordValue
+                    input.setCustomValidity(errorBool ? "Both passwords do not match" : "")
                     break
-                case "date":
+                case "onward_date":
                     if (input.min) break
                     input.min = new Date().toISOString().split('T')[0]
                     forceRevalidate(input)
-                    break
+                    break     
             }
-            errorCondition = errorCondition ?? !valid
-            toggleError(input, errorCondition, notify, force)
-            if (errorCondition) return
+            errorBool = errorBool ?? !input.validity?.valid
+            toggleError(input, errorBool, notify, force)
+            if (errorBool) return
             if (input.type === "radio")
                 Array.from(inputs)
                 ?.filter(i => i.name == input.name)
-                ?.forEach(radio => toggleError(radio, errorCondition, notify, force))
+                ?.forEach(radio => toggleError(radio, errorBool, notify, force))
         }
 
         function validateFormOnClient() {
@@ -424,6 +475,7 @@ class T007_Form_Manager {
     }
 
     static toggleFormGlobalError(form, bool) {
+        form.globalError = bool
         form.querySelectorAll(".field").forEach(field => {
             field.classList.toggle("error", bool)
             if (bool) field.querySelector(".input-floating-label")?.classList.add("shake")

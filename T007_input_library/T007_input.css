@@ -149,6 +149,7 @@
 
 .input-floating-label {
     color: var(--i-current-color);
+    opacity: 0.85;
     display: inline-block;
     max-width: 100%;
     overflow: hidden;
@@ -167,6 +168,7 @@
 .field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .input-floating-label,
 .field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-floating-label {
     transform: translateY(-2.1rem) scale(0.75);
+    opacity: 1;
     left: .25rem;
     right: auto;
     max-width: 133%;
@@ -308,12 +310,12 @@
     overflow: hidden;
 }
 
-.helper-text.info,
+.helper-text[data-violation="none"],
 .helper-text.show {
     opacity: 1;
 }
 
-.helper-line:has(.helper-text.show) .helper-text.info {
+.helper-line:has(.helper-text.show) .helper-text[data-violation="none"] {
     opacity: 0;
 }
 
@@ -446,7 +448,7 @@
     border-color: var(--i-radio-checked-border-color);
 }
 
-.field.error :is(.checkbox-input-field .checkbox-box, .radio-input-field .radio-box) {
+.field:has(.input[type="checkbox"], .input[type="radio"]).error :is(.checkbox-input-field .checkbox-box, .radio-input-field .radio-box) {
     border-color: var(--i-error-color);
 }
 
