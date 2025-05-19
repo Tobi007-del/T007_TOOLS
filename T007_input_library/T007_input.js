@@ -180,16 +180,18 @@ class T007_Form_Manager {
         custom = '',
         label = '',
         placeholder = '',
-        required = false,
+        checked,
+        required,
         autocomplete = 'off',
-        pattern = null,
-        minLength = null,
-        maxLength = null,
-        minSize = null,
-        maxSize = null,
-        min = null,
-        max = null,
-        step = null,
+        pattern,
+        minLength,
+        maxLength,
+        minSize,
+        maxSize,
+        min,
+        max,
+        step,
+        accept,
         options = [], // an array for when the input is select
         eyeToggler = true, // a boolean for only input type = "password"
         passwordMeter = true, // a boolean for only input type = "password"
@@ -231,17 +233,19 @@ class T007_Form_Manager {
         input.custom = custom && input.setAttribute("custom", custom)
         input.placeholder = placeholder
         input.autocomplete = autocomplete
-        if (value) input.value = value
-        if (id) input.id = id
-        if (required) input.required = true
-        if (pattern) input.pattern = pattern
-        if (minLength) input.minLength = minLength
-        if (maxLength) input.maxLength = maxLength
-        if (minSize) input.minSize = minSize && input.setAttribute("minsize", minSize)
-        if (maxSize) input.maxSize = maxSize && input.setAttribute("maxsize", maxSize)
-        if (min !== null) input.min = min
-        if (max !== null) input.max = max
-        if (step !== null) input.step = step    
+        if (value ?? false) input.value = value
+        if (checked ?? false) input.checked = checked
+        if (id ?? false) input.id = id
+        if (required ?? false) input.required = true
+        if (pattern ?? false) input.pattern = pattern
+        if (minLength ?? false) input.minLength = minLength
+        if (maxLength ?? false) input.maxLength = maxLength
+        if (minSize ?? false) input.minSize = minSize && input.setAttribute("minsize", minSize)
+        if (maxSize ?? false) input.maxSize = maxSize && input.setAttribute("maxsize", maxSize)
+        if (min ?? false) input.min = min
+        if (max ?? false) input.max = max
+        if (step ?? false) input.step = step   
+        if (accept ?? false) input.accept = accept
         if (type === 'select') input.innerHTML = options.length && options.map(option => `<option value="${option}">${option}</option>`).join('')
         inputField.appendChild(input)
 

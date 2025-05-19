@@ -2,6 +2,9 @@
     --i-font-family: inherit;
     --i-font-size: 1rem;
     --i-height: 3.5rem;
+    --i-border-radius: .25rem;
+    --i-border-width: 1px;
+    --i-active-border-width: 2px;
     --i-checkmark-color: white;
     --i-checkbox-background: whitesmoke;
     --i-checkbox-checked-background: dodgerblue;
@@ -29,7 +32,7 @@
 .field *::before {
     box-sizing: border-box;
     font-family: var(--i-font-family);
-    transition-property: transform, filter, background, background-color, color, border-color, right, left, top, bottom, width, height;
+    transition-property: transform, filter, background-color, color, border, right, left, top, bottom, width, height;
     transition-duration: 150ms;
     transition-timing-function: ease;
 }
@@ -64,7 +67,7 @@
     height: var(--i-height);
     width: 100%;
     padding: 1rem;
-    border-radius: .25rem;
+    border-radius: var(--i-border-radius);
     display: inline-flex;
     align-items: baseline;
 }
@@ -91,12 +94,14 @@
 
 .input-outline>* {
     height: 100%;
-    border-color: var(--i-current-color) !important;
+    border-style: solid;
+    border-color: var(--i-current-color);
+    border-width: var(--i-border-width);
     pointer-events: none;
 }
 
 .field:has(.input:focus) .input-outline>* {
-    border-width: .125rem !important;
+    border-width: var(--i-border-active-width);
 }
 
 .input-outline-leading {
@@ -105,7 +110,6 @@
     border-top-right-radius: 0;
     border-bottom-left-radius: .25rem;
     border-bottom-right-radius: 0;
-    border-left: 1px solid;
     border-right: none;
 }
 
@@ -116,13 +120,6 @@
     border-bottom-left-radius: 0;
     border-bottom-right-radius: .25rem;
     border-left: none;
-    border-right: 1px solid;
-}
-
-.input-outline-leading,
-.input-outline-trailing {
-    border-top: 1px solid;
-    border-bottom: 1px solid;
 }
 
 .input-outline-notch {
@@ -132,6 +129,9 @@
     flex: 0 0 auto;
     border-top: 1px solid;
     border-bottom: 1px solid;
+    border-left: none;
+    border-right: none;
+    transition-property: border-color;
 }
 
 .field:has(.input-icon) .input-outline-notch {
