@@ -1,7 +1,8 @@
 :where(:root) {
     --i-font-family: inherit;
     --i-font-size: 1rem;
-    --i-height: 3.5rem;
+    --i-height: 3rem;
+    --i-padding: .75rem;
     --i-border-radius: .25rem;
     --i-border-width: 1px;
     --i-active-border-width: 2px;
@@ -66,7 +67,7 @@
     min-width: 3rem;
     height: var(--i-height);
     width: 100%;
-    padding: 1rem;
+    padding: var(--i-padding);
     border-radius: var(--i-border-radius);
     display: inline-flex;
     align-items: baseline;
@@ -127,11 +128,9 @@
     width: auto;
     max-width: calc(100% - .75rem);
     flex: 0 0 auto;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
     border-left: none;
     border-right: none;
-    transition-property: border-color;
+    transition-property: border-bottom;
 }
 
 .field:has(.input-icon) .input-outline-notch {
@@ -159,7 +158,7 @@
     transform: translateY(-50%);
     font-weight: 400;
     font-size: var(--i-font-size);
-    line-height: 1.15rem;
+    line-height: 1.3;
     transform-origin: left top;
     white-space: nowrap;
     will-change: transform;
@@ -167,7 +166,7 @@
 
 .field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .input-floating-label,
 .field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-floating-label {
-    transform: translateY(-2.1rem) scale(0.75);
+    transform: translateY(calc(-1 * ((var(--i-height)/2) + (var(--i-font-size)/2)))) scale(0.75);
     opacity: 1;
     left: .25rem;
     right: auto;
@@ -176,7 +175,7 @@
 
 .field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .input-floating-label.shake,
 .field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-floating-label.shake {
-    transform: translateY(-2.1rem) translateX(.25rem) scale(0.75);
+    transform: translateY(calc(-1 * ((var(--i-height)/2) + (var(--i-font-size)/2)))) translateX(.25rem) scale(0.75);
 }
 
 .input {
@@ -192,6 +191,10 @@
     padding: 0;
     font-family: inherit;
     outline: none !important;
+}
+
+.input[type="file"] {
+    height: unset;
 }
 
 .input:is(textarea) {
