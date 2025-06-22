@@ -98,6 +98,7 @@
 }
 
 .t007-toast {
+  touch-action: none;
   position: relative;
   display: flex;
   align-items: center;

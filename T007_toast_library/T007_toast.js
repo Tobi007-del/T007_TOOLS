@@ -5,6 +5,8 @@ window.TOAST_DEFAULT_OPTIONS = {
   canClose: window.TOAST_DEFAULT_OPTIONS?.canClose ?? true,
   closeOnClick: window.TOAST_DEFAULT_OPTIONS?.closeOnClick ?? false,
   dragToClose: window.TOAST_DEFAULT_OPTIONS?.dragToClose ?? true,
+  dragToClosePercent: window.TOAST_DEFAULT_OPTIONS?.dragToClosePercent ?? 40,
+  dragToCloseDir: window.TOAST_DEFAULT_OPTIONS?.dragToCloseDir ?? "x",
   showProgress: window.TOAST_DEFAULT_OPTIONS?.showProgress ?? true,
   pauseOnHover: window.TOAST_DEFAULT_OPTIONS?.pauseOnHover ?? true,
   pauseOnFocusLoss: window.TOAST_DEFAULT_OPTIONS?.pauseOnFocusLoss ?? true,
@@ -80,8 +82,11 @@ class t007Toast {
   #pause
   #visiblityChange
   #shouldUnPause
+  #pointerType
   #pointerStartX
   #pointerDeltaX
+  #pointerStartY
+  #pointerDeltaY
   #pointerRAF
   #pointerTicker = false
 
@@ -216,11 +221,12 @@ class t007Toast {
    */
   set dragToClose(value) {
     if (value) {
-      this.#toastElem.addEventListener('touchstart', this.handleToastPointerStart, {passive: false})
-      this.#toastElem.addEventListener('touchend', this.handleToastPointerEnd)
+      this.#pointerType = value
+      this.#toastElem.addEventListener('pointerdown', this.handleToastPointerStart, {passive: false})
+      this.#toastElem.addEventListener('pointerup', this.handleToastPointerEnd)
     } else {
-      this.#toastElem.removeEventListener('touchstart', this.handleToastPointerStart, {passive: false})
-      this.#toastElem.removeEventListener('touchend', this.handleToastPointerEnd)
+      this.#toastElem.removeEventListener('pointerdown', this.handleToastPointerStart, {passive: false})
+      this.#toastElem.removeEventListener('pointerup', this.handleToastPointerEnd)
     }      
   }
 
@@ -228,11 +234,13 @@ class t007Toast {
    * @param {object} options
    */
   handleToastPointerStart(e) {
+    if (typeof this.#pointerType === "string" && e.pointerType !== this.#pointerType) return
     if (e.touches?.length > 1) return
     e.stopImmediatePropagation()
-    this.#pointerStartX = e.clientX ?? e.targetTouches[0]?.clientX
+    this.#pointerStartX = this.dragToCloseDir.includes("x") ? (e.clientX ?? e.targetTouches[0]?.clientX) : 0
+    this.#pointerStartY = this.dragToCloseDir.includes("x") ? (e.clientY ?? e.targetTouches[0]?.clientY) : 0
     this.#pointerTicker = false
-    this.#toastElem.addEventListener('touchmove', this.handleToastPointerMove, {passive: false})
+    this.#toastElem.addEventListener('pointermove', this.handleToastPointerMove, {passive: false})
     this.#isPaused = true
   }
   
@@ -244,11 +252,15 @@ class t007Toast {
     e.stopImmediatePropagation()
     if (this.#pointerTicker) return
     this.#pointerRAF = requestAnimationFrame(() => {
-      let x = e.clientX ?? e.targetTouches[0]?.clientX
-      this.#pointerDeltaX = x - this.#pointerStartX
+      let x = e.clientX ?? e.targetTouches[0]?.clientX,
+      y = e.clientY ?? e.targetTouches[0]?.clientY
+      this.#pointerDeltaX = this.dragToCloseDir.includes("x") ? x - this.#pointerStartX : 0
+      this.#pointerDeltaY = this.dragToCloseDir.includes("y") ? y - this.#pointerStartY : 0
       this.#toastElem.style.setProperty("transition", "none", "important")
-      this.#toastElem.style.setProperty("transform", `translateX(${this.#pointerDeltaX}px)`, "important")
-      this.#toastElem.style.setProperty("opacity", clamp(0, 1 - (Math.abs(this.#pointerDeltaX) / this.#toastElem.offsetWidth), 1), "important")
+      this.#toastElem.style.setProperty("transform", `translate(${this.#pointerDeltaX}px, ${this.#pointerDeltaY}px)`, "important")
+      const xR = Math.abs(this.#pointerDeltaX) / this.#toastElem.offsetWidth,
+      yR = Math.abs(this.#pointerDeltaY) / this.#toastElem.offsetHeight
+      this.#toastElem.style.setProperty("opacity", clamp(0, 1 - (yR > 0.5 ? yR : xR), 1), "important")
       this.#pointerTicker = false
     })
     this.#pointerTicker = true
@@ -257,14 +269,15 @@ class t007Toast {
   /**
    * @param {object} options
    */
-  handleToastPointerEnd() {
+  handleToastPointerEnd(e) {
+    if (typeof this.#pointerType === "string" && e.pointerType !== this.#pointerType) return
     cancelAnimationFrame(this.#pointerRAF)
-    if (Math.abs(this.#pointerDeltaX) > (this.#toastElem.offsetWidth*0.4)) {
+    if (this.dragToCloseDir.includes("x") ? Math.abs(this.#pointerDeltaX) > (this.#toastElem.offsetWidth*(this.dragToClosePercent.x ?? this.dragToClosePercent/100)) : Math.abs(this.#pointerDeltaY) > (this.#toastElem.offsetHeight*(this.dragToClosePercent.y ?? this.dragToClosePercent/100))) {
       this.remove("instant")
       return
     } 
     this.#pointerTicker = false
-    this.#toastElem.removeEventListener('touchmove', this.handleToastPointerMove, {passive: false})
+    this.#toastElem.removeEventListener('pointermove', this.handleToastPointerMove, {passive: false})
     this.#toastElem.style.removeProperty("transition")
     this.#toastElem.style.removeProperty("transform")
     this.#toastElem.style.removeProperty("opacity")
