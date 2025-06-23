@@ -2,7 +2,7 @@ window.TOAST_DEFAULT_OPTIONS = {
   autoClose: window.TOAST_DEFAULT_OPTIONS?.autoClose ?? true,
   position: window.TOAST_DEFAULT_OPTIONS?.position ?? "top-right",
   onClose: window.TOAST_DEFAULT_OPTIONS?.onClose ?? function() {}, 
-  canClose: window.TOAST_DEFAULT_OPTIONS?.canClose ?? true,
+  closeButton: window.TOAST_DEFAULT_OPTIONS?.closeButton ?? true,
   closeOnClick: window.TOAST_DEFAULT_OPTIONS?.closeOnClick ?? false,
   dragToClose: window.TOAST_DEFAULT_OPTIONS?.dragToClose ?? true,
   dragToClosePercent: window.TOAST_DEFAULT_OPTIONS?.dragToClosePercent ?? 40,
@@ -205,7 +205,7 @@ class t007Toast {
   /**
    * @param {boolean} value
    */
-  set canClose(value) {
+  set closeButton(value) {
     this.#toastElem.classList.toggle("can-close", value)
   }
 
@@ -252,7 +252,7 @@ class t007Toast {
     e.stopImmediatePropagation()
     if (this.#pointerTicker) return
     this.#pointerRAF = requestAnimationFrame(() => {
-      let x = e.clientX ?? e.targetTouches[0]?.clientX,
+      const x = e.clientX ?? e.targetTouches[0]?.clientX,
       y = e.clientY ?? e.targetTouches[0]?.clientY
       this.#pointerDeltaX = this.dragToCloseDir.includes("x") ? x - this.#pointerStartX : 0
       this.#pointerDeltaY = this.dragToCloseDir.includes("y") ? y - this.#pointerStartY : 0

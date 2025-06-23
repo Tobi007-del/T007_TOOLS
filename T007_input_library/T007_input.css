@@ -46,6 +46,10 @@
     -webkit-font-smoothing: antialiased;
 }
 
+.field:has(.input[hidden]) {
+  display: none;
+}
+
 .field:where(:hover) {
     --i-current-color: var(--i-hover-color);
 }
