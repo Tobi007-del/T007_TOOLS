@@ -1,4 +1,8 @@
 window.TOAST_DEFAULT_OPTIONS = {
+  body: window.TOAST_DEFAULT_OPTIONS?.body ?? "",
+  type: window.TOAST_DEFAULT_OPTIONS?.type ?? "",
+  icon: window.TOAST_DEFAULT_OPTIONS?.icon ?? true,
+  image: window.TOAST_DEFAULT_OPTIONS?.image ?? false,
   autoClose: window.TOAST_DEFAULT_OPTIONS?.autoClose ?? true,
   position: window.TOAST_DEFAULT_OPTIONS?.position ?? "top-right",
   onClose: window.TOAST_DEFAULT_OPTIONS?.onClose ?? function() {}, 
@@ -95,7 +99,7 @@ class t007Toast {
     _ACTIVE_TOASTS.push(this)
     this.options = {...window.TOAST_DEFAULT_OPTIONS, ...options}
     this.#toastElem = document.createElement("div")
-    this.#toastElem.classList.add("t007-toast")
+    this.#toastElem.classList = `t007-toast ${this.options.type} ${this.options.icon ? "has-icon" : ""}`
     requestAnimationFrame(() => this.#toastElem.classList.add("t007-toast-show"))
     this.#unpause = () => this.#isPaused = false
     this.#pause = () => this.#isPaused = true
@@ -120,11 +124,11 @@ class t007Toast {
   set autoClose(value) {
     if (value === false) return
     if (value === true) {
-      switch (this.options.data.type) {
+      switch (this.options.type) {
         case "success":
         case "error":
         case "warning": 
-          value = window.TOAST_DURATIONS[this.options.data.type]
+          value = window.TOAST_DURATIONS[this.options.type]
           break
         default:
           value = window.TOAST_DURATIONS.info  
@@ -172,27 +176,34 @@ class t007Toast {
   }
 
   /**
-   * @param {object} value
+   * @param {string} value
    */
-  set data({type, image, body}) {
+  set body(body) {
+    const type = this.options.type,
+    image = this.options.image,
+    icon = this.options.icon
+    let defaultIcon = ""
     switch(type) {
+      case "info":
+        defaultIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#3498db"/><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 10v6"/><circle cx="12" cy="7" r="1.5" fill="#fff"/></svg>`
+        break
       case "success":
-        this.#toastElem.classList.add("success")
+        defaultIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#27ae60"/><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 12l3 3l6-6"/></svg>`
         break
       case "error":
-        this.#toastElem.classList.add("error")
+        defaultIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#e74c3c"/><path fill="#fff" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 8l8 8M16 8l-8 8"/></svg>`
         break
       case "warning":
-        this.#toastElem.classList.add("warning")
+        defaultIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#f1c40f" stroke="#f39c12" stroke-width="2" stroke-linejoin="round" d="M12 3L2.5 20.5A2 2 0 0 0 4.5 23h15a2 2 0 0 0 2-2.5L12 3z"/><circle cx="12" cy="17" r="1.5" fill="#fff"/><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v6"/></svg>`
         break
-      case "info": 
-        this.#toastElem.classList.add("info")
-        break
+      default:
+        defaultIcon = ""
     }
     this.#toastElem.innerHTML = 
     `
       <div class="t007-toast-image-wrapper">
         ${image ? `<img class="t007-toast-image" src="${image}" alt="toast-image">` : ``}
+        ${icon ? `<span class="t007-toast-icon">${typeof icon === "string" ? icon : defaultIcon}</span>` : ""}
       </div>
       <span class="t007-toast-body">
         <p class="t007-toast-body-text">${body}</p>
@@ -338,11 +349,11 @@ class t007Toast {
     if (!("vibrate" in navigator)) return
     if (value === false) return
     if (value === true) {
-      switch (this.options.data.type) {
+      switch (this.options.type) {
         case "success":
         case "error":
         case "warning": 
-          value = window.TOAST_VIBRATIONS[this.options.data.type]
+          value = window.TOAST_VIBRATIONS[this.options.type]
           break
         default:
           value = window.TOAST_VIBRATIONS.info  
@@ -388,6 +399,11 @@ class t007Toast {
   }
 }
 
-export default function Toast(options) {
-  return new t007Toast(options)
-}
+export default (function Toast() {
+  const base = (body, options = {}) => new t007Toast({ ...options, body })
+  base.info = (body, options = {}) => base(body, { ...options, type: "info" })
+  base.error = (body, options = {}) => base(body, { ...options, type: "error" })
+  base.success = (body, options = {}) => base(body, { ...options, type: "success" })
+  base.warn = (body, options = {}) => base(body, { ...options, type: "warning" })
+  return base
+})()
