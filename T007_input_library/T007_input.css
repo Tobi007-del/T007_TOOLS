@@ -1,490 +1,691 @@
 :where(:root) {
-    --i-font-family: inherit;
-    --i-font-size: 1rem;
-    --i-height: 3rem;
-    --i-padding: .75rem;
-    --i-border-radius: .25rem;
-    --i-border-width: 1px;
-    --i-active-border-width: 2px;
-    --i-checkmark-color: white;
-    --i-checkbox-background: whitesmoke;
-    --i-checkbox-checked-background: dodgerblue;
-    --i-checkbox-border-color: #707070;
-    --i-checkbox-checked-border-color: black;
-    --i-radio-color: dodgerblue;
-    --i-radio-background: whitesmoke;
-    --i-radio-checked-background: whitesmoke;
-    --i-radio-border-color: #707070;
-    --i-radio-checked-border-color: dodgerblue;
-    --i-normal-color: rgba(0, 0, 0, 0.45);
-    --i-hover-color: from(var(--i-normal-color) r g b/0.65);
-    --i-focus-color: black;
-    --i-success-color: green;
-    --i-error-color: #b00020;
-    --p-meter-color-weak: #b81a0a;
-    --p-meter-color-fair: #f68b1e;
-    --p-meter-color-strong: #0a8b1e;
-    --p-meter-color-very-strong: #39FF14;
+  --t007-input-font-family: inherit;
+  --t007-input-color: black;
+  --t007-input-base-color: rgb(from var(--t007-input-color) r g b/0.45);
+  --t007-input-hover-color: rgb(from var(--t007-input-color) r g b/0.65);
+  --t007-input-focus-color: rgb(from var(--t007-input-color) r g b/1);
+  --t007-input-success-color: green;
+  --t007-input-error-color: #b00020;
+  --t007-input-font-size: 1rem;
+  --t007-input-height: 3rem;
+  --t007-input-padding: 0.75rem;
+  --t007-input-border-radius: 0.25rem;
+  --t007-input-border-width: 1px;
+  --t007-input-active-border-width: 2px;
+  --t007-input-checkmark-color: white;
+  --t007-input-checkbox-background: whitesmoke;
+  --t007-input-checkbox-checked-background: dodgerblue;
+  --t007-input-checkbox-border-color: #707070;
+  --t007-input-checkbox-checked-border-color: black;
+  --t007-input-radio-color: dodgerblue;
+  --t007-input-radio-background: whitesmoke;
+  --t007-input-radio-checked-background: whitesmoke;
+  --t007-input-radio-border-color: #707070;
+  --t007-input-radio-checked-border-color: dodgerblue;
+  --t007-input-p-meter-color-weak: #b81a0a;
+  --t007-input-p-meter-color-fair: #f68b1e;
+  --t007-input-p-meter-color-strong: #0a8b1e;
+  --t007-input-p-meter-color-very-strong: #39ff14;
 }
 
-.field,
-.field *,
-.field *::after,
-.field *::before {
-    box-sizing: border-box;
-    font-family: var(--i-font-family);
-    transition-property: transform, filter, background-color, color, border, right, left, top, bottom, width, height;
-    transition-duration: 150ms;
-    transition-timing-function: ease;
+.t007-input-field,
+.t007-input-field *,
+.t007-input-field *::after,
+.t007-input-field *::before {
+  box-sizing: border-box;
+  font-family: var(--t007-input-font-family);
+  transition-property:
+    transform, filter, background-color, color, border, right, left, top,
+    bottom, width, height;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
 }
 
-.field {
-    --i-current-color: var(--i-normal-color);
-    width: 100%;
-    max-width: 100%;
-    padding-top: 1rem;
-    -webkit-font-smoothing: antialiased;
+.t007-input-field {
+  --t007-input-current-color: var(--t007-input-base-color);
+  width: 100%;
+  max-width: 100%;
+  padding-top: 1rem;
+  -webkit-font-smoothing: antialiased;
 }
 
-.field:has(.input[hidden]) {
+.t007-input-field:has(.t007-input[hidden]) {
   display: none;
 }
 
-.field:where(:hover) {
-    --i-current-color: var(--i-hover-color);
+.t007-input-field:where(:hover) {
+  --t007-input-current-color: var(--t007-input-hover-color);
 }
 
-.field:where(:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))))) {
-    --i-current-color: var(--i-focus-color);
+.t007-input-field:where(
+    :has(
+      .t007-input:is(
+          [data-filled],
+          :focus,
+          :-webkit-autofill,
+          :not(:placeholder-shown):where(
+              :not(select):not([type="date"]):not([type="time"]):not(
+                  [type="datetime-local"]
+                ):not([type="month"]):not([type="week"]):not(
+                  [type="color"]
+                ):not([type="range"]):not([type="file"])
+            )
+        )
+    )
+  ) {
+  --t007-input-current-color: var(--t007-input-focus-color);
 }
 
-.field.success {
-    --i-current-color: var(--i-success-color);
+.t007-input-field.t007-input-success {
+  --t007-input-current-color: var(--t007-input-success-color);
 }
 
-.field.error {
-    --i-current-color: var(--i-error-color);
+.t007-input-field.t007-input-error {
+  --t007-input-current-color: var(--t007-input-error-color);
 }
 
-.input-field {
-    position: relative;
-    min-width: 3rem;
-    height: var(--i-height);
-    width: 100%;
-    padding: var(--i-padding);
-    border-radius: var(--i-border-radius);
-    display: inline-flex;
-    align-items: baseline;
+.t007-input-wrapper {
+  position: relative;
+  min-width: 3rem;
+  height: var(--t007-input-height);
+  width: 100%;
+  padding: var(--t007-input-padding);
+  border-radius: var(--t007-input-border-radius);
+  display: inline-flex;
+  align-items: baseline;
 }
 
-.input-field:has(textarea) {
-    min-height: fit-content;
+.t007-input-wrapper:has(textarea) {
+  min-height: fit-content;
 }
 
-.input-field:has(.input-icon) {
-    padding-right: 0;
+.t007-input-wrapper:has(.t007-input-icon) {
+  padding-right: 0;
 }
 
-.input-outline {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    width: 100%;
-    max-width: 100%;
-    height: 100%;
-    pointer-events: none;
-    text-align: left;
+.t007-input-outline {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  pointer-events: none;
+  text-align: left;
 }
 
-.input-outline>* {
-    height: 100%;
-    border-style: solid;
-    border-color: var(--i-current-color);
-    border-width: var(--i-border-width);
-    pointer-events: none;
+.t007-input-outline > * {
+  height: 100%;
+  border-style: solid;
+  border-color: var(--t007-input-current-color);
+  border-width: var(--t007-input-border-width);
+  pointer-events: none;
 }
 
-.field:has(.input:focus) .input-outline>* {
-    border-width: var(--i-border-active-width);
+.t007-input-field:has(.t007-input:focus) .t007-input-outline > * {
+  border-width: var(--t007-input-border-active-width);
 }
 
-.input-outline-leading {
-    width: 0.75rem;
-    border-top-left-radius: .25rem;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: .25rem;
-    border-bottom-right-radius: 0;
-    border-right: none;
+.t007-input-outline-leading {
+  width: 0.75rem;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0;
+  border-right: none;
 }
 
-.input-outline-trailing {
-    flex: 1;
-    border-top-left-radius: 0;
-    border-top-right-radius: .25rem;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: .25rem;
-    border-left: none;
+.t007-input-outline-trailing {
+  flex: 1;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0.25rem;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0.25rem;
+  border-left: none;
 }
 
-.input-outline-notch {
-    position: relative;
-    width: auto;
-    max-width: calc(100% - .75rem);
-    flex: 0 0 auto;
-    border-left: none;
-    border-right: none;
-    transition-property: border-bottom;
+.t007-input-outline-notch {
+  position: relative;
+  width: auto;
+  max-width: calc(100% - 0.75rem);
+  flex: 0 0 auto;
+  border-left: none;
+  border-right: none;
+  transition-property: border-bottom;
 }
 
-.field:has(.input-icon) .input-outline-notch {
-    max-width: calc(100% - 3.75rem);
+.t007-input-field:has(.t007-input-icon) .t007-input-outline-notch {
+  max-width: calc(100% - 3.75rem);
 }
 
-.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .input-outline-notch,
-.field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-outline-notch {
-    border-top: none;
+.t007-input-field:has(
+    .t007-input:is(
+        [data-filled],
+        :focus,
+        :-webkit-autofill,
+        :not(:placeholder-shown):where(
+            :not(select):not([type="date"]):not([type="time"]):not(
+                [type="datetime-local"]
+              ):not([type="month"]):not([type="week"]):not([type="color"]):not(
+                [type="range"]
+              ):not([type="file"])
+          )
+      )
+  )
+  .t007-input-outline-notch,
+.t007-input-field:has(
+    .t007-input:is(
+        select,
+        :not([placeholder=""]),
+        [type="date"],
+        [type="time"],
+        [type="datetime-local"],
+        [type="month"],
+        [type="week"],
+        [type="color"],
+        [type="range"],
+        [type="file"]
+      )
+  )
+  .t007-input-outline-notch {
+  border-top: none;
 }
 
-.field:not(:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))), .input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"]))) .input-outline-notch {
-    width: auto !important;
+.t007-input-field:not(
+    :has(
+      .t007-input:is(
+          [data-filled],
+          :focus,
+          :-webkit-autofill,
+          :not(:placeholder-shown):where(
+              :not(select):not([type="date"]):not([type="time"]):not(
+                  [type="datetime-local"]
+                ):not([type="month"]):not([type="week"]):not(
+                  [type="color"]
+                ):not([type="range"]):not([type="file"])
+            )
+        ),
+      .t007-input:is(
+          select,
+          :not([placeholder=""]),
+          [type="date"],
+          [type="time"],
+          [type="datetime-local"],
+          [type="month"],
+          [type="week"],
+          [type="color"],
+          [type="range"],
+          [type="file"]
+        )
+    )
+  )
+  .t007-input-outline-notch {
+  width: auto !important;
 }
 
-.input-floating-label {
-    color: var(--i-current-color);
-    opacity: 0.85;
-    display: inline-block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    position: relative;
-    top: calc(var(--i-height) / 2);
-    transform: translateY(-50%);
-    font-weight: 400;
-    font-size: var(--i-font-size);
-    line-height: 1.3;
-    transform-origin: left top;
-    white-space: nowrap;
-    will-change: transform;
+.t007-input-floating-label {
+  color: var(--t007-input-current-color);
+  opacity: 0.85;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  top: calc(var(--t007-input-height) / 2);
+  transform: translateY(-50%);
+  font-weight: 400;
+  font-size: var(--t007-input-font-size);
+  line-height: 1.3;
+  transform-origin: left top;
+  white-space: nowrap;
+  will-change: transform;
 }
 
-.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .input-floating-label,
-.field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-floating-label {
-    transform: translateY(calc(-1 * ((var(--i-height)/2) + (var(--i-font-size)/2)))) scale(0.75);
-    opacity: 1;
-    left: .25rem;
-    right: auto;
-    max-width: 133%;
+.t007-input-field:has(
+    .t007-input:is(
+        [data-filled],
+        :focus,
+        :-webkit-autofill,
+        :not(:placeholder-shown):where(
+            :not(select):not([type="date"]):not([type="time"]):not(
+                [type="datetime-local"]
+              ):not([type="month"]):not([type="week"]):not([type="color"]):not(
+                [type="range"]
+              ):not([type="file"])
+          )
+      )
+  )
+  .t007-input-floating-label,
+.t007-input-field:has(
+    .t007-input:is(
+        select,
+        :not([placeholder=""]),
+        [type="date"],
+        [type="time"],
+        [type="datetime-local"],
+        [type="month"],
+        [type="week"],
+        [type="color"],
+        [type="range"],
+        [type="file"]
+      )
+  )
+  .t007-input-floating-label {
+  transform: translateY(
+      calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2)))
+    )
+    scale(0.75);
+  opacity: 1;
+  left: 0.25rem;
+  right: auto;
+  max-width: 133%;
 }
 
-.field:has(.input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .input-floating-label.shake,
-.field:has(.input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .input-floating-label.shake {
-    transform: translateY(calc(-1 * ((var(--i-height)/2) + (var(--i-font-size)/2)))) translateX(.25rem) scale(0.75);
+.t007-input-field:has(
+    .t007-input:is(
+        [data-filled],
+        :focus,
+        :-webkit-autofill,
+        :not(:placeholder-shown):where(
+            :not(select):not([type="date"]):not([type="time"]):not(
+                [type="datetime-local"]
+              ):not([type="month"]):not([type="week"]):not([type="color"]):not(
+                [type="range"]
+              ):not([type="file"])
+          )
+      )
+  )
+  .t007-input-floating-label.t007-input-shake,
+.t007-input-field:has(
+    .t007-input:is(
+        select,
+        :not([placeholder=""]),
+        [type="date"],
+        [type="time"],
+        [type="datetime-local"],
+        [type="month"],
+        [type="week"],
+        [type="color"],
+        [type="range"],
+        [type="file"]
+      )
+  )
+  .t007-input-floating-label.t007-input-shake {
+  transform: translateY(
+      calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2)))
+    )
+    translateX(0.25rem) scale(0.75);
 }
 
-.input {
-    border: none;
-    background: none;
-    color: var(--i-current-color);
-    caret-color: var(--i-current-color);
-    border-radius: 0;
-    font-size: var(--i-font-size);
-    height: 100%;
-    width: 100%;
-    min-width: 0;
-    padding: 0;
-    font-family: inherit;
-    outline: none !important;
+.t007-input {
+  border: none;
+  background: none;
+  color: var(--t007-input-current-color);
+  caret-color: var(--t007-input-current-color);
+  border-radius: 0;
+  font-size: var(--t007-input-font-size);
+  height: 100%;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  font-family: inherit;
+  outline: none !important;
 }
 
-.input[type="file"] {
-    height: unset;
+.t007-input[type="file"] {
+  height: unset;
 }
 
-.input:is(textarea) {
-    resize: vertical;
+.t007-input:is(textarea) {
+  resize: vertical;
 }
 
-.input:not(select) {
-    appearance: none;
+.t007-input:not(select) {
+  appearance: none;
 }
 
 ::picker(select) {
-    color: black;
+  color: black;
 }
 
-.input:is([type="checkbox"], [type="radio"]) {
-    opacity: 0;
-    position: absolute;
-    pointer-events: none;
+.t007-input:is([type="checkbox"], [type="radio"]) {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
 }
 
-.input::placeholder {
-    color: currentColor;
-    opacity: 0.55;
+.t007-input::placeholder {
+  color: currentColor;
+  opacity: 0.55;
 }
 
-:where(.input[type="file"])::file-selector-button {
-    font-family: inherit;
-    font-weight: bold;
-    font-size: calc(var(--i-font-size)/1.25);
-    margin-right: 0.65rem;
-    padding: 0.225rem;
-    border-top: none;
-    border-right: none;
-    border-width: 2px;
-    border-radius: 0.18rem;
-    background: dodgerblue;
-    color: whitesmoke;
-    cursor: pointer;
-    transition: filter 200ms ease;
+:where(.t007-input[type="file"])::file-selector-button {
+  font-family: inherit;
+  font-weight: bold;
+  font-size: calc(var(--t007-input-font-size) / 1.25);
+  margin-right: 0.65rem;
+  padding: 0.225rem;
+  border-top: none;
+  border-right: none;
+  border-width: 2px;
+  border-radius: 0.18rem;
+  background: dodgerblue;
+  color: whitesmoke;
+  cursor: pointer;
+  transition: filter 200ms ease;
 }
 
-:where(.input[type="file"])::file-selector-button:where(:active) {
-    border-width: 1px;
+:where(.t007-input[type="file"])::file-selector-button:where(:active) {
+  border-width: 1px;
 }
 
-:where(.input[type="file"])::file-selector-button:where(:hover, :focus-visible) {
-    filter: brightness(80%);
+:where(.t007-input[type="file"])::file-selector-button:where(
+    :hover,
+    :focus-visible
+  ) {
+  filter: brightness(80%);
 }
 
-.input-field:has(.input[type="file"].image-selected) {
-    padding-block: 0.5rem;
-    padding-left: 0.5rem;
+.t007-input-wrapper:has(.t007-input[type="file"].t007-image-selected) {
+  padding-block: 0.5rem;
+  padding-left: 0.5rem;
 }
 
-:where(.input[type="file"].image-selected)::file-selector-button {
-    background: center/contain no-repeat var(--i-image-selected-src), linear-gradient(black, black), black;
-    color: transparent;
-    padding: 0.725rem;
-    border: none;
+:where(.t007-input[type="file"].t007-image-selected)::file-selector-button {
+  background:
+    center/contain no-repeat var(--t007-input-image-src),
+    linear-gradient(black, black),
+    black;
+  color: transparent;
+  padding: 0.725rem;
+  border: none;
 }
 
-/* .field:has(.input:-webkit-autofill) .input-outline > * {
+/* .t007-input-field:has(.t007-input:-webkit-autofill) .t007-input-outline > * {
     background-color: var(--current-theme-inverse-transparent-color);
 } */
 
-.input:-webkit-autofill {
-    transition: background-color 50000000s ease-in-out 0s !important;
-    -webkit-text-fill-color: var(--i-current-color) !important;
+.t007-input:-webkit-autofill {
+  transition: background-color 50000000s ease-in-out 0s !important;
+  -webkit-text-fill-color: var(--t007-input-current-color) !important;
 }
 
-.input-icon {
-    background: none;
-    border: none;
-    padding: 0.75rem;
-    align-self: center;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.t007-input-icon {
+  background: none;
+  border: none;
+  padding: 0.75rem;
+  align-self: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.input-icon svg path {
-    fill: var(--i-current-color);
+.t007-input-icon svg path {
+  fill: var(--t007-input-current-color);
 }
 
-.field:has(input[type="password"]) .input-password-visible-icon,
-.field:has(input[type="text"]) .input-password-hidden-icon {
-    display: none;
+.t007-input-field:has(input[type="password"]) .t007-input-password-visible-icon,
+.t007-input-field:has(input[type="text"]) .t007-input-password-hidden-icon {
+  display: none;
 }
 
-.helper-line {
-    position: relative;
-    padding-inline: 1rem;
-    height: 1rem;
+.t007-input-helper-line {
+  position: relative;
+  padding-inline: 1rem;
+  height: 1rem;
 }
 
-.helper-text::before {
-    content: "";
-    position: relative;
-    top: 0;
-    left: 0;
-    display: block;
-    height: .2rem;
+.t007-input-helper-text::before {
+  content: "";
+  position: relative;
+  top: 0;
+  left: 0;
+  display: block;
+  height: 0.2rem;
 }
 
-.helper-text {
-    position: absolute;
-    font-size: 0.75rem;
-    color: var(--i-current-color);
-    line-height: .785rem;
-    opacity: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+.t007-input-helper-text {
+  position: absolute;
+  font-size: 0.75rem;
+  color: var(--t007-input-current-color);
+  line-height: 0.785rem;
+  opacity: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.helper-text[data-violation="none"],
-.helper-text.show {
+.t007-input-helper-text[data-violation="none"],
+.t007-input-helper-text.t007-input-show {
+  opacity: 1;
+}
+
+.t007-input-helper-line:has(.t007-input-helper-text.t007-input-show) .t007-input-helper-text[data-violation="none"] {
+  opacity: 0;
+}
+
+.t007-input-password-meter {
+  --t007-input-p-meter-current-color: var(--t007-input-p-meter-color-weak);
+  display: none;
+  margin-top: 0.75rem;
+}
+
+.t007-input-field:has(
+    .t007-input:is([type="password"], [type="text"]):is(
+        [data-filled],
+        :-webkit-autofill,
+        :not(:placeholder-shown)
+      )
+  )
+  .t007-input-password-meter {
+  display: block;
+}
+
+.t007-input-password-meter[data-strength-level="2"] {
+  --t007-input-p-meter-current-color: var(--t007-input-p-meter-color-fair);
+}
+
+.t007-input-password-meter[data-strength-level="3"] {
+  --t007-input-p-meter-current-color: var(--t007-input-p-meter-color-strong);
+}
+
+.t007-input-password-meter[data-strength-level="4"] {
+  --t007-input-p-meter-current-color: var(--t007-input-p-meter-color-very-strong);
+}
+
+.t007-input-password-meter::after {
+  content: "";
+  position: relative;
+  bottom: 0;
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  margin-top: 0.75rem;
+  color: var(--t007-input-p-meter-current-color);
+  line-height: normal;
+}
+
+.t007-input-password-meter[data-strength-level="1"]::after {
+  content: "Weak";
+}
+
+.t007-input-password-meter[data-strength-level="2"]::after {
+  content: "Fair";
+}
+
+.t007-input-password-meter[data-strength-level="3"]::after {
+  content: "Strong";
+}
+
+.t007-input-password-meter[data-strength-level="4"]::after {
+  content: "Very Strong";
+}
+
+.t007-input-password-strength-meter {
+  display: flex;
+}
+
+.t007-input-password-strength-meter > div {
+  flex: 1;
+  margin-right: 0.25rem;
+  height: 0.225rem;
+}
+
+.t007-input-password-meter[data-strength-level="1"] .t007-input-p-weak,
+.t007-input-password-meter[data-strength-level="2"] :is(.t007-input-p-weak, .t007-input-p-fair),
+.t007-input-password-meter[data-strength-level="3"] :is(.t007-input-p-weak, .t007-input-p-fair, .t007-input-p-strong),
+.t007-input-password-meter[data-strength-level="4"]
+  :is(.t007-input-p-weak, .t007-input-p-fair, .t007-input-p-strong, .t007-input-p-very-strong) {
+  background-color: var(--t007-input-p-meter-current-color);
+}
+
+.t007-input-checkbox-group,
+.t007-input-radio-group {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.t007-input-checkbox-wrapper,
+.t007-input-radio-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.t007-input-checkbox-label,
+.t007-input-radio-label {
+  color: var(--t007-input-current-color);
+}
+
+:is(.t007-input-checkbox-wrapper, .t007-input-radio-wrapper):hover {
+  filter: brightness(95%);
+}
+
+.t007-input-checkbox-box,
+.t007-input-radio-box {
+  position: relative;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.t007-input-checkbox-box {
+  background: var(--t007-input-checkbox-background);
+  border-color: var(--t007-input-checkbox-border-color);
+}
+
+.t007-input-radio-box {
+  background: var(--t007-input-radio-background);
+  border-color: var(--t007-input-radio-border-color);
+}
+
+.t007-input-checkbox-box {
+  border-radius: 0.2rem;
+}
+
+.t007-input-radio-box {
+  border-radius: 50%;
+}
+
+.t007-input-field:has(.t007-input[type="checkbox"]:checked) .t007-input-checkbox-box {
+  background: var(--t007-input-checkbox-checked-background);
+  border-color: var(--t007-input-checkbox-checked-border-color);
+}
+
+.t007-input-field:has(.t007-input[type="radio"]:checked) .t007-input-radio-box {
+  background: var(--t007-input-radio-checked-background);
+  border-color: var(--t007-input-radio-checked-border-color);
+}
+
+.t007-input-field:has(.t007-input[type="checkbox"], .t007-input[type="radio"]).t007-input-error
+  :is(.t007-input-checkbox-wrapper .t007-input-checkbox-box, .t007-input-radio-wrapper .t007-input-radio-box) {
+  border-color: var(--t007-input-error-color);
+}
+
+.t007-input-checkbox-tag,
+.t007-input-radio-tag {
+  content: "";
+  opacity: 0;
+  position: absolute;
+  margin: auto;
+  inset: 0;
+}
+
+.t007-input-checkbox-tag {
+  top: -10%;
+  width: 35%;
+  height: 70%;
+  border: solid var(--t007-input-checkmark-color);
+  border-width: 0 0.125rem 0.125rem 0;
+  transform: rotate(45deg);
+}
+
+.t007-input-radio-tag {
+  width: 70%;
+  height: 70%;
+  border-radius: inherit;
+  background: var(--t007-input-radio-color);
+}
+
+.t007-input-field:has(.t007-input[type="checkbox"]:checked) .t007-input-checkbox-tag,
+.t007-input-field:has(.t007-input[type="radio"]:checked) .t007-input-radio-tag {
+  opacity: 1;
+}
+
+/* Base styles to enable pointer effects */
+.t007-input-checkbox-box,
+.t007-input-radio-box {
+  position: relative;
+}
+
+/* Pulse bubble effect on click */
+.t007-input-checkbox-box::before,
+.t007-input-radio-box::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgb(from var(--t007-input-checkbox-checked-background) r g b/0.15); /* subtle blue flash */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.t007-input-checkbox-box:hover::before,
+.t007-input-radio-box:hover::before {
+  width: 200%;
+  height: 200%;
+}
+
+.t007-input-field:has(.t007-input[type="checkbox"]:checked) .t007-input-checkbox-box::before,
+.t007-input-field:has(.t007-input[type="radio"]:checked) .t007-input-radio-box::before {
+  animation: t007-pulse 350ms ease-out forwards;
+}
+
+@keyframes t007-pulse {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.5;
+  } 85% {
+    width: 250%;
+    height: 250%;
     opacity: 1;
-}
-
-.helper-line:has(.helper-text.show) .helper-text[data-violation="none"] {
+  } 100% {
+    width: 250%;
+    height: 250%;
     opacity: 0;
-}
-
-.password-meter {
-    --p-meter-current-color: var(--p-meter-color-weak);
-    display: none;
-    margin-top: .75rem;
-}
-
-.field:has(.input:is([type="password"], [type="text"]):is([data-filled], :-webkit-autofill, :not(:placeholder-shown))) .password-meter {
-    display: block;
-}
-
-.password-meter[data-strength-level="2"] {
-    --p-meter-current-color: var(--p-meter-color-fair);
-}
-
-.password-meter[data-strength-level="3"] {
-    --p-meter-current-color: var(--p-meter-color-strong);
-}
-
-.password-meter[data-strength-level="4"] {
-    --p-meter-current-color: var(--p-meter-color-very-strong);
-}
-
-.password-meter::after {
-    content: "";
-    position: relative;
-    bottom: 0;
-    display: block;
-    text-align: right;
-    font-size: 0.75rem;
-    margin-top: .75rem;
-    color: var(--p-meter-current-color);
-    line-height: normal;
-}
-
-.password-meter[data-strength-level="1"]::after {
-    content: "Weak";
-}
-
-.password-meter[data-strength-level="2"]::after {
-    content: "Fair";
-}
-
-.password-meter[data-strength-level="3"]::after {
-    content: "Strong";
-}
-
-.password-meter[data-strength-level="4"]::after {
-    content: "Very Strong";
-}
-
-.password-strength-meter {
-    display: flex;
-}
-
-.password-strength-meter>div {
-    flex: 1;
-    margin-right: .25rem;
-    height: .225rem;
-}
-
-.password-meter[data-strength-level="1"] .p-weak,
-.password-meter[data-strength-level="2"] :is(.p-weak, .p-fair),
-.password-meter[data-strength-level="3"] :is(.p-weak, .p-fair, .p-strong),
-.password-meter[data-strength-level="4"] :is(.p-weak, .p-fair, .p-strong, .p-very-strong) {
-    background-color: var(--p-meter-current-color);
-}
-
-.checkbox-group,
-.radio-group {
-    display: inline-flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.checkbox-input-field,
-.radio-input-field {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.checkbox-label,
-.radio-label {
-    color: var(--i-current-color);
-}
-
-:is(.checkbox-input-field, .radio-input-field):hover {
-    filter: brightness(95%);
-}
-
-.checkbox-box,
-.radio-box {
-    position: relative;
-    width: .85rem;
-    height: .85rem;
-    border-style: solid;
-    border-width: 1px;
-}
-
-.checkbox-box {
-    background: var(--i-checkbox-background);
-    border-color: var(--i-checkbox-border-color);
-}
-
-.radio-box {
-    background: var(--i-radio-background);
-    border-color: var(--i-radio-border-color);
-}
-
-.checkbox-box {
-    border-radius: 0.2rem;
-}
-
-.radio-box {
-    border-radius: 50%;
-}
-
-.field:has(.input[type="checkbox"]:checked) .checkbox-box {
-    background: var(--i-checkbox-checked-background);
-    border-color: var(--i-checkbox-checked-border-color);
-}
-
-.field:has(.input[type="radio"]:checked) .radio-box {
-    background: var(--i-radio-checked-background);
-    border-color: var(--i-radio-checked-border-color);
-}
-
-.field:has(.input[type="checkbox"], .input[type="radio"]).error :is(.checkbox-input-field .checkbox-box, .radio-input-field .radio-box) {
-    border-color: var(--i-error-color);
-}
-
-.checkbox-box::after,
-.radio-box::after {
-    content: "";
-    opacity: 0;
-    position: absolute;
-    margin: auto;
-    inset: 0;
-}
-
-.checkbox-box::after {
-    top: -10%;
-    width: 35%;
-    height: 70%;
-    border: solid var(--i-checkmark-color);
-    border-width: 0 0.125rem 0.125rem 0;
-    transform: rotate(45deg);
-}
-
-.radio-box::after {
-    width: 70%;
-    height: 70%;
-    border-radius: inherit;
-    background: var(--i-radio-color);
-}
-
-.field:has(.input[type="checkbox"]:checked) .checkbox-box::after,
-.field:has(.input[type="radio"]:checked) .radio-box::after {
-    opacity: 1;
+  }
 }

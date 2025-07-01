@@ -1,5 +1,5 @@
 class T007_Form_Manager {
-  static forms = document.getElementsByClassName("input-form")
+  static forms = document.getElementsByClassName("t007-input-form")
 
   static violationKeys = ["valueMissing", "typeMismatch", "patternMismatch", "stepMismatch", "tooShort", "tooLong", "rangeUnderflow", "rangeOverflow", "badInput", "customError"]
 
@@ -61,9 +61,11 @@ class T007_Form_Manager {
     for (const mutation of mutations) {
     for (const node of mutation.addedNodes) {
       if (node.nodeType !== 1) continue
-      if (node?.classList?.contains("field") || node?.querySelector(".field")) {
-        const field = node.classList.contains("field") ? node : node.querySelector(".field")
-        window.T007FM.setUpField(field)
+      if (node?.classList?.contains("t007-input-field") || node?.querySelector(".t007-input-field")) {
+        const fields = [...(node.classList.contains("t007-input-field") ? [node] : node.querySelectorAll(".t007-input-field"))]
+        for (const field of fields) {
+          window.T007FM.setUpField(field)
+        }
       }
     }
     }
@@ -82,7 +84,7 @@ class T007_Form_Manager {
   }
 
   static autoFitNotch(field) {
-    const notch = field?.querySelector(".input-outline-notch")
+    const notch = field?.querySelector(".t007-input-outline-notch")
     if (!notch) return
     const label = notch.firstElementChild
     if (!label.innerText) return
@@ -108,8 +110,8 @@ class T007_Form_Manager {
   }
 
   static setFallbackHelper(field) {
-    const helperLine = field?.querySelector(".helper-line")
-    if (!helperLine || helperLine.querySelector(".helper-text[data-violation='auto']")) return
+    const helperLine = field?.querySelector(".t007-input-helper-line")
+    if (!helperLine || helperLine.querySelector(".t007-input-helper-text[data-violation='auto']")) return
     const el = document.createElement('p')
     el.className = 'helper-text'
     el.setAttribute('data-violation', "auto")
@@ -118,21 +120,21 @@ class T007_Form_Manager {
 
   static setFieldListeners(field) {
     if (!field) return
-    const input = field.querySelector(".input"),
-    floatingLabel = field.querySelector(".input-floating-label"),
-    eyeOpen = field.querySelector(".input-password-visible-icon"),
-    eyeClosed = field.querySelector(".input-password-hidden-icon") 
+    const input = field.querySelector(".t007-input"),
+    floatingLabel = field.querySelector(".t007-input-floating-label"),
+    eyeOpen = field.querySelector(".t007-input-password-visible-icon"),
+    eyeClosed = field.querySelector(".t007-input-password-hidden-icon") 
     if (input.type === "file") input.addEventListener("input", async () => {
       const file = input.files?.[0],
       img = new Image()
       img.onload = () => {
-        input.style.setProperty("--i-image-selected-src", `url(${src})`)
+        input.style.setProperty("--t007-input-image-src", `url(${src})`)
         input.classList.add("image-selected")
         setTimeout(() => URL.revokeObjectURL(src), 1000)
       }
       img.onerror = () => {
-        input.style.removeProperty("--i-image-selected-src")
-        input.classList.remove("image-selected")
+        input.style.removeProperty("--t007-input-image-src")
+        input.classList.remove("t007-image-selected")
         URL.revokeObjectURL(src)
       }
       let src
@@ -154,18 +156,18 @@ class T007_Form_Manager {
         })
       }
       if (!src) {
-        input.style.removeProperty("--i-image-selected-src")
-        input.classList.remove("image-selected")
+        input.style.removeProperty("--t007-input-image-src")
+        input.classList.remove("t007-image-selected")
         return
       }
       img.src = src
     })
-    if (floatingLabel) floatingLabel.ontransitionend = () => floatingLabel.classList.remove("shake")
+    if (floatingLabel) floatingLabel.ontransitionend = () => floatingLabel.classList.remove("t007-input-shake")
     if (eyeOpen && eyeClosed) eyeOpen.onclick = eyeClosed.onclick = () => window.T007FM.togglePasswordType(input)
   }
 
   static setUpField(field) {
-    window.T007FM.toggleFilled(field.querySelector(".input"))
+    window.T007FM.toggleFilled(field.querySelector(".t007-input"))
     window.T007FM.autoFitNotch(field)
     window.T007FM.setFallbackHelper(field)
     window.T007FM.setFieldListeners(field)
@@ -198,35 +200,37 @@ class T007_Form_Manager {
     helperText = {} // { info, valueMissing, typeMismatch, patternMismatch, etc. }
   }) {
     const field = document.createElement('div')
-    field.className = 'field'
+    field.className = 't007-input-field'
 
     const inputField = document.createElement('label')
-    inputField.className = ["checkbox", "radio"].includes(type) ? `${type}-input-field` : 'input-field'
+    inputField.className = ["checkbox", "radio"].includes(type) ? `t007-input-${type}-wrapper` : 't007-input-wrapper'
     if (id) inputField.htmlFor = id
     field.appendChild(inputField)
 
     if (["checkbox", "radio"].includes(type)) {
     inputField.innerHTML = 
     `
-    <span class="${type}-box"></span>
-    <span class="${type}-label">${label}</span>   
+    <span class="t007-input-${type}-box">
+      <span class="t007-input-${type}-tag"></span>
+    </span>
+    <span class="t007-input-${type}-label">${label}</span>   
     `
     } else {
     const inputOutline = document.createElement('span')
-    inputOutline.className = 'input-outline'
+    inputOutline.className = 't007-input-outline'
     inputOutline.innerHTML = 
     `
-    <span class="input-outline-leading"></span>
-    <span class="input-outline-notch">
-      <span class="input-floating-label">${label}</span>
+    <span class="t007-input-outline-leading"></span>
+    <span class="t007-input-outline-notch">
+      <span class="t007-input-floating-label">${label}</span>
     </span>
-    <span class="input-outline-trailing"></span>
+    <span class="t007-input-outline-trailing"></span>
     `
     inputField.appendChild(inputOutline)
     }
 
     const input = document.createElement(type === 'textarea' ? 'textarea' : type === 'select' ? 'select' : 'input')
-    input.className = 'input'
+    input.className = 't007-input'
     if (['checkbox, radio'].includes(type)) input.value = label
     if (!['select', 'textarea'].includes(type)) input.type = type
     input.name = name
@@ -251,7 +255,7 @@ class T007_Form_Manager {
 
     if (eyeToggler && type === 'password') {
     const eyeOpen = document.createElement("i")
-    eyeOpen.className = "input-icon input-password-visible-icon"
+    eyeOpen.className = "t007-input-icon t007-input-password-visible-icon"
     eyeOpen.innerHTML = 
     `
     <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg">
@@ -261,7 +265,7 @@ class T007_Form_Manager {
     eyeOpen.setAttribute("aria-label", "Show password")
     inputField.appendChild(eyeOpen)
     const eyeClosed = document.createElement("i")
-    eyeClosed.className = "input-icon input-password-hidden-icon"
+    eyeClosed.className = "t007-input-icon t007-input-password-hidden-icon"
     eyeClosed.innerHTML = 
     `
     <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg">
@@ -273,11 +277,11 @@ class T007_Form_Manager {
     }
 
     const helperLine = document.createElement('div')
-    helperLine.className = 'helper-line'
+    helperLine.className = 't007-input-helper-line'
     //info helper
     if (helperText.info) {
     const infoText = document.createElement('p')
-    infoText.className = 'helper-text'
+    infoText.className = 't007-input-helper-text'
     el.setAttribute('data-violation', "none")
     helperLine.appendChild(infoText)
     }
@@ -285,7 +289,7 @@ class T007_Form_Manager {
     window.T007FM.violationKeys.forEach(key => {
     if (!helperText[key]) return
     const el = document.createElement('p')
-    el.className = 'helper-text'
+    el.className = 't007-input-helper-text'
     el.setAttribute('data-violation', key)
     el.textContent = helperText[key]
     helperLine.appendChild(el)
@@ -294,15 +298,15 @@ class T007_Form_Manager {
 
     if (passwordMeter && type === 'password') {
     const meter = document.createElement('div')
-    meter.className = 'password-meter'
+    meter.className = 't007-input-password-meter'
     meter.dataset.strengthLevel = '1'
     const strengthMeter = document.createElement('div')
-    strengthMeter.className = 'password-strength-meter'
+    strengthMeter.className = 't007-input-password-strength-meter'
     strengthMeter.innerHTML = `
-    <div class="p-weak"></div>
-    <div class="p-fair"></div>
-    <div class="p-strong"></div>
-    <div class="p-very-strong"></div>
+    <div class="t007-input-p-weak"></div>
+    <div class="t007-input-p-fair"></div>
+    <div class="t007-input-p-strong"></div>
+    <div class="t007-input-p-very-strong"></div>
     `
     meter.appendChild(strengthMeter)
     field.appendChild(meter)   
@@ -312,11 +316,12 @@ class T007_Form_Manager {
   }
 
   static handleFormValidation(form, n) {
-    if (!form?.classList.contains("input-form")) return
+    if (!form?.classList.contains("t007-input-form") || form.dataset.isValidating) return
+    form.dataset.isValidating = true
 
     n = n ?? Array.from(window.T007FM.forms).indexOf(form)
-    const fields = form.getElementsByClassName("field"),
-    inputs = form.getElementsByClassName("input")
+    const fields = form.getElementsByClassName("t007-input-field"),
+    inputs = form.getElementsByClassName("t007-input")
 
     Array.from(fields).forEach(window.T007FM.setUpField)
 
@@ -347,39 +352,39 @@ class T007_Form_Manager {
     })
 
     function toggleSubmitLoader(bool) {
-      form.classList.toggle("submit-loading", bool)
+      form.classList.toggle("t007-input-submit-loading", bool)
     }
 
     function toggleError(input, bool, notify = false, force = false) {
-      const field = input.closest(".field"),
-      floatingLabel = field.querySelector(".input-floating-label")
+      const field = input.closest(".t007-input-field"),
+      floatingLabel = field.querySelector(".t007-input-floating-label")
       if (bool && notify) {
-        field?.classList.add("error")
+        field?.classList.add("t007-input-error")
         toggleHelper(input, true)
-        floatingLabel?.classList.add("shake")
+        floatingLabel?.classList.add("t007-input-shake")
       } else if (!bool) {
-        field?.classList.remove("error")
+        field?.classList.remove("t007-input-error")
         toggleHelper(input, false)
       }
       if (!force) 
       if (input.value === "") {
-        field?.classList.remove("error")
+        field?.classList.remove("t007-input-error")
         toggleHelper(input, false) 
-        floatingLabel?.classList.remove("shake")
+        floatingLabel?.classList.remove("t007-input-shake")
       }
     }
 
     function toggleHelper(input, bool) {
-      const field = input.closest(".field"),
+      const field = input.closest(".t007-input-field"),
       violation = window.T007FM.violationKeys.find(violation => input.validity[violation] || input.Validity?.[violation]) ?? "",
-      helper = field.querySelector(`.helper-text[data-violation="${violation}"]`),
-      fallbackHelper = field.querySelector(`.helper-text[data-violation="auto"]`) 
-      input.closest(".field").querySelectorAll(`.helper-text:not([data-violation="${violation}"])`).forEach(helper => helper?.classList.remove("show"))
+      helper = field.querySelector(`.t007-input-helper-text[data-violation="${violation}"]`),
+      fallbackHelper = field.querySelector(`.t007-input-helper-text[data-violation="auto"]`) 
+      input.closest(".t007-input-field").querySelectorAll(`.t007-input-helper-text:not([data-violation="${violation}"])`).forEach(helper => helper?.classList.remove("t007-input-show"))
       if (helper) {
-        helper.classList.toggle("show", bool)
+        helper.classList.toggle("t007-input-show", bool)
       } else if (fallbackHelper) {
         fallbackHelper.textContent = input.validationMessage
-        fallbackHelper.classList.toggle("show", bool)
+        fallbackHelper.classList.toggle("t007-input-show", bool)
       }
     }
 
@@ -389,7 +394,7 @@ class T007_Form_Manager {
     }
 
     function updatePasswordMeter(input) {
-      const passwordMeter = input.closest(".field").querySelector(".password-meter")
+      const passwordMeter = input.closest(".t007-input-field").querySelector(".t007-input-password-meter")
       if (!passwordMeter) return
       const value = input.value?.trim()
       let strengthLevel = 0
@@ -404,7 +409,7 @@ class T007_Form_Manager {
     }
 
     function validateInput(input, notify = false, force = false) {
-      if (form.globalError || !input?.classList.contains("input")) return
+      if (form.globalError || !input?.classList.contains("t007-input")) return
       updatePasswordMeter(input)
       let value, errorBool
       switch(input.type) {
@@ -521,9 +526,9 @@ class T007_Form_Manager {
 
   static toggleFormGlobalError(form, bool) {
     form.globalError = bool
-    form.querySelectorAll(".field").forEach(field => {
-      field.classList.toggle("error", bool)
-      if (bool) field.querySelector(".input-floating-label")?.classList.add("shake")
+    form.querySelectorAll(".t007-input-field").forEach(field => {
+      field.classList.toggle("t007-input-error", bool)
+      if (bool) field.querySelector(".t007-input-floating-label")?.classList.add("t007-input-shake")
     })
   }
 

@@ -2,51 +2,51 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T007 Drag-and-Drop Form Builder</title>
-    <link rel="icon" type="image/jpeg" sizes="32x32" href="../assets/images/my_profile_s.jpeg">
-    <link rel="stylesheet" href="T007_input_builder.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T007 Drag-and-Drop Form Builder</title>
+  <link rel="icon" type="image/jpeg" sizes="32x32" href="../assets/images/my_profile_s.jpeg">
+  <link rel="stylesheet" href="T007_input_builder.css">
 </head>
 
 <body>
-    <div class="builder-container">
-        <div class="toolbox">
-            <h3>Toolbox</h3>
-            <div class="draggable" draggable="true" data-type="text">Text Input</div>
-            <div class="draggable" draggable="true" data-type="textarea">Textarea</div>
-            <div class="draggable" draggable="true" data-type="email">Email Input</div>
-            <div class="draggable" draggable="true" data-type="password">Password Input</div>
-            <div class="draggable" draggable="true" data-type="select">Select Dropdown</div>
-            <div class="draggable" draggable="true" data-type="radio">Radio Group</div>
-            <div class="draggable" draggable="true" data-type="checkbox">Checkbox Group</div>
-        </div>
-        <form class="form-canvas input-form" novalidate>
-            <div class="incompatible-message">Consider moving to a screen of width at least 500px, Your screen is not wide enough to use the form builder tool box :(</div>
-            <h3>Form Builder</h3>
-            <div class="drop-zone" id="dropZone"></div>
-            <div class="builder-footer">
-                <button type="button" onclick="exportFormHTML()">Export HTML</button>
-                <button type="button" onclick="exportFormJSON()">Export JSON</button>
-                <button type="button" onclick="saveToLocal()">Save</button>
-                <button type="button" onclick="loadFromLocal()">Load</button>
-                <button type="submit" onclick="submitForm()">Submit</button>
-                <h4>Exported Code:</h4>
-                <div class="output-container">
-                    <div class="output-buttons-container">
-                        <div class="output-button-wrapper">
-                            <button type="button" title="Copy Code" onclick="copyExportedCode()">Copy Code</button>
-                            <button type="button" onclick="toggleWrapExportedCode()">Toggle Wrap</button>
-                        </div>
-                    </div>
-                    <div class="output-box" id="output" data-code=""></div>
-                </div>
-            </div>
-        </form>
+  <div class="builder-container">
+    <div class="toolbox">
+      <h3>Toolbox</h3>
+      <div class="draggable" draggable="true" data-type="text">Text Input</div>
+      <div class="draggable" draggable="true" data-type="textarea">Textarea</div>
+      <div class="draggable" draggable="true" data-type="email">Email Input</div>
+      <div class="draggable" draggable="true" data-type="password">Password Input</div>
+      <div class="draggable" draggable="true" data-type="select">Select Dropdown</div>
+      <div class="draggable" draggable="true" data-type="radio">Radio Group</div>
+      <div class="draggable" draggable="true" data-type="checkbox">Checkbox Group</div>
     </div>
-    <p class="notice" style="position: absolute; bottom: 0; left: 50%; translate: -50%; text-align: center; font-size: 14px; font-weight: bold; margin: 0;">This is just a preview, a proper documentation will soon be available!</p>
-    <script type="module" src="T007_input_builder.js"></script>
-    <script type="module" src="T007_input.js"></script>
+    <form class="form-canvas input-form" novalidate>
+      <div class="incompatible-message">Consider moving to a screen of width at least 500px, Your screen is not wide enough to use the form builder tool box :(</div>
+      <h3>Form Builder</h3>
+      <div class="drop-zone" id="dropZone"></div>
+      <div class="builder-footer">
+        <button type="button" onclick="exportFormHTML()">Export HTML</button>
+        <button type="button" onclick="exportFormJSON()">Export JSON</button>
+        <button type="button" onclick="saveToLocal()">Save</button>
+        <button type="button" onclick="loadFromLocal()">Load</button>
+        <button type="submit" onclick="submitForm()">Submit</button>
+        <h4>Exported Code:</h4>
+        <div class="output-container">
+          <div class="output-buttons-container">
+            <div class="output-button-wrapper">
+              <button type="button" title="Copy Code" onclick="copyExportedCode()">Copy Code</button>
+              <button type="button" onclick="toggleWrapExportedCode()">Toggle Wrap</button>
+            </div>
+          </div>
+          <div class="output-box" id="output" data-code=""></div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <p class="notice" style="position: absolute; bottom: 0; left: 50%; translate: -50%; text-align: center; font-size: 14px; font-weight: bold; margin: 0;">This is just a preview, a proper documentation will soon be available!</p>
+  <script type="module" src="T007_input_builder.js"></script>
+  <script type="module" src="T007_input.js"></script>
 </body>
 
 </html>

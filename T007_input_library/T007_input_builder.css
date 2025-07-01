@@ -1,176 +1,176 @@
 html {
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 *, *::after, *::before {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 h3 {
-    margin-block: 1rem;
+  margin-block: 1rem;
 }
 
 h4 {
-    margin-block: 1.33rem;
+  margin-block: 1.33rem;
 }
 
 body {
-    position: relative;
-    margin: 0;
-    padding: 2rem;
-    background: #f9f9f9;
+  position: relative;
+  margin: 0;
+  padding: 2rem;
+  background: #f9f9f9;
 }
 
 .builder-container {
-    display: flex;
-    gap: 2rem;
+  display: flex;
+  gap: 2rem;
 }
 
 .toolbox,
 .form-canvas {
-    background: white;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .toolbox {
-    flex: 1;
-    position: sticky;
-    top: 2rem;
-    max-height: fit-content;
+  flex: 1;
+  position: sticky;
+  top: 2rem;
+  max-height: fit-content;
 }
 
 .toolbox h3,
 .form-canvas h3 {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .draggable {
-    cursor: grab;
-    margin: 1rem 0;
-    padding: 0.5rem;
-    border: 1px dashed #aaa;
-    border-radius: 4px;
-    background: #f0f0f0;
+  cursor: grab;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  border: 1px dashed #aaa;
+  border-radius: 4px;
+  background: #f0f0f0;
 }
 
 .form-canvas {
-    flex: 3;
-    min-width: 0;
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
+  flex: 3;
+  min-width: 0;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
 .drop-zone {
-    flex: 1;
-    border: 2px dashed #ccc;
-    padding: 1rem;
-    border-radius: 4px;
-    background: #fff;
-    overflow-y: auto;
+  flex: 1;
+  border: 2px dashed #ccc;
+  padding: 1rem;
+  border-radius: 4px;
+  background: #fff;
+  overflow-y: auto;
 }
 
 .drop-zone.dragover {
-    border: 2px dashed teal;
+  border: 2px dashed teal;
 }
 
 .form-field {
-    position: relative;
-    background: #fdfdfd;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  position: relative;
+  background: #fdfdfd;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .form-actions {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    display: flex;
-    gap: clamp(1px, 6vw, 12px);
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  gap: clamp(1px, 6vw, 12px);
 }
 
 .form-actions button {
-    background: transparent;
-    border: none;
-    cursor: pointer;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .form-actions button:hover {
-    color: red;
+  color: red;
 }
 
 .builder-footer {
-    margin-top: 2rem;
+  margin-top: 2rem;
 }
 
 .builder-footer button {
-    background: teal;
-    border-top: none;
-    border-right: none;
-    border-radius: 0.25rem;
-    font-size: .85rem;
-    color: white;
-    padding-inline: .3rem;
-    padding-block: .065rem;
-    border-width: 2px;
-    transition: border-width 50ms ease;
+  background: teal;
+  border-top: none;
+  border-right: none;
+  border-radius: 0.25rem;
+  font-size: .85rem;
+  color: white;
+  padding-inline: .3rem;
+  padding-block: .065rem;
+  border-width: 2px;
+  transition: border-width 50ms ease;
 }
 
 .builder-footer button:is(:active) {
-    border-width: 1px;
+  border-width: 1px;
 }
 
 .output-container {
-    position: relative;
-    height: 200px;
-    background: #eee;
-    background: #1e1e1e;
-    border-radius: 5px;
-    overflow: auto;
+  position: relative;
+  height: 200px;
+  background: #eee;
+  background: #1e1e1e;
+  border-radius: 5px;
+  overflow: auto;
 }
 
 .output-container:has(.output-box[data-code=""]) .output-buttons-container {
-    display: none;
+  display: none;
 }
 
 .output-buttons-container {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .output-button-wrapper {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    display: flex;
-    gap: 7px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  gap: 7px;
 }
 
 .output-box {
-    padding: 1rem;
-    font-family: monospace;
-    white-space: pre;
-    word-break: break-word;
-    display: block;
-    color: #d4d4d4;
+  padding: 1rem;
+  font-family: monospace;
+  white-space: pre;
+  word-break: break-word;
+  display: block;
+  color: #d4d4d4;
 }
 
 /* Highlight styles */
 /* Optional: Add hover effects for the tokens to make them interactive */
 .token:hover {
-    background-color: #3c3c3c;
-    /* Slightly lighter background on hover */
-    border-radius: 3px;
-    cursor: pointer;
+  background-color: #3c3c3c;
+  /* Slightly lighter background on hover */
+  border-radius: 3px;
+  cursor: pointer;
 }
 .token.comment { color: #6A9955; font-style: italic; }
 .token.tag, .token.key, .token.variable { color: #569CD6; }
@@ -184,40 +184,40 @@ body {
 .token.string,
 .token.number,
 .token.boolean {
-    margin-right: 2px;
+  margin-right: 2px;
 }
 
 .field-preview {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    color: #666;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .drop-zone .form-field.dragging {
-    opacity: 0.5;
-    border-color: #000;
+  opacity: 0.5;
+  border-color: #000;
 }
 
 .incompatible-message {
-    display: none;
+  display: none;
 }
 
 @media(max-width: 500px) {
-    body .toolbox {
-        display: none !important;
-    }
+  body .toolbox {
+    display: none !important;
+  }
 
-    .form-canvas {
-        position: relative;
-    }
+  .form-canvas {
+    position: relative;
+  }
 
-    .incompatible-message {
-        color: orangered;
-        max-width: 100%;
-        padding-block: 2rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-    }
+  .incompatible-message {
+    color: orangered;
+    max-width: 100%;
+    padding-block: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
 }
