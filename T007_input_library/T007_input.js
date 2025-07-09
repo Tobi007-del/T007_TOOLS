@@ -316,7 +316,7 @@ class T007_Form_Manager {
   static handleFormValidation(form, n) {
     if (!form?.classList.contains("t007-input-form") || form.dataset?.isValidating) return
 
-    form.dataset.isValidating = true
+    form.dataset.isValidating = ''
     form.validateOnClient = validateFormOnClient
     form.toggleGlobalError = toggleFormGlobalError
 
@@ -338,8 +338,8 @@ class T007_Form_Manager {
         e.preventDefault()
         if (!validateFormOnClient()) return
         if (form.validateOnServer && !await form.validateOnServer()) {
-         toggleFormGlobalError(form, true)
-          form.addEventListener("input", () => toggleFormGlobalError(form, false), { once: true, useCapture: true })
+          toggleFormGlobalError(true)
+          form.addEventListener("input", () => toggleFormGlobalError(false), { once: true, useCapture: true })
           return
         } 
         form.submit()
@@ -516,7 +516,7 @@ class T007_Form_Manager {
     }
 
     function toggleFormGlobalError(bool) {
-      form.dataset.globalError = bool
+      form.toggleAttribute("data-global-error", bool)
       form.querySelectorAll(".t007-input-field").forEach(field => {
         field.classList.toggle("t007-input-error", bool)
         if (bool) field.querySelector(".t007-input-floating-label")?.classList.add("t007-input-shake")
