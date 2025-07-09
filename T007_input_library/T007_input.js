@@ -6,22 +6,20 @@ class T007_Form_Manager {
   static _RESOURCE_CACHE = {}
 
   static init() {
-    window.T007FM.mountWindow()
-    window.T007FM.observeDOMForFields()
-    window.T007FM.loadResource(`/T007_TOOLS/T007_input_library/T007_input.css`)
-    Array.from(window.T007FM.forms).forEach((form, n) => window.T007FM.handleFormValidation(form, n))
+    window.t007FM.mountWindow()
+    window.t007FM.observeDOMForFields()
+    window.t007FM.loadResource(window.T007_INPUT_CSS_SRC || `/T007_TOOLS/T007_input_library/T007_input.css`)
+    Array.from(window.t007FM.forms).forEach((form, n) => window.t007FM.handleFormValidation(form, n))
   }
 
   static mountWindow() {
-    window.createField = window.T007FM.createField
-    window.handleFormValidation = window.T007FM.handleFormValidation
-    window.toggleFormGlobalError = window.T007FM.toggleFormGlobalError
-    window.validateFormOnClient = window.T007FM.validateFormOnClient
+    window.createField = window.t007FM.createField
+    window.handleFormValidation = window.t007FM.handleFormValidation
   }
 
   static loadResource(src, type = "style", options = {}) {
     const { module = false, media = null, crossorigin = null, integrity = null, } = options
-    if (window.T007FM._RESOURCE_CACHE[src]) return window.T007FM._RESOURCE_CACHE[src]
+    if (window.t007FM._RESOURCE_CACHE[src]) return window.t007FM._RESOURCE_CACHE[src]
     const isLoaded = (() => {
       if (type === "script") {
       return Array.from(document.scripts)?.some(s => s.src?.includes(src))
@@ -31,7 +29,7 @@ class T007_Form_Manager {
       return false
     })()
     if (isLoaded) return Promise.resolve(null) 
-    window.T007FM._RESOURCE_CACHE[src] = new Promise((resolve, reject) => {
+    window.t007FM._RESOURCE_CACHE[src] = new Promise((resolve, reject) => {
       if (type === "script") {
         const script = document.createElement("script")
         script.src = src
@@ -53,7 +51,7 @@ class T007_Form_Manager {
         reject(new Error(`Unsupported type: ${type}`))
       }
     })
-    return window.T007FM._RESOURCE_CACHE[src]
+    return window.t007FM._RESOURCE_CACHE[src]
   }
 
   static observeDOMForFields() {
@@ -64,7 +62,7 @@ class T007_Form_Manager {
       if (node?.classList?.contains("t007-input-field") || node?.querySelector(".t007-input-field")) {
         const fields = [...(node.classList.contains("t007-input-field") ? [node] : node.querySelectorAll(".t007-input-field"))]
         for (const field of fields) {
-          window.T007FM.setUpField(field)
+          window.t007FM.setUpField(field)
         }
       }
     }
@@ -88,14 +86,14 @@ class T007_Form_Manager {
     if (!notch) return
     const label = notch.firstElementChild
     if (!label.innerText) return
+    const style = getComputedStyle(label)
     const span = document.createElement('span')
     span.style.setProperty("visibility", "hidden", "important")
     span.style.setProperty("position", "absolute", "important")
     span.style.setProperty("whiteSpace", "nowrap", "important")
     span.style.setProperty("display", "inline", "important")
-    span.style.setProperty("font-size", getComputedStyle(label).fontSize.replace("px","")/getComputedStyle(document.documentElement).fontSize.replace("px", "") + "rem", "important")
-    span.style.setProperty("font-family", getComputedStyle(label).fontFamily, "important")
-    span.style.setProperty("scale", 0.75, "important")
+    span.style.setProperty("font-size", style.getPropertyValue("--t007-input-floating-label-font-size"), "important")
+    span.style.setProperty("font-family", style.fontFamily, "important")
     span.innerText = label.innerText
     document.body.appendChild(span)
     const width = span.getBoundingClientRect().width
@@ -113,7 +111,7 @@ class T007_Form_Manager {
     const helperLine = field?.querySelector(".t007-input-helper-line")
     if (!helperLine || helperLine.querySelector(".t007-input-helper-text[data-violation='auto']")) return
     const el = document.createElement('p')
-    el.className = 'helper-text'
+    el.className = 't007-input-helper-text'
     el.setAttribute('data-violation', "auto")
     helperLine.appendChild(el)
   }
@@ -163,14 +161,14 @@ class T007_Form_Manager {
       img.src = src
     })
     if (floatingLabel) floatingLabel.ontransitionend = () => floatingLabel.classList.remove("t007-input-shake")
-    if (eyeOpen && eyeClosed) eyeOpen.onclick = eyeClosed.onclick = () => window.T007FM.togglePasswordType(input)
+    if (eyeOpen && eyeClosed) eyeOpen.onclick = eyeClosed.onclick = () => window.t007FM.togglePasswordType(input)
   }
 
   static setUpField(field) {
-    window.T007FM.toggleFilled(field.querySelector(".t007-input"))
-    window.T007FM.autoFitNotch(field)
-    window.T007FM.setFallbackHelper(field)
-    window.T007FM.setFieldListeners(field)
+    window.t007FM.toggleFilled(field.querySelector(".t007-input"))
+    window.t007FM.autoFitNotch(field)
+    window.t007FM.setFallbackHelper(field)
+    window.t007FM.setFieldListeners(field)
   }
 
   // Field Builder Utility
@@ -286,7 +284,7 @@ class T007_Form_Manager {
     helperLine.appendChild(infoText)
     }
     //violation helpers
-    window.T007FM.violationKeys.forEach(key => {
+    window.t007FM.violationKeys.forEach(key => {
     if (!helperText[key]) return
     const el = document.createElement('p')
     el.className = 't007-input-helper-text'
@@ -316,17 +314,19 @@ class T007_Form_Manager {
   }
 
   static handleFormValidation(form, n) {
-    if (!form?.classList.contains("t007-input-form") || form.dataset.isValidating) return
-    form.dataset.isValidating = true
+    if (!form?.classList.contains("t007-input-form") || form.dataset?.isValidating) return
 
-    n = n ?? Array.from(window.T007FM.forms).indexOf(form)
+    form.dataset.isValidating = true
+    form.validateOnClient = validateFormOnClient
+    form.toggleGlobalError = toggleFormGlobalError
+
     const fields = form.getElementsByClassName("t007-input-field"),
     inputs = form.getElementsByClassName("t007-input")
 
-    Array.from(fields).forEach(window.T007FM.setUpField)
+    Array.from(fields).forEach(window.t007FM.setUpField)
 
     form.addEventListener("input", ({ target }) => {
-      window.T007FM.toggleFilled(target)
+      window.t007FM.toggleFilled(target)
       validateInput(target)
     })
 
@@ -337,10 +337,9 @@ class T007_Form_Manager {
       try {
         e.preventDefault()
         if (!validateFormOnClient()) return
-        if (window[`validateForm${n+1}OnServer`])
-        if (!await window[`validateForm${n+1}OnServer`]()) {
-          window.T007FM.toggleFormGlobalError(form, true)
-          form.addEventListener("input", () => window.T007FM.toggleFormGlobalError(form, false), { once: true, useCapture: true })
+        if (form.validateOnServer && !await form.validateOnServer()) {
+         toggleFormGlobalError(form, true)
+          form.addEventListener("input", () => toggleFormGlobalError(form, false), { once: true, useCapture: true })
           return
         } 
         form.submit()
@@ -355,7 +354,7 @@ class T007_Form_Manager {
       form.classList.toggle("t007-input-submit-loading", bool)
     }
 
-    function toggleError(input, bool, notify = false, force = false) {
+    function toggleError(input, bool, notify = false) {
       const field = input.closest(".t007-input-field"),
       floatingLabel = field.querySelector(".t007-input-floating-label")
       if (bool && notify) {
@@ -366,17 +365,11 @@ class T007_Form_Manager {
         field?.classList.remove("t007-input-error")
         toggleHelper(input, false)
       }
-      if (!force) 
-      if (input.value === "") {
-        field?.classList.remove("t007-input-error")
-        toggleHelper(input, false) 
-        floatingLabel?.classList.remove("t007-input-shake")
-      }
     }
 
     function toggleHelper(input, bool) {
       const field = input.closest(".t007-input-field"),
-      violation = window.T007FM.violationKeys.find(violation => input.validity[violation] || input.Validity?.[violation]) ?? "",
+      violation = window.t007FM.violationKeys.find(violation => input.validity[violation] || input.Validity?.[violation]) ?? "",
       helper = field.querySelector(`.t007-input-helper-text[data-violation="${violation}"]`),
       fallbackHelper = field.querySelector(`.t007-input-helper-text[data-violation="auto"]`) 
       input.closest(".t007-input-field").querySelectorAll(`.t007-input-helper-text:not([data-violation="${violation}"])`).forEach(helper => helper?.classList.remove("t007-input-show"))
@@ -408,8 +401,8 @@ class T007_Form_Manager {
       passwordMeter.dataset.strengthLevel = strengthLevel
     }
 
-    function validateInput(input, notify = false, force = false) {
-      if (form.globalError || !input?.classList.contains("t007-input")) return
+    function validateInput(input, notify = false) {
+      if (form.dataset.globalError || !input?.classList.contains("t007-input")) return
       updatePasswordMeter(input)
       let value, errorBool
       switch(input.type) {
@@ -422,13 +415,13 @@ class T007_Form_Manager {
             const maxSize = Number(max)
             errorBool = size > maxSize
             input.Validity.rangeOverflow = errorBool
-            input.setCustomValidity(errorBool ? (n ? `File ${input.files.length > 1 ? n : ""} size of ${window.T007FM.convertFileSize(size)} exceeds the per file maximum of ${window.T007FM.convertFileSize(maxSize)}` : `Total files size of ${window.T007FM.convertFileSize(size)} exceeds the total maximum of ${formatSize(maxSize)}`) : "")
+            input.setCustomValidity(errorBool ? (n ? `File ${input.files.length > 1 ? n : ""} size of ${window.t007FM.convertFileSize(size)} exceeds the per file maximum of ${window.t007FM.convertFileSize(maxSize)}` : `Total files size of ${window.t007FM.convertFileSize(size)} exceeds the total maximum of ${formatSize(maxSize)}`) : "")
           }
           const setMinError = (size, min, n=0) => {
             const minSize = Number(min)
             errorBool = size < minSize
             input.Validity.rangeUnderflow = errorBool
-            input.setCustomValidity(errorBool ? (n ? `File ${input.files.length > 1 ? n : ""} size of ${window.T007FM.convertFileSize(size)} is less than the per file minimum of ${formatSize(minSize)}` : `Total files size of ${window.T007FM.convertFileSize(size)} is less than the total minimum of ${formatSize(minSize)}`) : "")
+            input.setCustomValidity(errorBool ? (n ? `File ${input.files.length > 1 ? n : ""} size of ${window.t007FM.convertFileSize(size)} is less than the per file minimum of ${formatSize(minSize)}` : `Total files size of ${window.t007FM.convertFileSize(size)} is less than the total minimum of ${formatSize(minSize)}`) : "")
           }    
           for (const file of input.files) {
             totalFiles ++
@@ -491,7 +484,7 @@ class T007_Form_Manager {
           if (!confirmPasswordInput) break
           const confirmPasswordValue = confirmPasswordInput.value?.trim() 
           confirmPasswordInput.setCustomValidity(value !== confirmPasswordValue ? "Both passwords do not match" : "")
-          toggleError(confirmPasswordInput, value !== confirmPasswordValue, notify, force)
+          toggleError(confirmPasswordInput, value !== confirmPasswordValue, notify)
           break
         case "confirm_password":
           value = input.value?.trim()
@@ -509,39 +502,30 @@ class T007_Form_Manager {
           break    
       }
       errorBool = errorBool ?? !input.validity?.valid
-      toggleError(input, errorBool, notify, force)
+      toggleError(input, errorBool, notify)
       if (errorBool) return
       if (input.type === "radio")
         Array.from(inputs)
         ?.filter(i => i.name == input.name)
-        ?.forEach(radio => toggleError(radio, errorBool, notify, force))
+        ?.forEach(radio => toggleError(radio, errorBool, notify))
     }
 
     function validateFormOnClient() {
       Array.from(inputs).forEach(input => validateInput(input, true, true))
       return Array.from(inputs).every(input => input.validity.valid)
     }
-    window[`validateForm${n+1}OnClient`] = validateFormOnClient
-  }
 
-  static toggleFormGlobalError(form, bool) {
-    form.globalError = bool
-    form.querySelectorAll(".t007-input-field").forEach(field => {
-      field.classList.toggle("t007-input-error", bool)
-      if (bool) field.querySelector(".t007-input-floating-label")?.classList.add("t007-input-shake")
-    })
-  }
-
-  static validateFormOnClient(form) { 
-    const n = Array.from(window.T007FM.forms).indexOf(form)
-    if (window[`validateForm${n+1}OnClient`])
-    return window[`validateForm${n+1}OnClient`]()
+    function toggleFormGlobalError(bool) {
+      form.dataset.globalError = bool
+      form.querySelectorAll(".t007-input-field").forEach(field => {
+        field.classList.toggle("t007-input-error", bool)
+        if (bool) field.querySelector(".t007-input-floating-label")?.classList.add("t007-input-shake")
+      })
+    }
   }
 }
 
 if (typeof window !== "undefined") {
-  window.T007FM = T007_Form_Manager
-  window.T007FM.init()
-} else {
-  console.warn("There is no use of the T007 Form Library in this environment")
+  window.t007FM = T007_Form_Manager
+  window.t007FM.init()
 }

@@ -142,6 +142,7 @@ body {
 .output-buttons-container {
   position: sticky;
   top: 0;
+  left: 0;
   width: 100%;
   display: flex;
   justify-content: flex-end;

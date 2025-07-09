@@ -183,7 +183,7 @@ window.copyExportedCode = function copyExportedCode() {
 }
 
 function getFieldsHTML() {
-  const formFields = [...dropZone.querySelectorAll('.field')];
+  const formFields = [...dropZone.querySelectorAll('.t007-input-field')];
   const formHTML = formFields.map(field => field.outerHTML).join('');
   return formatHTML(formHTML);
 }
@@ -251,6 +251,10 @@ window.loadFromLocal = function loadFromLocal() {
 
 window.submitForm = function submitForm() {
   Toast.info("Simulating Form Submission");
+}
+
+window.resetForm = function submitForm() {
+  Toast.success("Provided Form Data Removed");
 }
 
 function addAutoSaveListeners(fieldEl) {

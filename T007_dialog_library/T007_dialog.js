@@ -54,8 +54,8 @@ function loadResource(src, type = "style", options = {}) {
   })
   return _RESOURCE_CACHE[src]
 }
-loadResource(`/T007_TOOLS/T007_dialog_library/T007_dialog.css`)
-loadResource(`/T007_TOOLS/T007_input_library/T007_input.js`, "script")
+loadResource(window.T007_DIALOG_CSS_SRC || `/T007_TOOLS/T007_dialog_library/T007_dialog.css`)
+loadResource(window.T007_INPUT_JS_SRC || `/T007_TOOLS/T007_input_library/T007_input.js`, "script")
 
 class dialog {
   dialog
@@ -175,13 +175,12 @@ class t007PromptDialog extends dialog {
       <form class="t007-input-form" novalidate>
       </form>
       <div class="t007-dialog-bottom-section">
-        <button class="t007-dialog-confirm-button" type="button" title="OK">OK</button>
+        <button class="t007-dialog-confirm-button" type="submit" title="OK">OK</button>
         <button class="t007-dialog-cancel-button" type="button" title="Cancel">Cancel</button>
       </div>
     `
     this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button")
     this.cancelBtn = this.dialog.querySelector(".t007-dialog-cancel-button")
-    this.confirmBtn.addEventListener("click", this.confirm)
     this.cancelBtn.addEventListener("click", this.cancel)
 
     fieldOptions.value = defaultValue
@@ -200,11 +199,11 @@ class t007PromptDialog extends dialog {
   show() {
     this.dialog.showModal()
     this.input.focus()
-    this.input.select && typeof this.input.select === "function" && this.input.select()
+    this.input.select?.()
   }
 
   confirm() {
-    if (!window.validateFormOnClient(this.form)) return
+    if (!this.form.validateOnClient?.()) return
     this.remove()
     this.resolve(this.input.value)
   }

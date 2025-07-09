@@ -7,6 +7,8 @@
   --t007-input-success-color: green;
   --t007-input-error-color: #b00020;
   --t007-input-font-size: 1rem;
+  --t007-input-floating-label-scale: .75;
+  --t007-input-floating-label-font-size: calc(var(--t007-input-font-size)*var(--t007-input-floating-label-scale));
   --t007-input-height: 3rem;
   --t007-input-padding: 0.75rem;
   --t007-input-border-radius: 0.25rem;
@@ -36,7 +38,7 @@
   font-family: var(--t007-input-font-family);
   transition-property:
     transform, filter, background-color, color, border, right, left, top,
-    bottom, width, height;
+    bottom, width, height, font-size;
   transition-duration: 150ms;
   transition-timing-function: ease;
 }
@@ -274,8 +276,8 @@
   .t007-input-floating-label {
   transform: translateY(
       calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2)))
-    )
-    scale(0.75);
+    );
+  font-size: var(--t007-input-floating-label-font-size);
   opacity: 1;
   left: 0.25rem;
   right: auto;
@@ -315,7 +317,7 @@
   transform: translateY(
       calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2)))
     )
-    translateX(0.25rem) scale(0.75);
+    translateX(0.25rem);
 }
 
 .t007-input {
@@ -663,10 +665,11 @@
   pointer-events: none;
 }
 
-.t007-input-checkbox-box:hover::before,
-.t007-input-radio-box:hover::before {
+.t007-input-field:is(:hover, :has(.t007-input[type="checkbox"]:focus-visible)) .t007-input-checkbox-box::before,
+.t007-input-field:is(:hover, :has(.t007-input[type="radio"]:focus-visible)) .t007-input-radio-box::before {
   width: 200%;
   height: 200%;
+  opacity: 1;
 }
 
 .t007-input-field:has(.t007-input[type="checkbox"]:checked) .t007-input-checkbox-box::before,

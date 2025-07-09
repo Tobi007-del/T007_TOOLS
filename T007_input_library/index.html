@@ -21,7 +21,7 @@
       <div class="draggable" draggable="true" data-type="radio">Radio Group</div>
       <div class="draggable" draggable="true" data-type="checkbox">Checkbox Group</div>
     </div>
-    <form class="form-canvas input-form" novalidate>
+    <form class="form-canvas t007-input-form" novalidate>
       <div class="incompatible-message">Consider moving to a screen of width at least 500px, Your screen is not wide enough to use the form builder tool box :(</div>
       <h3>Form Builder</h3>
       <div class="drop-zone" id="dropZone"></div>
@@ -30,6 +30,7 @@
         <button type="button" onclick="exportFormJSON()">Export JSON</button>
         <button type="button" onclick="saveToLocal()">Save</button>
         <button type="button" onclick="loadFromLocal()">Load</button>
+        <button type="reset" onclick="resetForm()">Reset</button>
         <button type="submit" onclick="submitForm()">Submit</button>
         <h4>Exported Code:</h4>
         <div class="output-container">

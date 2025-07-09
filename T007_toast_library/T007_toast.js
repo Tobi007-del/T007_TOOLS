@@ -68,7 +68,7 @@ function loadResource(src, type = "style", options = {}) {
   })
   return _RESOURCE_CACHE[src]
 }
-loadResource(`/T007_TOOLS/T007_toast_library/T007_toast.css`)
+loadResource(window.T007_TOAST_CSS_SRC || `/T007_TOOLS/T007_toast_library/T007_toast.css`)
 
 function clamp(min, amount, max) {
   return Math.min(Math.max(amount, min), max)
