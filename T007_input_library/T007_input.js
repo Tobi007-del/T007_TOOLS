@@ -5,10 +5,10 @@ class T007_Form_Manager {
 
   static _RESOURCE_CACHE = {}
 
-  static init() {
+  static async init() {
     window.t007FM.mountWindow()
     window.t007FM.observeDOMForFields()
-    window.t007FM.loadResource(window.T007_INPUT_CSS_SRC || `/T007_TOOLS/T007_input_library/T007_input.css`)
+    await window.t007FM.loadResource(window.T007_INPUT_CSS_SRC || `/T007_TOOLS/T007_input_library/T007_input.css`)
     Array.from(window.t007FM.forms).forEach((form, n) => window.t007FM.handleFormValidation(form, n))
   }
 
