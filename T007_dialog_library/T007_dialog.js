@@ -181,6 +181,7 @@ class t007PromptDialog extends dialog {
     `
     this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button")
     this.cancelBtn = this.dialog.querySelector(".t007-dialog-cancel-button")
+    this.confirmBtn.addEventListener("click", this.confirm)
     this.cancelBtn.addEventListener("click", this.cancel)
 
     fieldOptions.value = defaultValue
