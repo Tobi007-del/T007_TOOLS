@@ -26,7 +26,8 @@ dropZone.addEventListener("drop", async e => {
   dropZone.classList.remove("dragover");
 
   const label = await Prompt("Enter label for this field:", draggedType.charAt(0).toUpperCase() + draggedType.slice(1));
-  if (!label) return;
+  console.log(label)
+  if (!label) return draggedType = null;
 
   const required = await Confirm("Make this field required?");
   let placeholder = ['textarea', 'text', 'email', 'password'].includes(draggedType)
@@ -66,10 +67,10 @@ function createFieldElement(type, labelText, required, placeholder = '', options
 
   div.innerHTML = `
     <div class="form-actions">
-        <button type="button" onclick="toggleCollapse(this)">⬆️</button>
-        <button type="button" onclick="editField('${id}')">✏️</button>
-        <button type="button" onclick="cloneField('${id}')">➕</button>
-        <button type="button" onclick="removeField('${id}')">🗑️</button>
+        <button type="button" onclick="toggleCollapse(this)" title="Collapse field">⬆️</button>
+        <button type="button" onclick="editField('${id}')" title="Edit field">✏️</button>
+        <button type="button" onclick="cloneField('${id}')" title="Clone field">➕</button>
+        <button type="button" onclick="removeField('${id}')" title="Delete field">🗑️</button>
     </div>
     <label class="content-label">${labelText}</label>
     ${fieldEl}
@@ -217,6 +218,7 @@ window.exportFormJSON = function exportFormJSON() {
   data.forEach(datum => {
     delete datum.id;
     delete datum.collapsed;
+    if (datum.type !== "select") delete datum.options
   });
   const json = JSON.stringify(data, null, 2);
   document.getElementById("output").dataset.code = json;

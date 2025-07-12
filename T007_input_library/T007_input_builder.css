@@ -6,6 +6,7 @@ html {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  scrollbar-width: thin;
 }
 
 h3 {
@@ -40,7 +41,9 @@ body {
   flex: 1;
   position: sticky;
   top: 2rem;
-  max-height: fit-content;
+  max-height: calc(100dvh - 4rem);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .toolbox h3,
