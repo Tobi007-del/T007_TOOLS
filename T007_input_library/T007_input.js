@@ -127,12 +127,12 @@ class T007_Form_Manager {
       img = new Image()
       img.onload = () => {
         input.style.setProperty("--t007-input-image-src", `url(${src})`)
-        input.classList.add("image-selected")
+        input.classList.add("t007-input-image-selected")
         setTimeout(() => URL.revokeObjectURL(src), 1000)
       }
       img.onerror = () => {
         input.style.removeProperty("--t007-input-image-src")
-        input.classList.remove("t007-image-selected")
+        input.classList.remove("t007-input-image-selected")
         URL.revokeObjectURL(src)
       }
       let src
@@ -359,12 +359,11 @@ class T007_Form_Manager {
       floatingLabel = field.querySelector(".t007-input-floating-label")
       if (bool && notify) {
         field?.classList.add("t007-input-error")
-        toggleHelper(input, true)
         floatingLabel?.classList.add("t007-input-shake")
       } else if (!bool) {
         field?.classList.remove("t007-input-error")
-        toggleHelper(input, false)
       }
+      toggleHelper(input, field?.classList.contains("t007-input-error"))
     }
 
     function toggleHelper(input, bool) {

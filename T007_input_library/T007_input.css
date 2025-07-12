@@ -1,11 +1,23 @@
 :where(:root) {
   --t007-input-font-family: inherit;
   --t007-input-color: black;
+  --t007-input-icon-color: var(--t007-input-color);
   --t007-input-base-color: rgb(from var(--t007-input-color) r g b/0.45);
   --t007-input-hover-color: rgb(from var(--t007-input-color) r g b/0.65);
   --t007-input-focus-color: rgb(from var(--t007-input-color) r g b/1);
   --t007-input-success-color: green;
   --t007-input-error-color: #b00020;
+  --t007-input-base-text-color: var(--t007-input-color);
+  --t007-input-hover-text-color: var(--t007-input-color);
+  --t007-input-focus-text-color: var(--t007-input-color);
+  --t007-input-success-text-color: var(--t007-input-color);
+  --t007-input-error-text-color: var(--t007-input-color);
+  --t007-input-base-bg-color: transparent;
+  --t007-input-hover-bg-color: transparent;
+  --t007-input-focus-bg-color: transparent;
+  --t007-input-success-bg-color: transparent;
+  --t007-input-error-bg-color: transparent;
+  --t007-input-autofill-bg-color: transparent;
   --t007-input-font-size: 1rem;
   --t007-input-floating-label-scale: .75;
   --t007-input-floating-label-font-size: calc(var(--t007-input-font-size)*var(--t007-input-floating-label-scale));
@@ -24,6 +36,8 @@
   --t007-input-radio-checked-background: whitesmoke;
   --t007-input-radio-border-color: #707070;
   --t007-input-radio-checked-border-color: dodgerblue;
+  --t007-input-ripple-size: 250%;
+  --t007-input-ripple-bg-color: ;
   --t007-input-p-meter-color-weak: #b81a0a;
   --t007-input-p-meter-color-fair: #f68b1e;
   --t007-input-p-meter-color-strong: #0a8b1e;
@@ -36,6 +50,7 @@
 .t007-input-field *::before {
   box-sizing: border-box;
   font-family: var(--t007-input-font-family);
+  isolation: isolate;
   transition-property:
     transform, filter, background-color, color, border, right, left, top,
     bottom, width, height, font-size;
@@ -43,8 +58,14 @@
   transition-timing-function: ease;
 }
 
+.t007-input-outline > * {
+  background-color: var(--t007-input-current-bg-color);
+}
+
 .t007-input-field {
   --t007-input-current-color: var(--t007-input-base-color);
+  --t007-input-current-text-color: var(--t007-input-base-text-color);
+  --t007-input-current-bg-color: var(--t007-input-base-bg-color);
   width: 100%;
   max-width: 100%;
   padding-top: 1rem;
@@ -57,6 +78,8 @@
 
 .t007-input-field:where(:hover) {
   --t007-input-current-color: var(--t007-input-hover-color);
+  --t007-input-current-text-color: var(--t007-input-hover-text-color);
+  --t007-input-current-bg-color: var(--t007-input-hover-bg-color);
 }
 
 .t007-input-field:where(
@@ -76,14 +99,19 @@
     )
   ) {
   --t007-input-current-color: var(--t007-input-focus-color);
+  --t007-input-current-text-color: var(--t007-input-focus-text-color);
+  --t007-input-current-bg-color: var(--t007-input-focus-bg-color);
 }
 
 .t007-input-field.t007-input-success {
   --t007-input-current-color: var(--t007-input-success-color);
+  --t007-input-current-text-color: var(--t007-input-success-text-color);
+  --t007-input-current-bg-color: var(--t007-input-success-bg-color);
 }
 
 .t007-input-field.t007-input-error {
   --t007-input-current-color: var(--t007-input-error-color);
+  --t007-input-current-bg-color: var(--t007-input-error-bg-color);
 }
 
 .t007-input-wrapper {
@@ -108,7 +136,6 @@
 .t007-input-outline {
   position: absolute;
   inset: 0;
-  z-index: 1;
   display: flex;
   width: 100%;
   max-width: 100%;
@@ -323,8 +350,8 @@
 .t007-input {
   border: none;
   background: none;
-  color: var(--t007-input-current-color);
-  caret-color: var(--t007-input-current-color);
+  color: var(--t007-input-current-text-color);
+  caret-color: var(--t007-input-current-text-color);
   border-radius: 0;
   font-size: var(--t007-input-font-size);
   height: 100%;
@@ -389,12 +416,12 @@
   filter: brightness(80%);
 }
 
-.t007-input-wrapper:has(.t007-input[type="file"].t007-image-selected) {
+.t007-input-wrapper:has(.t007-input[type="file"].t007-input-image-selected) {
   padding-block: 0.5rem;
   padding-left: 0.5rem;
 }
 
-:where(.t007-input[type="file"].t007-image-selected)::file-selector-button {
+:where(.t007-input[type="file"].t007-input-image-selected)::file-selector-button {
   background:
     center/contain no-repeat var(--t007-input-image-src),
     linear-gradient(black, black),
@@ -404,9 +431,9 @@
   border: none;
 }
 
-/* .t007-input-field:has(.t007-input:-webkit-autofill) .t007-input-outline > * {
-    background-color: var(--current-theme-inverse-transparent-color);
-} */
+.t007-input-field:has(.t007-input:-webkit-autofill) {
+  --t007-input-current-bg-color: var(--t007-input-autofill-bg-color);
+}
 
 .t007-input:-webkit-autofill {
   transition: background-color 50000000s ease-in-out 0s !important;
@@ -416,7 +443,8 @@
 .t007-input-icon {
   background: none;
   border: none;
-  padding: 0.75rem;
+  border-radius: 50%;
+  padding: 0.5rem;
   align-self: center;
   cursor: pointer;
   display: flex;
@@ -424,8 +452,12 @@
   justify-content: center;
 }
 
+.t007-input-icon:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
 .t007-input-icon svg path {
-  fill: var(--t007-input-current-color);
+  fill: var(--t007-input-icon-color);
 }
 
 .t007-input-field:has(input[type="password"]) .t007-input-password-visible-icon,
@@ -657,7 +689,7 @@
   left: 50%;
   width: 0;
   height: 0;
-  background: rgb(from var(--t007-input-checkbox-checked-background) r g b/0.15); /* subtle blue flash */
+  background: var(--t007-input-ripple-bg-color);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
@@ -667,14 +699,14 @@
 
 .t007-input-field:is(:hover, :has(.t007-input[type="checkbox"]:focus-visible)) .t007-input-checkbox-box::before,
 .t007-input-field:is(:hover, :has(.t007-input[type="radio"]:focus-visible)) .t007-input-radio-box::before {
-  width: 200%;
-  height: 200%;
+  width: var(--t007-input-ripple-size);
+  height: var(--t007-input-ripple-size);
   opacity: 1;
 }
 
 .t007-input-field:has(.t007-input[type="checkbox"]:checked) .t007-input-checkbox-box::before,
 .t007-input-field:has(.t007-input[type="radio"]:checked) .t007-input-radio-box::before {
-  animation: t007-pulse 350ms ease-out forwards;
+  animation: t007-pulse 350ms ease-out;
 }
 
 @keyframes t007-pulse {
@@ -683,12 +715,12 @@
     height: 0;
     opacity: 0.5;
   } 85% {
-    width: 250%;
-    height: 250%;
+    width: var(--t007-input-ripple-size);
+    height: var(--t007-input-ripple-size);
     opacity: 1;
   } 100% {
-    width: 250%;
-    height: 250%;
+    width: var(--t007-input-ripple-size);
+    height: var(--t007-input-ripple-size);
     opacity: 0;
   }
 }
