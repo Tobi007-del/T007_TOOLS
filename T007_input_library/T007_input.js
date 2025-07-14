@@ -354,10 +354,10 @@ class T007_Form_Manager {
       form.classList.toggle("t007-input-submit-loading", bool)
     }
 
-    function toggleError(input, bool, notify = false) {
+    function toggleError(input, bool, flag = false) {
       const field = input.closest(".t007-input-field"),
       floatingLabel = field.querySelector(".t007-input-floating-label")
-      if (bool && notify) {
+      if (bool && flag) {
         field?.classList.add("t007-input-error")
         floatingLabel?.classList.add("t007-input-shake")
       } else if (!bool) {
@@ -400,7 +400,7 @@ class T007_Form_Manager {
       passwordMeter.dataset.strengthLevel = strengthLevel
     }
 
-    function validateInput(input, notify = false) {
+    function validateInput(input, flag = false) {
       if (form.dataset.globalError || !input?.classList.contains("t007-input")) return
       updatePasswordMeter(input)
       let value, errorBool
@@ -483,7 +483,7 @@ class T007_Form_Manager {
           if (!confirmPasswordInput) break
           const confirmPasswordValue = confirmPasswordInput.value?.trim() 
           confirmPasswordInput.setCustomValidity(value !== confirmPasswordValue ? "Both passwords do not match" : "")
-          toggleError(confirmPasswordInput, value !== confirmPasswordValue, notify)
+          toggleError(confirmPasswordInput, value !== confirmPasswordValue, flag)
           break
         case "confirm_password":
           value = input.value?.trim()
@@ -501,12 +501,12 @@ class T007_Form_Manager {
           break    
       }
       errorBool = errorBool ?? !input.validity?.valid
-      toggleError(input, errorBool, notify)
+      toggleError(input, errorBool, flag)
       if (errorBool) return
       if (input.type === "radio")
         Array.from(inputs)
         ?.filter(i => i.name == input.name)
-        ?.forEach(radio => toggleError(radio, errorBool, notify))
+        ?.forEach(radio => toggleError(radio, errorBool, flag))
     }
 
     function validateFormOnClient() {
