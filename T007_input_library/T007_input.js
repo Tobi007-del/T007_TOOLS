@@ -9,7 +9,7 @@ class T007_Form_Manager {
     window.t007FM.mountWindow()
     window.t007FM.observeDOMForFields()
     await window.t007FM.loadResource(window.T007_INPUT_CSS_SRC || `/T007_TOOLS/T007_input_library/T007_input.css`)
-    Array.from(window.t007FM.forms).forEach((form, n) => window.t007FM.handleFormValidation(form, n))
+    Array.from(window.t007FM.forms).forEach(window.t007FM.handleFormValidation)
   }
 
   static mountWindow() {
@@ -58,7 +58,7 @@ class T007_Form_Manager {
   );
   static _SCROLL_ASSIST_DATA = new WeakMap();
   static initScrollAssist(container, {
-    pxPerSecond = 80,
+    pxPerSecond = 160,
     assistClassName = "t007-input-helper-scroll-assist",
     vertical = true,
     horizontal = true
@@ -395,7 +395,7 @@ class T007_Form_Manager {
     return field
   }
 
-  static handleFormValidation(form, n) {
+  static handleFormValidation(form) {
     if (!form?.classList.contains("t007-input-form") || form.dataset?.isValidating) return
 
     form.dataset.isValidating = ''
