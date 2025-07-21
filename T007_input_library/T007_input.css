@@ -6,18 +6,19 @@
   --t007-input-hover-color: rgb(from var(--t007-input-color) r g b/0.8);
   --t007-input-focus-color: rgb(from var(--t007-input-color) r g b/1);
   --t007-input-success-color: green;
-  --t007-input-error-color: #b00020;
+  --t007-input-error-color: #d32f2f;
+  --t007-input-dark-error-color: #f44336;
   --t007-input-base-text-color: var(--t007-input-color);
   --t007-input-hover-text-color: var(--t007-input-color);
   --t007-input-focus-text-color: var(--t007-input-color);
   --t007-input-success-text-color: var(--t007-input-color);
   --t007-input-error-text-color: var(--t007-input-color);
-  --t007-input-base-bg-color: transparent;
-  --t007-input-hover-bg-color: transparent;
-  --t007-input-focus-bg-color: transparent;
-  --t007-input-success-bg-color: transparent;
-  --t007-input-error-bg-color: transparent;
-  --t007-input-autofill-bg-color: transparent;
+  --t007-input-base-background-color: transparent;
+  --t007-input-hover-background-color: transparent;
+  --t007-input-focus-background-color: transparent;
+  --t007-input-success-background-color: transparent;
+  --t007-input-error-background-color: transparent;
+  --t007-input-autofill-background-color: transparent;
   --t007-input-font-size: 1rem;
   --t007-input-floating-label-scale: 0.75;
   --t007-input-floating-label-font-size: calc(
@@ -25,6 +26,7 @@
   );
   --t007-input-helper-font-size: 0.75rem;
   --t007-input-height: 3rem;
+  --t007-input-width: 100%;
   --t007-input-icon-width: unset;
   --t007-input-icon-height: unset;
   --t007-input-padding: 0.75rem;
@@ -52,13 +54,13 @@
   --t007-input-radio-border-color: #707070;
   --t007-input-radio-checked-border-color: dodgerblue;
   --t007-input-ripple-size: 250%;
-  --t007-input-ripple-bg-color: rgb(
+  --t007-input-ripple-color: rgb(
     from var(--t007-input-checkbox-checked-background) r g b/0.15
   );
   --t007-input-p-meter-font-size: 0.75rem;
   --t007-input-p-meter-gap: 0.25rem;
   --t007-input-p-meter-height: 0.25rem;
-  --t007-input-p-meter-borde-radius: unset;
+  --t007-input-p-meter-border-radius: unset;
   --t007-input-p-meter-color-weak: #b81a0a;
   --t007-input-p-meter-color-fair: #f68b1e;
   --t007-input-p-meter-color-strong: #0a8b1e;
@@ -72,25 +74,33 @@
   box-sizing: border-box;
   font-family: var(--t007-input-font-family);
   isolation: isolate;
-  transition-property:
-    transform, filter, background-color, color, border, right, left, top,
-    bottom, width, height, font-size, scale;
+  transition-property: transform, filter, background-color, color, border, right,
+    left, top, bottom, width, height, font-size, scale;
   transition-duration: 150ms;
   transition-timing-function: ease;
 }
 
 .t007-input-outline > * {
-  background-color: var(--t007-input-current-bg-color);
+  background-color: var(--t007-input-current-background-color);
 }
 
 .t007-input-field {
   --t007-input-current-color: var(--t007-input-base-color);
   --t007-input-current-text-color: var(--t007-input-base-text-color);
-  --t007-input-current-bg-color: var(--t007-input-base-bg-color);
-  width: 100%;
+  --t007-input-current-background-color: var(
+    --t007-input-base-background-color
+  );
+  width: var(--t007-input-width);
   max-width: 100%;
-  padding-top: calc(var(--t007-input-helper-font-size) * 1.3);
+  padding-top: calc((var(--t007-input-floating-label-font-size) * 1.3) * 0.5);
   -webkit-font-smoothing: antialiased;
+}
+
+.t007-input-field.t007-input-no-helper:has(
+    .t007-input[type="checkbox"],
+    .t007-input[type="radio"]
+  ) {
+  display: contents;
 }
 
 .t007-input-field:has(.t007-input[hidden]) {
@@ -100,39 +110,47 @@
 .t007-input-field:where(:hover) {
   --t007-input-current-color: var(--t007-input-hover-color);
   --t007-input-current-text-color: var(--t007-input-hover-text-color);
-  --t007-input-current-bg-color: var(--t007-input-hover-bg-color);
+  --t007-input-current-background-color: var(
+    --t007-input-hover-background-color
+  );
 }
 
 .t007-input-field:where(
     :has(
-      .t007-input:is(
-          [data-filled],
-          :focus,
-          :-webkit-autofill,
-          :not(:placeholder-shown):where(
-              :not(select):not([type="date"]):not([type="time"]):not(
-                  [type="datetime-local"]
-                ):not([type="month"]):not([type="week"]):not(
-                  [type="color"]
-                ):not([type="range"]):not([type="file"])
-            )
-        )
-    )
+        .t007-input:is(
+            [data-filled],
+            :focus,
+            :-webkit-autofill,
+            :not(:placeholder-shown):where(
+                :not(select):not([type="date"]):not([type="time"]):not(
+                    [type="datetime-local"]
+                  ):not([type="month"]):not([type="week"]):not(
+                    [type="color"]
+                  ):not([type="range"]):not([type="file"])
+              )
+          )
+      )
   ) {
   --t007-input-current-color: var(--t007-input-focus-color);
   --t007-input-current-text-color: var(--t007-input-focus-text-color);
-  --t007-input-current-bg-color: var(--t007-input-focus-bg-color);
+  --t007-input-current-background-color: var(
+    --t007-input-focus-background-color
+  );
 }
 
 .t007-input-field.t007-input-success {
   --t007-input-current-color: var(--t007-input-success-color);
   --t007-input-current-text-color: var(--t007-input-success-text-color);
-  --t007-input-current-bg-color: var(--t007-input-success-bg-color);
+  --t007-input-current-background-color: var(
+    --t007-input-success-background-color
+  );
 }
 
 .t007-input-field.t007-input-error {
   --t007-input-current-color: var(--t007-input-error-color);
-  --t007-input-current-bg-color: var(--t007-input-error-bg-color);
+  --t007-input-current-background-color: var(
+    --t007-input-error-background-color
+  );
 }
 
 .t007-input-wrapper {
@@ -244,49 +262,49 @@
 
 .t007-input-field:not(
     :has(
-      .t007-input:is(
-          [data-filled],
-          :focus,
-          :-webkit-autofill,
-          :not(:placeholder-shown):where(
-              :not(select):not([type="date"]):not([type="time"]):not(
-                  [type="datetime-local"]
-                ):not([type="month"]):not([type="week"]):not(
-                  [type="color"]
-                ):not([type="range"]):not([type="file"])
-            )
-        ),
-      .t007-input:is(
-          select,
-          :not([placeholder=""]),
-          [type="date"],
-          [type="time"],
-          [type="datetime-local"],
-          [type="month"],
-          [type="week"],
-          [type="color"],
-          [type="range"],
-          [type="file"]
-        )
-    )
+        .t007-input:is(
+            [data-filled],
+            :focus,
+            :-webkit-autofill,
+            :not(:placeholder-shown):where(
+                :not(select):not([type="date"]):not([type="time"]):not(
+                    [type="datetime-local"]
+                  ):not([type="month"]):not([type="week"]):not(
+                    [type="color"]
+                  ):not([type="range"]):not([type="file"])
+              )
+          ),
+        .t007-input:is(
+            select,
+            :not([placeholder=""]),
+            [type="date"],
+            [type="time"],
+            [type="datetime-local"],
+            [type="month"],
+            [type="week"],
+            [type="color"],
+            [type="range"],
+            [type="file"]
+          )
+      )
   )
   .t007-input-outline-notch {
   width: auto !important;
 }
 
 .t007-input-floating-label {
+  position: relative;
   color: var(--t007-input-current-color);
   opacity: 0.85;
   display: inline-block;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  position: relative;
   top: calc(var(--t007-input-height) / 2);
   transform: translateY(-50%);
   font-weight: 400;
   font-size: var(--t007-input-font-size);
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transform-origin: left top;
   white-space: nowrap;
   will-change: transform;
@@ -322,6 +340,7 @@
       )
   )
   .t007-input-floating-label {
+  position: absolute;
   transform: translateY(
     calc(
       -1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2))
@@ -364,10 +383,10 @@
       )
   )
   .t007-input-floating-label.t007-input-shake {
+  position: absolute;
   transform: translateY(
       calc(
-        -1 *
-          ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2))
+        -1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2))
       )
     )
     translateX(0.25rem);
@@ -425,8 +444,7 @@
     (
         (var(--t007-input-height) / 2) -
           ((var(--t007-input-font-size) / 1.25) / 2)
-      ) -
-      ((var(--t007-input-floating-label-font-size) * 1.3) / 2) - 1px
+      ) - ((var(--t007-input-floating-label-font-size) * 1.3) / 2) - 1px
   );
 }
 
@@ -466,17 +484,17 @@
 :where(
     .t007-input[type="file"].t007-input-image-selected
   )::file-selector-button {
-  background:
-    center/contain no-repeat var(--t007-input-image-src),
-    linear-gradient(black, black),
-    black;
+  background: center/contain no-repeat var(--t007-input-image-src),
+    linear-gradient(black, black), black;
   color: transparent;
   padding-block: var(--t007-input-sb-padding-block);
   border: none;
 }
 
 .t007-input-field:has(.t007-input:-webkit-autofill) {
-  --t007-input-current-bg-color: var(--t007-input-autofill-bg-color);
+  --t007-input-current-background-color: var(
+    --t007-input-autofill-background-color
+  );
 }
 
 .t007-input:-webkit-autofill {
@@ -517,30 +535,55 @@
 .t007-input-helper-line {
   position: relative;
   padding-inline: 1rem;
-  height: calc(var(--t007-input-helper-font-size) * 1.3);
+  height: calc(var(--t007-input-helper-font-size) * 1.4);
+  color: var(--t007-input-current-color);
 }
 
-.t007-input-helper-text::before {
-  content: "";
+.t007-input-helper-text-wrapper {
   position: relative;
-  top: 0;
-  left: 0;
-  display: block;
-  height: 0.1rem;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.t007-input-text-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.t007-input-helper-scroll-assist {
+  position: absolute;
+  top: 1px;
+  min-width: 2rem;
+  height: 100%;
+  opacity: 0.075;
+  background: linear-gradient(
+    var(--gradient-dir),
+    transparent 0,
+    currentColor 30%,
+    transparent
+  );
+  z-index: 2;
+}
+
+.t007-input-helper-scroll-assist.left {
+  left: -0.35rem;
+  --gradient-dir: to right;
+}
+
+.t007-input-helper-scroll-assist.right {
+  right: -0.35rem;
+  --gradient-dir: to left;
 }
 
 .t007-input-helper-text {
   position: absolute;
+  top: 1px;
   font-size: var(--t007-input-helper-font-size);
-  color: var(--t007-input-current-color);
   opacity: 0;
   line-height: 1.2;
-  word-break: break-all;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  white-space: nowrap;
 }
 
 .t007-input-helper-text[data-violation="none"],
@@ -646,18 +689,24 @@
 }
 
 .t007-input-checkbox-wrapper {
-  gap: var(--t007-input-checkbox-gap);
   font-size: var(--t007-input-checkbox-font-size);
 }
 
 .t007-input-radio-wrapper {
-  gap: var(--t007-input-radio-gap);
   font-size: var(--t007-input-radio-font-size);
 }
 
 .t007-input-checkbox-label,
 .t007-input-radio-label {
   color: var(--t007-input-current-color);
+}
+
+.t007-input-checkbox-label:not(:empty) {
+  margin-left: var(--t007-input-checkbox-gap);
+}
+
+.t007-input-radio-label:not(:empty) {
+  margin-left: var(--t007-input-radio-gap);
 }
 
 :is(.t007-input-checkbox-wrapper, .t007-input-radio-wrapper):hover {
@@ -744,7 +793,7 @@
 }
 
 .t007-input-checkbox-tag {
-  top: -10%;
+  top: -15%;
   width: 35%;
   height: 70%;
   border: solid var(--t007-input-checkmark-color);
@@ -771,12 +820,14 @@
 }
 
 /* Base styles to enable pointer effects */
+:where(.t007-input-rippler),
 .t007-input-checkbox-box,
 .t007-input-radio-box {
   position: relative;
 }
 
 /* Pulse bubble effect on click */
+.t007-input-rippler::before,
 .t007-input-checkbox-box::before,
 .t007-input-radio-box::before {
   content: "";
@@ -785,17 +836,20 @@
   left: 50%;
   width: 0;
   height: 0;
-  background: var(--t007-input-ripple-bg-color);
+  background: var(--t007-input-ripple-color);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  transition:
-    width 0.3s ease,
-    height 0.3s ease,
-    opacity 0.3s ease;
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
   opacity: 0;
   pointer-events: none;
 }
 
+.t007-input-rippler:is(
+    :hover,
+    :focus-visible,
+    :has(:focus-visible),
+    :has(~ :focus-visible)
+  )::before,
 .t007-input-field:is(:hover, :has(.t007-input[type="checkbox"]:focus-visible))
   .t007-input-checkbox-box::before,
 .t007-input-field:is(:hover, :has(.t007-input[type="radio"]:focus-visible))
@@ -805,14 +859,15 @@
   opacity: 1;
 }
 
+.t007-input-rippler:is(:checked, :has(:checked), :has(~ :checked))::before,
 .t007-input-field:has(.t007-input[type="checkbox"]:checked)
   .t007-input-checkbox-box::before,
 .t007-input-field:has(.t007-input[type="radio"]:checked)
   .t007-input-radio-box::before {
-  animation: t007-pulse 350ms ease-out;
+  animation: t007-ripple-pulse 350ms ease-out;
 }
 
-@keyframes t007-pulse {
+@keyframes t007-ripple-pulse {
   0% {
     width: 0;
     height: 0;

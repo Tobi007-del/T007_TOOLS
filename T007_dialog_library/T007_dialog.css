@@ -9,6 +9,7 @@
   --t007-dialog-max-height: 30rem; 
   --t007-dialog-max-content-height: 12rem;
   --t007-dialog-padding: 1rem;
+  --t007-dialog-content-padding-block: 1.5rem;
   --t007-dialog-border-radius: 1rem;
   --t007-dialog-border: .05rem solid rgba(255, 255, 255, .25);
   --t007-dialog-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5), -2px -2px 6px rgba(0, 0, 0, 0.5);
@@ -48,6 +49,8 @@
   box-sizing: border-box;
   font-family: var(--t007-dialog-font-family);
   -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
 }
 
 .t007-dialog *:focus {
@@ -115,7 +118,7 @@ body:has(.t007-dialog[open]) {
 }
 
 .t007-dialog-top-section {
-  padding-block: 1.5rem;
+  padding-block: var(--t007-dialog-content-padding-block);
   max-height: var(--t007-dialog-max-content-height);
   overflow-x: hidden;
   overflow-y: auto;

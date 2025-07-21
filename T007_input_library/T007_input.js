@@ -54,6 +54,81 @@ class T007_Form_Manager {
     return window.t007FM._RESOURCE_CACHE[src]
   }
 
+  static _SCROLL_ASSIST_OBSERVER = new ResizeObserver(entries => entries.forEach(({ target }) => window.t007FM._SCROLL_ASSIST_DATA.get(target)?.update())
+  );
+  static _SCROLL_ASSIST_DATA = new WeakMap();
+  static initScrollAssist(container, {
+    pxPerSecond = 80,
+    assistClassName = "t007-input-helper-scroll-assist",
+    vertical = true,
+    horizontal = true
+  } = {}) {
+    const parent = container.parentElement;
+    if (!parent || window.t007FM._SCROLL_ASSIST_DATA.has(container)) return;
+    const assist = {};
+    let scrollId = null;
+    let last = performance.now();
+    const update = () => {
+      if (horizontal) {
+        const w = assist.left?.offsetWidth || 40;
+        assist.left.style.display = container.clientWidth < w * 2 ? "none" : container.scrollLeft > 0 ? "block" : "none";
+        assist.right.style.display = container.clientWidth < w * 2 ? "none" : container.scrollLeft + container.clientWidth < container.scrollWidth - 1 ? "block" : "none";
+      }
+      if (vertical) {
+        const h = assist.up?.offsetHeight || 40;
+        assist.up.style.display = container.clientHeight < h * 2 ? "none" : container.scrollTop > 0 ? "block" : "none";
+        assist.down.style.display = container.clientHeight < h * 2 ? "none" : container.scrollTop + container.clientHeight < container.scrollHeight - 1 ? "block" : "none";
+      }
+    };
+    const scroll = dir => {
+      const frame = () => {
+        const now = performance.now(), dt = now - last;
+        last = now;
+        const d = (pxPerSecond * dt) / 1000;
+        if (dir === "left") container.scrollLeft = Math.max(0, container.scrollLeft - d);
+        if (dir === "right") container.scrollLeft = Math.min(container.scrollWidth - container.clientWidth, container.scrollLeft + d);
+        if (dir === "up") container.scrollTop = Math.max(0, container.scrollTop - d);
+        if (dir === "down") container.scrollTop = Math.min(container.scrollHeight - container.clientHeight, container.scrollTop + d);
+        scrollId = requestAnimationFrame(frame);
+      };
+      last = performance.now();
+      frame();
+    };
+    const stop = () => {
+      if (scrollId) cancelAnimationFrame(scrollId);
+      scrollId = null;
+    };
+    const addAssist = dir => {
+      const el = Object.assign(document.createElement("div"), {
+        className: `${assistClassName} ${dir}`,
+        style: "display:none"
+      });
+      ["pointerenter", "dragenter"].forEach(e => el.addEventListener(e, () => scroll(dir)));
+      ["pointerleave", "pointerup", "pointercancel", "dragleave", "dragend"].forEach(e => el.addEventListener(e, stop));
+      (dir === "left" || dir === "up" ? parent.insertBefore : parent.appendChild).call(parent, el, container);
+      assist[dir] = el;
+    };
+    if (horizontal) ["left", "right"].forEach(addAssist);
+    if (vertical) ["up", "down"].forEach(addAssist);
+    container.addEventListener("scroll", update);
+    window.t007FM._SCROLL_ASSIST_OBSERVER.observe(container);
+    window.t007FM._SCROLL_ASSIST_DATA.set(container, {
+      update,
+      destroy() {
+        stop();
+        container.removeEventListener("scroll", update);
+        window.t007FM._SCROLL_ASSIST_OBSERVER.unobserve(container);
+        window.t007FM._SCROLL_ASSIST_DATA.delete(container);
+        Object.values(assist).forEach(el => el.remove());
+      }
+    });
+    update();
+    return window.t007FM._SCROLL_ASSIST_DATA.get(container);
+  }
+  static removeScrollAssist(container) {
+    window.t007FM._SCROLL_ASSIST_DATA.get(container)?.destroy();
+  }
+
   static observeDOMForFields() {
     (new MutationObserver(mutations => {
     for (const mutation of mutations) {
@@ -108,12 +183,12 @@ class T007_Form_Manager {
   }
 
   static setFallbackHelper(field) {
-    const helperLine = field?.querySelector(".t007-input-helper-line")
-    if (!helperLine || helperLine.querySelector(".t007-input-helper-text[data-violation='auto']")) return
+    const helperTextWrapper = field?.querySelector(".t007-input-helper-text-wrapper")
+    if (!helperTextWrapper || helperTextWrapper.querySelector(".t007-input-helper-text[data-violation='auto']")) return
     const el = document.createElement('p')
     el.className = 't007-input-helper-text'
     el.setAttribute('data-violation', "auto")
-    helperLine.appendChild(el)
+    helperTextWrapper.appendChild(el)
   }
 
   static setFieldListeners(field) {
@@ -162,6 +237,10 @@ class T007_Form_Manager {
     })
     if (floatingLabel) floatingLabel.ontransitionend = () => floatingLabel.classList.remove("t007-input-shake")
     if (eyeOpen && eyeClosed) eyeOpen.onclick = eyeClosed.onclick = () => window.t007FM.togglePasswordType(input)
+    const { update } = window.t007FM.initScrollAssist(field.querySelector(".t007-input-helper-text-wrapper"))
+    input.addEventListener("invalid", () => setTimeout(update))
+    input.addEventListener("valid", () => setTimeout(update))
+    input.addEventListener("blur", () => setTimeout(update))
   }
 
   static setUpField(field) {
@@ -198,7 +277,7 @@ class T007_Form_Manager {
     helperText = {} // { info, valueMissing, typeMismatch, patternMismatch, etc. }
   }) {
     const field = document.createElement('div')
-    field.className = 't007-input-field'
+    field.className = `t007-input-field ${helperText ===  false ? "t007-input-no-helper" : ""}`
 
     const inputField = document.createElement('label')
     inputField.className = ["checkbox", "radio"].includes(type) ? `t007-input-${type}-wrapper` : 't007-input-wrapper'
@@ -273,15 +352,17 @@ class T007_Form_Manager {
     eyeClosed.setAttribute("aria-label", "Hide password")
     inputField.appendChild(eyeClosed)
     }
-
+    if (helperText !== false) {
     const helperLine = document.createElement('div')
     helperLine.className = 't007-input-helper-line'
+    const helperTextWrapper = document.createElement('div')
+    helperTextWrapper.className = 't007-input-helper-text-wrapper'
     //info helper
     if (helperText.info) {
     const infoText = document.createElement('p')
     infoText.className = 't007-input-helper-text'
     el.setAttribute('data-violation', "none")
-    helperLine.appendChild(infoText)
+    helperTextWrapper.appendChild(infoText)
     }
     //violation helpers
     window.t007FM.violationKeys.forEach(key => {
@@ -290,10 +371,11 @@ class T007_Form_Manager {
     el.className = 't007-input-helper-text'
     el.setAttribute('data-violation', key)
     el.textContent = helperText[key]
-    helperLine.appendChild(el)
+    helperTextWrapper.appendChild(el)
     })
+    helperLine.appendChild(helperTextWrapper)
     field.appendChild(helperLine)
-
+    }
     if (passwordMeter && type === 'password') {
     const meter = document.createElement('div')
     meter.className = 't007-input-password-meter'
@@ -368,7 +450,7 @@ class T007_Form_Manager {
 
     function toggleHelper(input, bool) {
       const field = input.closest(".t007-input-field"),
-      violation = window.t007FM.violationKeys.find(violation => input.validity[violation] || input.Validity?.[violation]) ?? "",
+      violation = window.t007FM.violationKeys.find(violation => input.Validity?.[violation] || input.validity[violation]) ?? "",
       helper = field.querySelector(`.t007-input-helper-text[data-violation="${violation}"]`),
       fallbackHelper = field.querySelector(`.t007-input-helper-text[data-violation="auto"]`) 
       input.closest(".t007-input-field").querySelectorAll(`.t007-input-helper-text:not([data-violation="${violation}"])`).forEach(helper => helper?.classList.remove("t007-input-show"))
@@ -510,8 +592,9 @@ class T007_Form_Manager {
     }
 
     function validateFormOnClient() {
-      Array.from(inputs).forEach(input => validateInput(input, true, true))
-      return Array.from(inputs).every(input => input.validity.valid)
+      Array.from(inputs).forEach(input => validateInput(input, true))
+      form.querySelector("input:invalid")?.focus()
+      return Array.from(inputs).every(input => input.checkValidity())
     }
 
     function toggleFormGlobalError(bool) {
