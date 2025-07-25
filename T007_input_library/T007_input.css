@@ -518,7 +518,7 @@
 
 .t007-input-helper-line {
   position: relative;
-  padding-inline: 1rem;
+  margin-inline: 1rem;
   height: calc(var(--t007-input-helper-font-size) * 1.4);
   color: var(--t007-input-current-color);
 }
@@ -552,12 +552,12 @@
 }
 
 .t007-input-helper-scroll-assist.left {
-  left: -0.35rem;
+  left: -0rem;
   --gradient-dir: to right;
 }
 
 .t007-input-helper-scroll-assist.right {
-  right: -0.35rem;
+  right: -0rem;
   --gradient-dir: to left;
 }
 
