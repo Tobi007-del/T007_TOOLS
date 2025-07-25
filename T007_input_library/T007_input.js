@@ -54,11 +54,11 @@ class T007_Form_Manager {
     return window.t007FM._RESOURCE_CACHE[src]
   }
 
-  static _SCROLL_ASSIST_OBSERVER = new ResizeObserver(entries => entries.forEach(({ target }) => window.t007FM._SCROLL_ASSIST_DATA.get(target)?.update())
+  static _SCROLL_ASSIST_OBSERVER = (typeof window !== "undefined") && new ResizeObserver(entries => entries.forEach(({ target }) => window.t007FM._SCROLL_ASSIST_DATA.get(target)?.update())
   );
   static _SCROLL_ASSIST_DATA = new WeakMap();
   static initScrollAssist(container, {
-    pxPerSecond = 160,
+    pxPerSecond = 80,
     assistClassName = "t007-input-helper-scroll-assist",
     vertical = true,
     horizontal = true
@@ -156,26 +156,6 @@ class T007_Form_Manager {
     input.type = input.type === "password" ? "text" : "password"
   }
 
-  static autoFitNotch(field) {
-    const notch = field?.querySelector(".t007-input-outline-notch")
-    if (!notch) return
-    const label = notch.firstElementChild
-    if (!label.innerText) return
-    const style = getComputedStyle(label)
-    const span = document.createElement('span')
-    span.style.setProperty("visibility", "hidden", "important")
-    span.style.setProperty("position", "absolute", "important")
-    span.style.setProperty("whiteSpace", "nowrap", "important")
-    span.style.setProperty("display", "inline", "important")
-    span.style.setProperty("font-size", style.getPropertyValue("--t007-input-floating-label-font-size"), "important")
-    span.style.setProperty("font-family", style.fontFamily, "important")
-    span.innerText = label.innerText
-    document.body.appendChild(span)
-    const width = span.getBoundingClientRect().width
-    document.body.removeChild(span)
-    notch.style.width = `${(width + 8)/getComputedStyle(document.documentElement).fontSize.replace("px", "")}rem` // Add small padding
-  }
-
   static toggleFilled(input) {
     if (!input) return
     const isFilled = input.type === "checkbox" || input.type === "radio" ? input.checked : input.value !== '' || input.files?.length > 0
@@ -244,10 +224,11 @@ class T007_Form_Manager {
   }
 
   static setUpField(field) {
+    if (field.dataset.setUp) return;
     window.t007FM.toggleFilled(field.querySelector(".t007-input"))
-    window.t007FM.autoFitNotch(field)
     window.t007FM.setFallbackHelper(field)
     window.t007FM.setFieldListeners(field)
+    field.dataset.setUp = 'true'
   }
 
   // Field Builder Utility
@@ -398,7 +379,7 @@ class T007_Form_Manager {
   static handleFormValidation(form) {
     if (!form?.classList.contains("t007-input-form") || form.dataset?.isValidating) return
 
-    form.dataset.isValidating = ''
+    form.dataset.isValidating = 'true'
     form.validateOnClient = validateFormOnClient
     form.toggleGlobalError = toggleFormGlobalError
 

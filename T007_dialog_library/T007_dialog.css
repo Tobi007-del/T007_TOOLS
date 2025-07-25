@@ -17,10 +17,16 @@
   --t007-dialog-backdrop-blur: blur(5px);
   --t007-dialog-message-font-size: 0.9rem;
   --t007-dialog-button-font-size: 0.8rem;
-  --t007-toast-button-width: 4.7rem;
-  --t007-toast-button-height: 2.3rem;
-  --t007-toast-button-border-radius: 1.25rem;
-  --t007-toast-button-gap: 0.65rem;
+  --t007-dialog-button-min-width: 4.7rem;
+  --t007-dialog-button-width: unset;
+  --t007-dialog-button-max-width: unset;
+  --t007-dialog-button-min-height: 2.3rem;
+  --t007-dialog-button-height: unset;
+  --t007-dialog-button-max-height: unset;
+  --t007-dialog-button-padding-inline: 1rem;
+  --t007-dialog-button-padding-block: 0.5rem;
+  --t007-dialog-button-border-radius: 1.25rem;
+  --t007-dialog-button-gap: 0.65rem;
   --t007-dialog-message-color: whitesmoke;
   --t007-confirm-button-color: grey;
   --t007-confirm-button-background: greenyellow;
@@ -136,14 +142,20 @@ body:has(.t007-dialog[open]) {
 .t007-dialog-bottom-section {
   align-self: flex-end;
   display: flex;
-  gap: var(--t007-toast-button-gap);
+  gap: var(--t007-dialog-button-gap);
 }
 
 .t007-dialog button {
   font-size: var(--t007-dialog-button-font-size);
-  width: var(--t007-toast-button-width);
-  height: var(--t007-toast-button-height);
-  border-radius: var(--t007-toast-button-border-radius);
+  min-width: var(--t007-dialog-button-min-width);
+  width: var(--t007-dialog-button-width);
+  max-width: var(--t007-dialog-button-max-width);
+  min-height: var(--t007-dialog-button-min-height);
+  height: var(--t007-dialog-button-height);
+  max-height: var(--t007-dialog-button-max-height);
+  padding-inline: var(--t007-dialog-button-padding-inline);
+  padding-block: var(--t007-dialog-button-padding-block);
+  border-radius: var(--t007-dialog-button-border-radius);
   transition: 100ms ease;
 }
 

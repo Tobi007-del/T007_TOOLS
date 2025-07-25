@@ -26,7 +26,6 @@ dropZone.addEventListener("drop", async e => {
   dropZone.classList.remove("dragover");
 
   const label = await Prompt("Enter label for this field:", draggedType.charAt(0).toUpperCase() + draggedType.slice(1));
-  console.log(label)
   if (!label) return draggedType = null;
 
   const required = await Confirm("Make this field required?");

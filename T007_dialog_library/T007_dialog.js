@@ -1,13 +1,13 @@
-export function Alert(message) {
-  return new Promise(resolve => new t007AlertDialog({ message, resolve }))
+export function Alert(message, options) {
+  return new Promise(resolve => new t007AlertDialog({ message, resolve, options }))
 }
 
-export function Confirm(question) {
-  return new Promise(resolve => new t007ConfirmDialog({ question, resolve }))
+export function Confirm(question, options) {
+  return new Promise(resolve => new t007ConfirmDialog({ question, resolve, options }))
 }
 
-export function Prompt(question, defaultValue, fieldOptions) {
-  return new Promise(resolve => new t007PromptDialog({ question, defaultValue, fieldOptions, resolve }))
+export function Prompt(question, defaultValue, options) {
+  return new Promise(resolve => new t007PromptDialog({ question, defaultValue, resolve, options }))
 }
 
 if (typeof window !== "undefined") {
@@ -65,9 +65,10 @@ class dialog {
     this.bindMethods()
     this.resolve = resolve
     this.dialog = document.createElement("dialog")
+    this.dialog.closedBy = "any"
     this.dialog.classList.add("t007-dialog")
     document.body.append(this.dialog)
-    document.addEventListener("keydown", this.handleKeyDown)
+    this.dialog.addEventListener("cancel", this.cancel)
   } 
 
   bindMethods() {
@@ -87,7 +88,6 @@ class dialog {
   }
 
   remove() {
-    document.removeEventListener("keydown", this.handleKeyDown)
     this.dialog.close()
     this.dialog.remove()
   }
@@ -100,33 +100,24 @@ class dialog {
   cancel() {
     this.remove()
     this.resolve(false)
-  }   
-
-  handleKeyDown(e) {
-    e.stopImmediatePropagation()
-    switch(e.key?.toString().toLowerCase()) {
-      case "escape":
-        this.cancel()
-        break
-    }
   }
 }
 
 class t007AlertDialog extends dialog {
-  constructor({ message, resolve }) {
+  constructor({ message, resolve, options }) {
     super(resolve)
-    this.render(message)
+    this.render(message, options)
     this.show()      
   }
     
-  render(message) {
+  render(message, options = {}) {
     this.dialog.innerHTML =  
     `
       <div class="t007-dialog-top-section">
         <p class="t007-dialog-question">${message}</p>
       </div>
       <div class="t007-dialog-bottom-section">
-        <button class="t007-dialog-confirm-button" type="button" title="OK">OK</button>
+        <button class="t007-dialog-confirm-button" type="button">${options.confirmText || 'OK'}</button>
       </div>
     `
     this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button")
@@ -135,21 +126,21 @@ class t007AlertDialog extends dialog {
 }
 
 class t007ConfirmDialog extends dialog {
-  constructor({ question, resolve }) {
+  constructor({ question, resolve, options }) {
     super(resolve)
-    this.render(question)
+    this.render(question, options)
     this.show()
   }
 
-  render(question) {
+  render(question, options = {}) {
     this.dialog.innerHTML =  
     `
       <div class="t007-dialog-top-section">
         <p class="t007-dialog-question">${question}</p>
       </div>
       <div class="t007-dialog-bottom-section">
-        <button class="t007-dialog-confirm-button" type="button" title="OK">OK</button>
-        <button class="t007-dialog-cancel-button" type="button" title="Cancel">Cancel</button>
+        <button class="t007-dialog-confirm-button" type="button">${options.confirmText || 'OK'}</button>
+        <button class="t007-dialog-cancel-button" type="button">${options.cancelText || 'Cancel'}</button>
       </div>
     `
     this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button")
@@ -160,13 +151,13 @@ class t007ConfirmDialog extends dialog {
 }
 
 class t007PromptDialog extends dialog {
-  constructor({ question, defaultValue, fieldOptions, resolve }) {
+  constructor({ question, defaultValue, resolve, options }) {
     super(resolve)
-    this.render(question, defaultValue, fieldOptions)
+    this.render(question, defaultValue, options)
     this.show()
   }
 
-  render(question, defaultValue, fieldOptions = {}) {
+  render(question, defaultValue, options = {}) {
     this.dialog.innerHTML =  
     `
       <div class="t007-dialog-top-section">
@@ -175,8 +166,8 @@ class t007PromptDialog extends dialog {
       <form class="t007-input-form" novalidate>
       </form>
       <div class="t007-dialog-bottom-section">
-        <button class="t007-dialog-confirm-button" type="submit" title="OK">OK</button>
-        <button class="t007-dialog-cancel-button" type="button" title="Cancel">Cancel</button>
+        <button class="t007-dialog-confirm-button" type="submit">${options.confirmText || 'OK'}</button>
+        <button class="t007-dialog-cancel-button" type="button">${options.cancelText || 'Cancel'}</button>
       </div>
     `
     this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button")
@@ -184,9 +175,11 @@ class t007PromptDialog extends dialog {
     this.confirmBtn.addEventListener("click", this.confirm)
     this.cancelBtn.addEventListener("click", this.cancel)
 
-    fieldOptions.value = defaultValue
+    delete options.confirmText
+    delete options.cancelText
+    options.value = defaultValue
     this.form = this.dialog.querySelector("form")
-    this.field = createField(fieldOptions)
+    this.field = createField(options)
     this.input = this.field.querySelector(".t007-input")
     this.form.addEventListener("submit", e => {
       e.preventDefault()

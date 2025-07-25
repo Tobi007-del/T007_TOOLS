@@ -150,10 +150,7 @@ class t007Toast {
       }
       if (!this.#isPaused) {
         this.#timeVisible += time - lastTime
-        if (this.#timeVisible >= this.#autoClose) {
-          this.remove()
-          return 
-        }
+        if (this.#timeVisible >= this.#autoClose) return this.remove()
       }
 
       lastTime = time
@@ -235,9 +232,11 @@ class t007Toast {
       this.#pointerType = value
       this.#toastElem.addEventListener('pointerdown', this.handleToastPointerStart, {passive: false})
       this.#toastElem.addEventListener('pointerup', this.handleToastPointerEnd)
+      this.#toastElem.addEventListener('pointercancel', this.handleToastPointerEnd)
     } else {
       this.#toastElem.removeEventListener('pointerdown', this.handleToastPointerStart, {passive: false})
       this.#toastElem.removeEventListener('pointerup', this.handleToastPointerEnd)
+      this.#toastElem.addEventListener('pointercancel', this.handleToastPointerEnd)
     }      
   }
 
@@ -283,10 +282,7 @@ class t007Toast {
   handleToastPointerEnd(e) {
     if (typeof this.#pointerType === "string" && e.pointerType !== this.#pointerType) return
     cancelAnimationFrame(this.#pointerRAF)
-    if (this.dragToCloseDir.includes("x") ? Math.abs(this.#pointerDeltaX) > (this.#toastElem.offsetWidth*(this.dragToClosePercent.x ?? this.dragToClosePercent/100)) : Math.abs(this.#pointerDeltaY) > (this.#toastElem.offsetHeight*(this.dragToClosePercent.y ?? this.dragToClosePercent/100))) {
-      this.remove("instant")
-      return
-    } 
+    if (this.dragToCloseDir.includes("x") ? Math.abs(this.#pointerDeltaX) > (this.#toastElem.offsetWidth*(this.dragToClosePercent.x ?? this.dragToClosePercent/100)) : Math.abs(this.#pointerDeltaY) > (this.#toastElem.offsetHeight*(this.dragToClosePercent.y ?? this.dragToClosePercent/100))) return this.remove("instant")
     this.#pointerTicker = false
     this.#toastElem.removeEventListener('pointermove', this.handleToastPointerMove, {passive: false})
     this.#toastElem.style.removeProperty("transition")

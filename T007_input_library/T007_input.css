@@ -8,17 +8,21 @@
   --t007-input-success-color: green;
   --t007-input-error-color: #d32f2f;
   --t007-input-dark-error-color: #f44336;
+  --t007-input-disabled-color: gray;
   --t007-input-base-text-color: var(--t007-input-color);
   --t007-input-hover-text-color: var(--t007-input-color);
   --t007-input-focus-text-color: var(--t007-input-color);
   --t007-input-success-text-color: var(--t007-input-color);
   --t007-input-error-text-color: var(--t007-input-color);
+  --t007-input-disabled-text-color: var(--t007-input-disabled-color);
   --t007-input-base-background-color: transparent;
   --t007-input-hover-background-color: transparent;
   --t007-input-focus-background-color: transparent;
   --t007-input-success-background-color: transparent;
   --t007-input-error-background-color: transparent;
+  --t007-input-disabled-background-color: transparent;
   --t007-input-autofill-background-color: transparent;
+  --t007-input-disabled-opacity: 0.6;
   --t007-input-font-size: 1rem;
   --t007-input-floating-label-scale: 0.75;
   --t007-input-floating-label-font-size: calc(
@@ -148,9 +152,20 @@
 
 .t007-input-field.t007-input-error {
   --t007-input-current-color: var(--t007-input-error-color);
+  --t007-input-current-text-color: var(--t007-input-error-text-color);
   --t007-input-current-background-color: var(
     --t007-input-error-background-color
   );
+}
+
+.t007-input-field:has(.t007-input:disabled) {
+  --t007-input-current-color: var(--t007-input-disabled-color);
+  --t007-input-current-text-color: var(--t007-input-disabled-text-color);
+  --t007-input-current-background-color: var(
+    --t007-input-disabled-background-color
+  );
+  opacity: var(--t007-input-disabled-opacity);
+  cursor: not-allowed;
 }
 
 .t007-input-wrapper {
@@ -214,10 +229,10 @@
 }
 
 .t007-input-outline-notch {
-  position: relative;
-  width: auto;
-  max-width: calc(100% - 0.75rem);
   flex: 0 0 auto;
+  position: relative;
+  width: fit-content;
+  max-width: calc(100% - 0.75rem);
   border-left: none;
   border-right: none;
   transition-property: border-bottom;
@@ -260,43 +275,11 @@
   border-top: none;
 }
 
-.t007-input-field:not(
-    :has(
-        .t007-input:is(
-            [data-filled],
-            :focus,
-            :-webkit-autofill,
-            :not(:placeholder-shown):where(
-                :not(select):not([type="date"]):not([type="time"]):not(
-                    [type="datetime-local"]
-                  ):not([type="month"]):not([type="week"]):not(
-                    [type="color"]
-                  ):not([type="range"]):not([type="file"])
-              )
-          ),
-        .t007-input:is(
-            select,
-            :not([placeholder=""]),
-            [type="date"],
-            [type="time"],
-            [type="datetime-local"],
-            [type="month"],
-            [type="week"],
-            [type="color"],
-            [type="range"],
-            [type="file"]
-          )
-      )
-  )
-  .t007-input-outline-notch {
-  width: auto !important;
-}
-
 .t007-input-floating-label {
   position: relative;
   color: var(--t007-input-current-color);
   opacity: 0.85;
-  display: inline-block;
+  display: block;
   max-width: 100%;
   top: calc(var(--t007-input-height) / 2);
   transform: translateY(-50%);
@@ -308,6 +291,10 @@
   transform-origin: left top;
   white-space: nowrap;
   will-change: transform;
+}
+
+.t007-input-floating-label:not(:empty) {
+  margin-inline: 0.25rem;
 }
 
 .t007-input-field:has(
@@ -340,7 +327,6 @@
       )
   )
   .t007-input-floating-label {
-  position: absolute;
   transform: translateY(
     calc(
       -1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2))
@@ -348,7 +334,6 @@
   );
   font-size: var(--t007-input-floating-label-font-size);
   opacity: 1;
-  left: 0.25rem;
   right: auto;
   max-width: 133%;
 }
@@ -383,7 +368,6 @@
       )
   )
   .t007-input-floating-label.t007-input-shake {
-  position: absolute;
   transform: translateY(
       calc(
         -1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2))
