@@ -66,18 +66,25 @@ class T007_Form_Manager {
     const parent = container.parentElement;
     if (!parent || window.t007FM._SCROLL_ASSIST_DATA.has(container)) return;
     const assist = {};
-    let scrollId = null;
-    let last = performance.now();
+    let scrollId = null,
+    last = performance.now(),
+    assistWidth = 20,
+    assistHeight = 20;
     const update = () => {
+      const hasInteractive = !!parent.querySelector('button, a[href], input, select, textarea, [contenteditable="true"], [tabindex]:not([tabindex="-1"])');
       if (horizontal) {
-        const w = assist.left?.offsetWidth || 40;
-        assist.left.style.display = container.clientWidth < w * 2 ? "none" : container.scrollLeft > 0 ? "block" : "none";
-        assist.right.style.display = container.clientWidth < w * 2 ? "none" : container.scrollLeft + container.clientWidth < container.scrollWidth - 1 ? "block" : "none";
+        const w = assist.left?.offsetWidth || assistWidth;
+        const check = hasInteractive ? container.clientWidth < w * 2 : false;
+        assist.left.style.display = check ? "none" : container.scrollLeft > 0 ? "block" : "none";
+        assist.right.style.display = check ? "none" : container.scrollLeft + container.clientWidth < container.scrollWidth - 1 ? "block" : "none";
+        assistWidth = w;
       }
       if (vertical) {
-        const h = assist.up?.offsetHeight || 40;
-        assist.up.style.display = container.clientHeight < h * 2 ? "none" : container.scrollTop > 0 ? "block" : "none";
-        assist.down.style.display = container.clientHeight < h * 2 ? "none" : container.scrollTop + container.clientHeight < container.scrollHeight - 1 ? "block" : "none";
+        const h = assist.up?.offsetHeight || assistHeight;
+        const check = hasInteractive ? container.clientHeight < h * 2 : false;
+        assist.up.style.display = check ? "none" : container.scrollTop > 0 ? "block" : "none";
+        assist.down.style.display = check ? "none" : container.scrollTop + container.clientHeight < container.scrollHeight - 1 ? "block" : "none";
+        assistHeight = h;
       }
     };
     const scroll = dir => {
@@ -233,144 +240,160 @@ class T007_Form_Manager {
 
   // Field Builder Utility
   static createField({
-    type = 'text',
-    value = '',
-    id = '',
-    name = '',
-    custom = '',
+    isWrapper = false,
     label = '',
+    type = 'text',
     placeholder = '',
-    checked,
-    required,
-    autocomplete = 'off',
-    pattern,
-    minLength,
-    maxLength,
+    custom = '',
     minSize,
     maxSize,
-    min,
-    max,
-    step,
-    accept,
-    options = [], // an array for when the input is select
-    eyeToggler = true, // a boolean for only input type = "password"
-    passwordMeter = true, // a boolean for only input type = "password"
-    helperText = {} // { info, valueMissing, typeMismatch, patternMismatch, etc. }
+    minTotalSize,
+    maxTotalSize,
+    options = [],
+    indeterminate = false,
+    eyeToggler = true,
+    passwordMeter = true,
+    helperText = {},
+    className = '',
+    children,
+    startIcon = '',
+    endIcon = '',
+    nativeIcon = '',
+    passwordVisibleIcon = '',
+    passwordHiddenIcon = '',
+    ...otherProps
   }) {
+    const isSelect = type === 'select'
+    const isTextArea = type === 'textarea'
+    const isCheckboxOrRadio = type === 'checkbox' || type === 'radio'
     const field = document.createElement('div')
-    field.className = `t007-input-field ${helperText ===  false ? "t007-input-no-helper" : ""}`
+    field.className = `t007-input-field ${isWrapper ? 't007-input-is-wrapper' : ''} ${indeterminate ? "t007-input-indeterminate" : ""} ${!!nativeIcon ? 't007-input-icon-override' : ''} ${helperText === false ? 't007-input-no-helper' : ''} ${className}`
 
-    const inputField = document.createElement('label')
-    inputField.className = ["checkbox", "radio"].includes(type) ? `t007-input-${type}-wrapper` : 't007-input-wrapper'
-    if (id) inputField.htmlFor = id
-    field.appendChild(inputField)
-
-    if (["checkbox", "radio"].includes(type)) {
-    inputField.innerHTML = 
-    `
-    <span class="t007-input-${type}-box">
-      <span class="t007-input-${type}-tag"></span>
-    </span>
-    <span class="t007-input-${type}-label">${label}</span>   
-    `
+    const labelEl = document.createElement('label')
+    labelEl.className = isCheckboxOrRadio
+      ? `t007-input-${type}-wrapper`
+      : 't007-input-wrapper'
+    field.appendChild(labelEl)
+    if (isCheckboxOrRadio) {
+      labelEl.innerHTML = `
+        <span class="t007-input-${type}-box">
+          <span class="t007-input-${type}-tag"></span>
+        </span>
+        <span class="t007-input-${type}-label">${label}</span>
+      `
     } else {
-    const inputOutline = document.createElement('span')
-    inputOutline.className = 't007-input-outline'
-    inputOutline.innerHTML = 
-    `
-    <span class="t007-input-outline-leading"></span>
-    <span class="t007-input-outline-notch">
-      <span class="t007-input-floating-label">${label}</span>
-    </span>
-    <span class="t007-input-outline-trailing"></span>
-    `
-    inputField.appendChild(inputOutline)
+      const outline = document.createElement('span')
+      outline.className = 't007-input-outline'
+      outline.innerHTML = `
+        <span class="t007-input-outline-leading"></span>
+        <span class="t007-input-outline-notch">
+          <span class="t007-input-floating-label">${label}</span>
+        </span>
+        <span class="t007-input-outline-trailing"></span>
+      `
+      labelEl.appendChild(outline)
     }
-
-    const input = document.createElement(type === 'textarea' ? 'textarea' : type === 'select' ? 'select' : 'input')
-    input.className = 't007-input'
-    if (['checkbox, radio'].includes(type)) input.value = label
-    if (!['select', 'textarea'].includes(type)) input.type = type
-    input.name = name
-    input.custom = custom && input.setAttribute("custom", custom)
-    input.placeholder = placeholder
-    input.autocomplete = autocomplete
-    if (value ?? false) input.value = value
-    if (checked ?? false) input.checked = checked
-    if (id ?? false) input.id = id
-    if (required ?? false) input.required = true
-    if (pattern ?? false) input.pattern = pattern
-    if (minLength ?? false) input.minLength = minLength
-    if (maxLength ?? false) input.maxLength = maxLength
-    if (minSize ?? false) input.minSize = minSize && input.setAttribute("minsize", minSize)
-    if (maxSize ?? false) input.maxSize = maxSize && input.setAttribute("maxsize", maxSize)
-    if (min ?? false) input.min = min
-    if (max ?? false) input.max = max
-    if (step ?? false) input.step = step   
-    if (accept ?? false) input.accept = accept
-    if (type === 'select') input.innerHTML = options.length && options.map(option => `<option value="${option}">${option}</option>`).join('')
-    inputField.appendChild(input)
-
-    if (eyeToggler && type === 'password') {
-    const eyeOpen = document.createElement("i")
-    eyeOpen.className = "t007-input-icon t007-input-password-visible-icon"
-    eyeOpen.innerHTML = 
-    `
-    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-      <path fill="rgba(0,0,0,.54)" d="M12 16q1.875 0 3.188-1.312Q16.5 13.375 16.5 11.5q0-1.875-1.312-3.188Q13.875 7 12 7q-1.875 0-3.188 1.312Q7.5 9.625 7.5 11.5q0 1.875 1.312 3.188Q10.125 16 12 16Zm0-1.8q-1.125 0-1.912-.788Q9.3 12.625 9.3 11.5t.788-1.913Q10.875 8.8 12 8.8t1.913.787q.787.788.787 1.913t-.787 1.912q-.788.788-1.913.788Zm0 4.8q-3.65 0-6.65-2.038-3-2.037-4.35-5.462 1.35-3.425 4.35-5.463Q8.35 4 12 4q3.65 0 6.65 2.037 3 2.038 4.35 5.463-1.35 3.425-4.35 5.462Q15.65 19 12 19Z"></path>
-    </svg>   
-    `
-    eyeOpen.setAttribute("aria-label", "Show password")
-    inputField.appendChild(eyeOpen)
-    const eyeClosed = document.createElement("i")
-    eyeClosed.className = "t007-input-icon t007-input-password-hidden-icon"
-    eyeClosed.innerHTML = 
-    `
-    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-      <path fill="rgba(0,0,0,.54)" d="m19.8 22.6-4.2-4.15q-.875.275-1.762.413Q12.95 19 12 19q-3.775 0-6.725-2.087Q2.325 14.825 1 11.5q.525-1.325 1.325-2.463Q3.125 7.9 4.15 7L1.4 4.2l1.4-1.4 18.4 18.4ZM12 16q.275 0 .512-.025.238-.025.513-.1l-5.4-5.4q-.075.275-.1.513-.025.237-.025.512 0 1.875 1.312 3.188Q10.125 16 12 16Zm7.3.45-3.175-3.15q.175-.425.275-.862.1-.438.1-.938 0-1.875-1.312-3.188Q13.875 7 12 7q-.5 0-.938.1-.437.1-.862.3L7.65 4.85q1.025-.425 2.1-.638Q10.825 4 12 4q3.775 0 6.725 2.087Q21.675 8.175 23 11.5q-.575 1.475-1.512 2.738Q20.55 15.5 19.3 16.45Zm-4.625-4.6-3-3q.7-.125 1.288.112.587.238 1.012.688.425.45.613 1.038.187.587.087 1.162Z"></path>
-    </svg>   
-    `
-    eyeClosed.setAttribute("aria-label", "Hide password")
-    inputField.appendChild(eyeClosed)
+    const inputEl = document.createElement(isTextArea ? 'textarea' : isSelect ? 'select' : 'input',)
+    inputEl.className = 't007-input'
+    if (!isSelect && !isTextArea) inputEl.type = type
+    inputEl.placeholder = placeholder
+    if (custom) inputEl.setAttribute('custom', custom)
+    if (minSize) inputEl.setAttribute('minsize', minSize)
+    if (maxSize) inputEl.setAttribute('maxsize', maxSize)
+    if (minTotalSize) inputEl.setAttribute('mintotalsize', minTotalSize)
+    if (maxTotalSize) inputEl.setAttribute('maxtotalsize', maxTotalSize)
+    // Drill other props into input, quite reckless though but necessary
+    Object.entries(otherProps).forEach(([key, val]) => inputEl.setAttribute(key, val))
+    // Insert options if select
+    if (isSelect && Array.isArray(options)) {
+      inputEl.innerHTML = options
+        .map((opt) =>
+          typeof opt === 'string'
+            ? `<option value="${opt}">${opt}</option>`
+            : `<option value="${opt.value}">${opt.option}</option>`,
+        )
+        .join('')
     }
+    // Append main input/textarea/select
+    labelEl.appendChild(!isWrapper ? inputEl : children)
+    // Native or end icon for date/time/month/datetime-local
+    const nativeTypes = ['date', 'time', 'month', 'datetime-local']
+    if (nativeTypes.includes(type) && nativeIcon) {
+      const icon = document.createElement('i')
+      icon.className = 't007-input-icon'
+      icon.innerHTML = nativeIcon
+      labelEl.appendChild(icon)
+    } else if (endIcon) {
+      const icon = document.createElement('i')
+      icon.className = 't007-input-icon'
+      icon.innerHTML = endIcon 
+      labelEl.appendChild(icon)
+    }
+    // Password toggle eye icons
+    if (type === 'password' && eyeToggler) {
+      const visibleIcon = document.createElement('i')
+      visibleIcon.className =
+        't007-input-icon t007-input-password-visible-icon'
+      visibleIcon.setAttribute('aria-label', 'Show password')
+      visibleIcon.setAttribute('role', 'button')
+      visibleIcon.innerHTML =
+        passwordVisibleIcon ||
+        /* Default open eye SVG */
+        `<svg width="24" height="24"><path fill="rgba(0,0,0,.54)" d="M12 16q1.875 0 3.188-1.312Q16.5 13.375 16.5 11.5q0-1.875-1.312-3.188Q13.875 7 12 7q-1.875 0-3.188 1.312Q7.5 9.625 7.5 11.5q0 1.875 1.312 3.188Q10.125 16 12 16Zm0-1.8q-1.125 0-1.912-.788Q9.3 12.625 9.3 11.5t.788-1.913Q10.875 8.8 12 8.8t1.913.787q.787.788.787 1.913t-.787 1.912q-.788.788-1.913.788Zm0 4.8q-3.65 0-6.65-2.038-3-2.037-4.35-5.462 1.35-3.425 4.35-5.463Q8.35 4 12 4q3.65 0 6.65 2.037 3 2.038 4.35 5.463-1.35 3.425-4.35 5.462Q15.65 19 12 19Z"/></svg>`
+      labelEl.appendChild(visibleIcon)
+      const hiddenIcon = document.createElement('i')
+      hiddenIcon.className =
+        't007-input-icon t007-input-password-hidden-icon'
+      hiddenIcon.setAttribute('aria-label', 'Hide password')
+      hiddenIcon.setAttribute('role', 'button')
+      hiddenIcon.innerHTML =
+        passwordHiddenIcon ||
+        /* Default closed eye SVG */
+        `<svg width="24" height="24"><path fill="rgba(0,0,0,.54)" d="m19.8 22.6-4.2-4.15q-.875.275-1.762.413Q12.95 19 12 19q-3.775 0-6.725-2.087Q2.325 14.825 1 11.5q.525-1.325 1.325-2.463Q3.125 7.9 4.15 7L1.4 4.2l1.4-1.4 18.4 18.4ZM12 16q.275 0 .512-.025.238-.025.513-.1l-5.4-5.4q-.075.275-.1.513-.025.237-.025.512 0 1.875 1.312 3.188Q10.125 16 12 16Zm7.3.45-3.175-3.15q.175-.425.275-.862.1-.438.1-.938 0-1.875-1.312-3.188Q13.875 7 12 7q-.5 0-.938.1-.437.1-.862.3L7.65 4.85q1.025-.425 2.1-.638Q10.825 4 12 4q3.775 0 6.725 2.087Q21.675 8.175 23 11.5q-.575 1.475-1.512 2.738Q20.55 15.5 19.3 16.45Zm-4.625-4.6-3-3q.7-.125 1.288.112.587.238 1.012.688.425.45.613 1.038.187.587.087 1.162Z"/></svg>`
+      labelEl.appendChild(hiddenIcon)
+    }
+    // Helper line
     if (helperText !== false) {
-    const helperLine = document.createElement('div')
-    helperLine.className = 't007-input-helper-line'
-    const helperTextWrapper = document.createElement('div')
-    helperTextWrapper.className = 't007-input-helper-text-wrapper'
-    //info helper
-    if (helperText.info) {
-    const infoText = document.createElement('p')
-    infoText.className = 't007-input-helper-text'
-    el.setAttribute('data-violation', "none")
-    helperTextWrapper.appendChild(infoText)
+      const helperLine = document.createElement('div')
+      helperLine.className = 't007-input-helper-line'
+      const helperWrapper = document.createElement('div')
+      helperWrapper.className = 't007-input-helper-text-wrapper'
+      // Info text
+      if (helperText.info) {
+        const info = document.createElement('p')
+        info.className = 't007-input-helper-text'
+        info.setAttribute('data-violation', 'none')
+        info.textContent = helperText.info
+        helperWrapper.appendChild(info)
+      }
+      // Violation texts
+      if (typeof window !== 'undefined' && window.t007FM?.violationKeys) {
+        window.t007FM.violationKeys.forEach((key) => {
+          if (!helperText[key]) return
+          const el = document.createElement('p')
+          el.className = 't007-input-helper-text'
+          el.setAttribute('data-violation', key)
+          el.textContent = helperText[key]
+          helperWrapper.appendChild(el)
+        })
+      }
+      helperLine.appendChild(helperWrapper)
+      field.appendChild(helperLine)
     }
-    //violation helpers
-    window.t007FM.violationKeys.forEach(key => {
-    if (!helperText[key]) return
-    const el = document.createElement('p')
-    el.className = 't007-input-helper-text'
-    el.setAttribute('data-violation', key)
-    el.textContent = helperText[key]
-    helperTextWrapper.appendChild(el)
-    })
-    helperLine.appendChild(helperTextWrapper)
-    field.appendChild(helperLine)
-    }
+    // Password strength meter
     if (passwordMeter && type === 'password') {
-    const meter = document.createElement('div')
-    meter.className = 't007-input-password-meter'
-    meter.dataset.strengthLevel = '1'
-    const strengthMeter = document.createElement('div')
-    strengthMeter.className = 't007-input-password-strength-meter'
-    strengthMeter.innerHTML = `
-    <div class="t007-input-p-weak"></div>
-    <div class="t007-input-p-fair"></div>
-    <div class="t007-input-p-strong"></div>
-    <div class="t007-input-p-very-strong"></div>
-    `
-    meter.appendChild(strengthMeter)
-    field.appendChild(meter)   
+      const meter = document.createElement('div')
+      meter.className = 't007-input-password-meter'
+      meter.dataset.strengthLevel = '1'
+      meter.innerHTML = `
+        <div class="t007-input-password-strength-meter">
+          <div class="t007-input-p-weak"></div>
+          <div class="t007-input-p-fair"></div>
+          <div class="t007-input-p-strong"></div>
+          <div class="t007-input-p-very-strong"></div>
+        </div>
+      `
+      field.appendChild(meter)
     }
 
     return field

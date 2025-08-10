@@ -9,7 +9,7 @@
   --t007-toast-background: rgb(from black r g b/.4);
   --t007-toast-background-blur: 10px;
   --t007-toast-animation-duration: 250ms;
-  --t007-toast-animation-timing-function: cubic-bezier(0.34, 1.64, 0.64, 1);
+  --t007-toast-animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
   --t007-toast-margin: 8px;
   --t007-toast-min-width: unset;
   --t007-toast-width: calc(var(--t007-toast-unit) * 20);
@@ -20,7 +20,8 @@
   --t007-toast-padding: calc(var(--t007-toast-unit) / 2.25);
   --t007-toast-border: unset;
   --t007-toast-border-radius: calc(var(--t007-toast-unit) / 3);
-  --t007-toast-box-shadow: unset;
+  --t007-toast-box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06), 0 6px 16px rgba(0, 0, 0, 0.08);
   --t007-toast-progress-height: calc(var(--t007-toast-unit) / 4);
   --t007-toast-progress-background: var(--t007-toast-type-color);
   --t007-toast-progress-backdrop-background: rgb(
