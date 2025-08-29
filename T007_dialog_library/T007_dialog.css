@@ -1,4 +1,4 @@
-:where(:root) {
+:root {
   --t007-dialog-font-family: inherit;
   --t007-dialog-unit: 1rem;
   --t007-dialog-background: rgb(20,20,20);
@@ -38,14 +38,8 @@
   --t007-cancel-button-outline-color: greenyellow;
 }
 
-.t007-dialog {
-  --t007-input-base-color: rgb(from var(--t007-dialog-message-color) r g b/0.45);
-  --t007-input-hover-color: rgb(from var(--t007-dialog-message-color) r g b/0.95);
-  --t007-input-focus-color: var(--t007-dialog-message-color);
-  --t007-input-base-text-color: var(--t007-dialog-message-color);
-  --t007-input-hover-text-color: var(--t007-dialog-message-color);
-  --t007-input-focus-text-color: var(--t007-dialog-message-color);
-  --t007-input-error-text-color: var(--t007-dialog-message-color);
+.t007-dialog .t007-input-field {
+  --t007-input-color: var(--t007-dialog-message-color);
 }
 
 .t007-dialog,

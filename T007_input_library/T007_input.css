@@ -1,69 +1,25 @@
 :where(:root) {
-  --t007-input-font-family: inherit;
-  --t007-input-color: black;
-  --t007-input-icon-fill: var(--t007-input-color);
-  --t007-input-icon-stroke: unset;
-  --t007-input-base-color: rgb(from var(--t007-input-color) r g b/0.45);
-  --t007-input-hover-color: rgb(from var(--t007-input-color) r g b/0.8);
-  --t007-input-focus-color: rgb(from var(--t007-input-color) r g b/1);
-  --t007-input-success-color: green;
-  --t007-input-error-color: #d32f2f;
   --t007-input-dark-error-color: #f44336;
-  --t007-input-disabled-color: gray;
-  --t007-input-base-text-color: var(--t007-input-color);
-  --t007-input-hover-text-color: var(--t007-input-color);
-  --t007-input-focus-text-color: var(--t007-input-color);
-  --t007-input-success-text-color: var(--t007-input-color);
-  --t007-input-error-text-color: var(--t007-input-color);
-  --t007-input-disabled-text-color: var(--t007-input-disabled-color);
-  --t007-input-base-background-color: transparent;
-  --t007-input-hover-background-color: transparent;
-  --t007-input-focus-background-color: transparent;
-  --t007-input-success-background-color: transparent;
-  --t007-input-error-background-color: transparent;
-  --t007-input-disabled-background-color: transparent;
-  --t007-input-autofill-background-color: transparent;
-  --t007-input-disabled-opacity: 0.6;
+  --t007-input-font-family: inherit;
+  --t007-input-width: 100%;
+  --t007-input-height: 3rem;
+  --t007-input-padding: 0.75rem;
   --t007-input-font-size: 1rem;
   --t007-input-floating-label-scale: 0.75;
   --t007-input-floating-label-font-size: calc(
     var(--t007-input-font-size) * var(--t007-input-floating-label-scale)
   );
-  --t007-input-helper-font-size: 0.75rem;
-  --t007-input-height: 3rem;
-  --t007-input-width: 100%;
-  --t007-input-icon-width: unset;
-  --t007-input-icon-height: unset;
-  --t007-input-padding: 0.75rem;
+  --t007-input-helper-font-size: 0.7rem;
+  --t007-input-border-width: 1px;
+  --t007-input-focused-border-width: 2px;
   --t007-input-border-radius: 0.25rem;
   --t007-input-border-style: solid;
-  --t007-input-active-border-style: var(--t007-input-border-style);
-  --t007-input-border-width: 1px;
-  --t007-input-active-border-width: 2px;
-  --t007-input-checkbox-font-size: 0.9rem;
-  --t007-input-checkbox-gap: 0.5rem;
-  --t007-input-checkmark-color: white;
-  --t007-input-checkmark-width: 2px;
-  --t007-input-checkbox-size: 0.85rem;
-  --t007-input-checkbox-background: whitesmoke;
-  --t007-input-checkbox-checked-background: dodgerblue;
-  --t007-input-checkbox-border-width: 1px;
-  --t007-input-checkbox-border-radius: 0.2rem;
-  --t007-input-checkbox-border-color: #707070;
-  --t007-input-checkbox-checked-border-color: black;
-  --t007-input-radio-gap: 0.5rem;
-  --t007-input-radio-font-size: 0.9rem;
-  --t007-input-radio-color: dodgerblue;
-  --t007-input-radio-size: 0.85rem;
-  --t007-input-radio-background: whitesmoke;
-  --t007-input-radio-checked-background: whitesmoke;
-  --t007-input-radio-border-width: 1px;
-  --t007-input-radio-border-color: #707070;
-  --t007-input-radio-checked-border-color: dodgerblue;
-  --t007-input-ripple-size: 250%;
-  --t007-input-ripple-color: rgb(
-    from var(--t007-input-checkbox-checked-background) r g b/0.15
-  );
+  --t007-input-focused-border-style: var(--t007-input-border-style);
+  --t007-input-icon-width: unset;
+  --t007-input-icon-height: unset;
+  --t007-input-icon-fill: var(--t007-input-color);
+  --t007-input-icon-stroke: unset;
+  --t007-input-disabled-opacity: 0.6;
   --t007-input-p-meter-font-size: 0.75rem;
   --t007-input-p-meter-gap: 0.25rem;
   --t007-input-p-meter-height: 0.25rem;
@@ -72,6 +28,89 @@
   --t007-input-p-meter-color-fair: #f68b1e;
   --t007-input-p-meter-color-strong: #0a8b1e;
   --t007-input-p-meter-color-very-strong: #39ff14;
+  --t007-input-ripple-size: 250%;
+  --t007-input-ripple-color: rgb(
+    from var(--t007-input-checkbox-checked-background) r g b/0.15
+  );
+}
+
+/* general input state variables */
+:where(:root, .t007-input-field) {
+  --t007-input-color: black;
+  /* borders */
+  --t007-input-base-color: rgb(from var(--t007-input-color) r g b/0.45);
+  --t007-input-hover-color: var(--t007-input-color);
+  --t007-input-focused-color: var(--t007-input-color);
+  --t007-input-filled-color: var(--t007-input-base-color);
+  --t007-input-error-color: #d32f2f;
+  --t007-input-disabled-color: gray;
+  /* label */
+  --t007-input-base-label-color: rgb(
+    from var(--t007-input-base-color) r g b/0.95
+  );
+  --t007-input-hover-label-color: var(--t007-input-base-label-color);
+  --t007-input-focused-label-color: var(--t007-input-focused-color);
+  --t007-input-filled-label-color: var(--t007-input-base-label-color);
+  --t007-input-error-label-color: var(--t007-input-error-color);
+  --t007-input-disabled-label-color: var(--t007-input-disabled-color);
+  /* value */
+  --t007-input-base-value-color: var(--t007-input-color);
+  --t007-input-hover-value-color: var(--t007-input-base-value-color);
+  --t007-input-focused-value-color: var(--t007-input-base-value-color);
+  --t007-input-filled-value-color: var(--t007-input-base-value-color);
+  --t007-input-error-value-color: var(--t007-input-base-value-color);
+  --t007-input-disabled-value-color: var(--t007-input-disabled-color);
+  /* helper */
+  --t007-input-base-helper-color: rgb(from var(--t007-input-color) r g b/0.8);
+  --t007-input-hover-helper-color: var(--t007-input-base-helper-color);
+  --t007-input-focused-helper-color: rgb(
+    from var(--t007-input-color) r g b/0.9
+  );
+  --t007-input-filled-helper-color: var(--t007-input-filled-color);
+  --t007-input-error-helper-color: var(--t007-input-error-color);
+  --t007-input-disabled-helper-color: var(--t007-input-disabled-color);
+  /* background */
+  --t007-input-base-background-color: transparent;
+  --t007-input-hover-background-color: var(--t007-input-base-background-color);
+  --t007-input-focused-background-color: var(
+    --t007-input-base-background-color
+  );
+  --t007-input-filled-background-color: var(--t007-input-base-background-color);
+  --t007-input-error-background-color: var(--t007-input-base-background-color);
+  --t007-input-disabled-background-color: var(
+    --t007-input-base-background-color
+  );
+  --t007-input-autofill-background-color: var(
+    --t007-input-base-background-color
+  );
+}
+
+/* checkbox input state variables */
+:where(:root) {
+  --t007-input-checkbox-font-size: 0.9rem;
+  --t007-input-checkbox-gap: 0.5rem;
+  --t007-input-checkmark-color: white;
+  --t007-input-checkmark-width: 2px;
+  --t007-input-checkbox-size: 0.85rem;
+  --t007-input-checkbox-background: whitesmoke;
+  --t007-input-checkbox-checked-background: dodgerblue;
+  --t007-input-checkbox-border-color: #707070;
+  --t007-input-checkbox-checked-border-color: black;
+  --t007-input-checkbox-border-width: 1px;
+  --t007-input-checkbox-border-radius: 0.2rem;
+}
+
+/* radio input state variables */
+:where(:root) {
+  --t007-input-radio-font-size: 0.9rem;
+  --t007-input-radio-gap: 0.5rem;
+  --t007-input-radio-color: dodgerblue;
+  --t007-input-radio-size: 0.85rem;
+  --t007-input-radio-background: whitesmoke;
+  --t007-input-radio-border-color: #707070;
+  --t007-input-radio-checked-border-color: dodgerblue;
+  --t007-input-radio-checked-background: whitesmoke;
+  --t007-input-radio-border-width: 1px;
 }
 
 .t007-input-field,
@@ -87,13 +126,11 @@
   transition-timing-function: ease;
 }
 
-.t007-input-outline > * {
-  background-color: var(--t007-input-current-background-color);
-}
-
 .t007-input-field {
   --t007-input-current-color: var(--t007-input-base-color);
-  --t007-input-current-text-color: var(--t007-input-base-text-color);
+  --t007-input-current-label-color: var(--t007-input-base-label-color);
+  --t007-input-current-value-color: var(--t007-input-base-value-color);
+  --t007-input-current-helper-color: var(--t007-input-base-helper-color);
   --t007-input-current-background-color: var(
     --t007-input-base-background-color
   );
@@ -104,41 +141,18 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.t007-input-field.t007-input-no-helper:has(
-    .t007-input[type="checkbox"],
-    .t007-input[type="radio"]
-  ) {
-  display: contents;
-}
-
-.t007-input-field:has(.t007-input[hidden]) {
-  display: none;
-}
-
-.t007-input-field:where(:hover) {
-  --t007-input-current-color: var(--t007-input-hover-color);
-  --t007-input-current-text-color: var(--t007-input-hover-text-color);
-  --t007-input-current-background-color: var(
-    --t007-input-hover-background-color
-  );
-}
-
 .t007-input-field:where(.t007-input-is-wrapper):where(
-    :has([data-wrapper-filled="true"]),
-    :has(
-      :is([contenteditable="true"]):is([data-filled], :focus, :-webkit-autofill)
-    )
-  ),
-.t007-input-field.t007-input-is-wrapper:where(
     :has([contenteditable="true"]:not(:empty)):not(
         :has([contenteditable="true"] > br:only-child)
       ):not(:has([contenteditable="true"] > :only-child > br:only-child))
+  ),
+.t007-input-field:where(.t007-input-is-wrapper):where(
+    :has([data-wrapper-filled], [contenteditable="true"][data-filled])
   ),
 .t007-input-field:where(
     :has(
       .t007-input:is(
           [data-filled],
-          :focus,
           :-webkit-autofill,
           :not(:placeholder-shown):where(
               :not(select):not([type="date"]):not([type="time"]):not(
@@ -150,24 +164,46 @@
         )
     )
   ) {
-  --t007-input-current-color: var(--t007-input-focus-color);
-  --t007-input-current-text-color: var(--t007-input-focus-text-color);
+  --t007-input-current-color: var(--t007-input-filled-color);
+  --t007-input-current-label-color: var(--t007-input-filled-label-color);
+  --t007-input-current-value-color: var(--t007-input-filled-value-color);
+  --t007-input-current-helper-color: var(--t007-input-filled-helper-color);
   --t007-input-current-background-color: var(
-    --t007-input-focus-background-color
+    --t007-input-filled-background-color
   );
 }
 
-.t007-input-field.t007-input-success {
-  --t007-input-current-color: var(--t007-input-success-color);
-  --t007-input-current-text-color: var(--t007-input-success-text-color);
+.t007-input-field:where(:hover) {
+  --t007-input-current-color: var(--t007-input-hover-color);
+  --t007-input-current-label-color: var(--t007-input-hover-label-color);
+  --t007-input-current-value-color: var(--t007-input-hover-value-color);
+  --t007-input-current-helper-color: var(--t007-input-hover-helper-color);
   --t007-input-current-background-color: var(
-    --t007-input-success-background-color
+    --t007-input-hover-background-color
   );
 }
 
-.t007-input-field.t007-input-error {
+.t007-input-field:where(.t007-input-is-wrapper):where(
+    :has([data-wrapper-focused], [contenteditable="true"]:focus)
+  ),
+.t007-input-field:where(:has(.t007-input:focus)) {
+  --t007-input-current-color: var(--t007-input-focused-color);
+  --t007-input-current-label-color: var(--t007-input-focused-label-color);
+  --t007-input-current-value-color: var(--t007-input-focused-value-color);
+  --t007-input-current-helper-color: var(--t007-input-focused-helper-color);
+  --t007-input-current-background-color: var(
+    --t007-input-focused-background-color
+  );
+}
+
+.t007-input-field:where(.t007-input-is-wrapper):where(
+    :has([data-wrapper-error], [contenteditable="true"][data-error])
+  ),
+.t007-input-field:where(:has(.t007-input[data-error])) {
   --t007-input-current-color: var(--t007-input-error-color);
-  --t007-input-current-text-color: var(--t007-input-error-text-color);
+  --t007-input-current-label-color: var(--t007-input-error-label-color);
+  --t007-input-current-value-color: var(--t007-input-error-value-color);
+  --t007-input-current-helper-color: var(--t007-input-error-helper-color);
   --t007-input-current-background-color: var(
     --t007-input-error-background-color
   );
@@ -175,12 +211,33 @@
 
 .t007-input-field:has(.t007-input:disabled) {
   --t007-input-current-color: var(--t007-input-disabled-color);
-  --t007-input-current-text-color: var(--t007-input-disabled-text-color);
+  --t007-input-current-label-color: var(--t007-input-disabled-label-color);
+  --t007-input-current-value-color: var(--t007-input-disabled-value-color);
+  --t007-input-current-helper-color: var(--t007-input-disabled-helper-color);
   --t007-input-current-background-color: var(
     --t007-input-disabled-background-color
   );
   opacity: var(--t007-input-disabled-opacity);
   cursor: not-allowed;
+}
+
+.t007-input-field:has(.t007-input:-webkit-autofill) {
+  --t007-input-current-background-color: var(
+    --t007-input-autofill-background-color
+  );
+}
+
+.t007-input-field:where(
+    .t007-input-no-helper:has(
+        .t007-input[type="checkbox"],
+        .t007-input[type="radio"]
+      )
+  ) {
+  display: contents;
+}
+
+.t007-input-field:has(.t007-input[hidden]) {
+  display: none;
 }
 
 .t007-input-wrapper {
@@ -225,19 +282,22 @@
 
 .t007-input-outline > * {
   height: 100%;
-  border-style: solid;
+  background-color: var(--t007-input-current-background-color);
   border-color: var(--t007-input-current-color);
   border-width: var(--t007-input-border-width);
   border-style: var(--t007-input-border-style);
   pointer-events: none;
 }
 
-.t007-input-field.t007-input-is-wrapper:has(:is([contenteditable="true"]):focus)
+.t007-input-field.t007-input-is-wrapper:has(
+    [data-wrapper-focused],
+    [contenteditable="true"]:focus
+  )
   .t007-input-outline
   > *,
 .t007-input-field:has(.t007-input:focus) .t007-input-outline > * {
-  border-width: var(--t007-input-active-border-width);
-  border-style: var(--t007-input-active-border-style);
+  border-width: var(--t007-input-focused-border-width);
+  border-style: var(--t007-input-focused-border-style);
 }
 
 .t007-input-outline-leading {
@@ -266,7 +326,9 @@
   max-width: calc(100% - 0.75rem);
   border-left: none !important;
   border-right: none !important;
-  transition-property: border-bottom;
+  transition-property:
+    border-bottom, transform, filter, background-color, color, right, left, top,
+    bottom, width, height, font-size, scale;
 }
 
 .t007-input-field:has(.t007-input-icon) .t007-input-outline-notch {
@@ -313,7 +375,7 @@
   display: block;
   max-width: 100%;
   transform: translateY(-50%);
-  color: var(--t007-input-current-color);
+  color: var(--t007-input-current-label-color);
   opacity: 0.85;
   font-weight: 400;
   font-size: var(--t007-input-font-size);
@@ -415,8 +477,8 @@
 .t007-input {
   border: none;
   background: none;
-  color: var(--t007-input-current-text-color);
-  caret-color: var(--t007-input-current-text-color);
+  color: var(--t007-input-current-value-color);
+  caret-color: var(--t007-input-current-value-color);
   border-radius: 0;
   font-size: var(--t007-input-font-size);
   height: 100%;
@@ -432,22 +494,24 @@
   height: unset;
 }
 
-.t007-input:is(textarea) {
-  resize: vertical;
+.t007-input:is([type="checkbox"], [type="radio"]) {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
 }
 
 .t007-input:not(select) {
   appearance: none;
 }
 
-::picker(select) {
-  color: black;
+.t007-input:where(textarea) {
+  min-height: 100%;
+  height: auto;
+  resize: none;
 }
 
-.t007-input:is([type="checkbox"], [type="radio"]) {
-  opacity: 0;
-  position: absolute;
-  pointer-events: none;
+:where(select.t007-input::picker(select)) {
+  color: black;
 }
 
 .t007-input::placeholder {
@@ -515,15 +579,9 @@
   border: none;
 }
 
-.t007-input-field:has(.t007-input:-webkit-autofill) {
-  --t007-input-current-background-color: var(
-    --t007-input-autofill-background-color
-  );
-}
-
 .t007-input:-webkit-autofill {
   transition: background-color 50000000s ease-in-out 0s !important;
-  -webkit-text-fill-color: var(--t007-input-current-text-color) !important;
+  -webkit-value-fill-color: var(--t007-input-current-value-color) !important;
 }
 
 .t007-input-field.t007-input-icon-override
@@ -580,7 +638,7 @@
   position: relative;
   margin-inline: 1rem;
   height: calc(var(--t007-input-helper-font-size) * 1.4);
-  color: var(--t007-input-current-color);
+  color: var(--t007-input-current-helper-color);
 }
 
 .t007-input-helper-text-wrapper {
@@ -592,11 +650,11 @@
   scrollbar-width: none;
 }
 
-.t007-input-text-wrapper::-webkit-scrollbar {
+.t007-input-helper-text-wrapper::-webkit-scrollbar {
   display: none;
 }
 
-.t007-input-helper-scroll-assist {
+.t007-input-scroll-assist {
   position: absolute;
   top: 1px;
   min-width: 2rem;
@@ -611,19 +669,19 @@
   z-index: 2;
 }
 
-.t007-input-helper-scroll-assist.left {
+.t007-input-scroll-assist[data-scroll-direction="left"] {
   left: -0.25rem;
   --gradient-dir: to right;
 }
 
-.t007-input-helper-scroll-assist.right {
+.t007-input-scroll-assist[data-scroll-direction="right"] {
   right: -0.25rem;
   --gradient-dir: to left;
 }
 
 .t007-input-helper-text {
   position: absolute;
-  top: 1px;
+  top: 2px;
   font-size: var(--t007-input-helper-font-size);
   opacity: 0;
   line-height: 1.2;
@@ -742,7 +800,7 @@
 
 .t007-input-checkbox-label,
 .t007-input-radio-label {
-  color: var(--t007-input-current-color);
+  color: var(--t007-input-current-label-color);
 }
 
 .t007-input-checkbox-label:not(:empty) {
