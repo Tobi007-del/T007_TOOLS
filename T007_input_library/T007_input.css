@@ -581,7 +581,7 @@
 
 .t007-input:-webkit-autofill {
   transition: background-color 50000000s ease-in-out 0s !important;
-  -webkit-value-fill-color: var(--t007-input-current-value-color) !important;
+  -webkit-text-fill-color: var(--t007-input-current-value-color) !important;
 }
 
 .t007-input-field.t007-input-icon-override
