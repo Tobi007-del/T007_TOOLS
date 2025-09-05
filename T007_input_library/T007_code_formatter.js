@@ -1,25 +1,39 @@
 export function formatHTML(html, indentSize = 4) {
-  const voidTags = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"]);
-  const indent = (level) => ' '.repeat(level * indentSize);
+  const voidTags = new Set([
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "source",
+    "track",
+    "wbr",
+  ]);
+  const indent = (level) => " ".repeat(level * indentSize);
   const formatted = [];
   const stack = [];
   const tokens = html
-  .replace(/>\s+</g, '><') // Remove whitespace between tags
-  .replace(/</g, '\n<')
-  .replace(/>/g, '>\n')
-  .split('\n')
-  .map(t => t.trim())
-  .filter(Boolean);
+    .replace(/>\s+</g, "><") // Remove whitespace between tags
+    .replace(/</g, "\n<")
+    .replace(/>/g, ">\n")
+    .split("\n")
+    .map((t) => t.trim())
+    .filter(Boolean);
   for (const token of tokens) {
-    if (token.startsWith('</')) {
+    if (token.startsWith("</")) {
       // Closing tag: decrease indent first
       if (stack.length) stack.pop();
       formatted.push(indent(stack.length) + token);
-    } else if (token.startsWith('<') && token.endsWith('>')) {
+    } else if (token.startsWith("<") && token.endsWith(">")) {
       const tagNameMatch = token.match(/^<\s*([^\s>\/]+)/);
       const tagName = tagNameMatch?.[1]?.toLowerCase();
       formatted.push(indent(stack.length) + token);
-      if (tagName && !voidTags.has(tagName) && !token.endsWith('/>')) {
+      if (tagName && !voidTags.has(tagName) && !token.endsWith("/>")) {
         // Only increase indent for non-void, non-self-closing tags
         stack.push(tagName);
       }
@@ -28,18 +42,16 @@ export function formatHTML(html, indentSize = 4) {
       formatted.push(indent(stack.length) + token);
     }
   }
-  return formatted.join('\n');
+  return formatted.join("\n");
 }
 
 export function highlightHTML(html) {
-  const escape = str => str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  const escape = (str) =>
+    str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   html = escape(html);
   html = html.replace(
     /(?<=&lt;style[^&]*&gt;)(?<styleContent>[\s\S]*?)(?=&lt;\/style&gt;)|(?<=&lt;script[^&]*&gt;)(?<scriptContent>[\s\S]*?)(?=&lt;\/script&gt;)|(?<comment>&lt;!--[\s\S]*?--&gt;)|(?<tag>&lt;\/?[^\s&]+)|(?<attr>[\w-:]+)(?<eq>=)(?<val>\"[^\"]*\"|\'[^\']*\')|(?<closetag>\/?&gt;)/g,
-    (match,  ...args) => {
+    (match, ...args) => {
       const groups = args.at(-1);
       if (groups.styleContent) {
         return highlightCSS(groups.styleContent);
@@ -53,9 +65,9 @@ export function highlightHTML(html) {
         return `<span class="token attr">${groups.attr}</span><span class="token eq">${groups.eq}</span><span class="token value">${groups.val}</span>`;
       } else if (groups.closetag) {
         return `<span class="token tag">${groups.closetag}</span>`;
-      } 
+      }
       return match;
-    }
+    },
   );
   return html;
 }
@@ -81,8 +93,6 @@ export function highlightJSON(json) {
         return `<span class="token bracket">${groups.bracket}</span>`;
       }
       return match;
-    }
+    },
   );
 }
-
-

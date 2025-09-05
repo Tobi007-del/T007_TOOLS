@@ -1,18 +1,19 @@
 :root {
   --t007-dialog-font-family: inherit;
   --t007-dialog-unit: 1rem;
-  --t007-dialog-background: rgb(20,20,20);
+  --t007-dialog-background: rgb(20, 20, 20);
   --t007-dialog-gap: 0.8rem;
   --t007-dialog-width: 26.5rem;
   --t007-dialog-height: fit-content;
   --t007-dialog-max-width: 90%;
-  --t007-dialog-max-height: 30rem; 
+  --t007-dialog-max-height: 30rem;
   --t007-dialog-max-content-height: 12rem;
   --t007-dialog-padding: 1rem;
   --t007-dialog-content-padding-block: 1.5rem;
   --t007-dialog-border-radius: 1rem;
-  --t007-dialog-border: .05rem solid rgba(255, 255, 255, .25);
-  --t007-dialog-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5), -2px -2px 6px rgba(0, 0, 0, 0.5);
+  --t007-dialog-border: 0.05rem solid rgba(255, 255, 255, 0.25);
+  --t007-dialog-box-shadow:
+    2px 2px 6px rgba(0, 0, 0, 0.5), -2px -2px 6px rgba(0, 0, 0, 0.5);
   --t007-dialog-backdrop-background: rgba(0, 0, 0, 0.2);
   --t007-dialog-backdrop-blur: blur(6px);
   --t007-dialog-message-font-size: 0.9rem;
@@ -32,7 +33,7 @@
   --t007-confirm-button-background: greenyellow;
   --t007-cancel-button-color: greenyellow;
   --t007-cancel-button-background: grey;
-  --t007-button-outline-width: .15rem;
+  --t007-button-outline-width: 0.15rem;
   --t007-button-outline-style: solid;
   --t007-confirm-button-outline-color: grey;
   --t007-cancel-button-outline-color: greenyellow;
@@ -55,12 +56,12 @@
 
 .t007-dialog *:focus {
   outline-style: dashed;
-  outline-offset: .1rem;
+  outline-offset: 0.1rem;
   outline-width: 0;
 }
 
 .t007-dialog *:focus-visible {
-  outline-width: .15rem;
+  outline-width: 0.15rem;
   transition: none !important;
 }
 
@@ -85,7 +86,6 @@ body:has(.t007-dialog[open]) {
 
 .t007-dialog {
   margin: auto;
-  display: flex;
   flex-direction: column;
   gap: var(--t007-dialog-gap);
   background: var(--t007-dialog-background);
@@ -99,10 +99,18 @@ body:has(.t007-dialog[open]) {
   border-radius: var(--t007-dialog-border-radius);
 }
 
+.t007-dialog[open] {
+  display: flex;
+}
+
 .t007-dialog::backdrop {
   background-color: var(--t007-dialog-backdrop-background);
   -webkit-backdrop-filter: var(--t007-dialog-backdrop-blur);
   backdrop-filter: var(--t007-dialog-backdrop-blur);
+}
+
+.t007-dialog[open]::backdrop {
+  display: block;
 }
 
 .t007-dialog > * {
@@ -162,7 +170,7 @@ body:has(.t007-dialog[open]) {
 .t007-dialog-cancel-button {
   color: var(--t007-cancel-button-color);
   background: var(--t007-cancel-button-background);
-  opacity: .9;
+  opacity: 0.9;
 }
 
 .t007-dialog button:hover {
@@ -170,7 +178,7 @@ body:has(.t007-dialog[open]) {
 }
 
 .t007-dialog-confirm-button:hover {
-  opacity: .9;
+  opacity: 0.9;
 }
 
 .t007-dialog-cancel-button:hover {
