@@ -75,21 +75,27 @@ class T007_Form_Manager {
     return t007FM._RESOURCE_CACHE[src];
   }
 
-  static _SCROLL_ASSIST_OBSERVER =
+  static _SCROLLER_R_OBSERVER =
     typeof window !== "undefined" &&
     new ResizeObserver((entries) =>
       entries.forEach(({ target }) =>
-        t007FM._SCROLL_ASSIST_DATA.get(target)?.update()
+        t007FM._SCROLLERS.get(target)?.update()
       )
     );
-  static _SCROLL_ASSIST_M_OBSERVER =
+  static _SCROLLER_M_OBSERVER =
     typeof window !== "undefined" &&
-    new MutationObserver((entries) =>
-      entries.forEach(({ target }) =>
-        t007FM._SCROLL_ASSIST_DATA.get(target)?.update()
-      )
-    );
-  static _SCROLL_ASSIST_DATA = new WeakMap();
+    new MutationObserver((entries) => {
+      const containers = new Set();
+      for (const entry of entries) {
+        let node = entry.target;
+        while (node && !t007FM._SCROLLERS.has(node)) node = node.parentElement;
+        if (node) containers.add(node);
+      }
+      for (const container of containers) {
+        t007FM._SCROLLERS.get(container)?.update();
+      }
+    });
+  static _SCROLLERS = new WeakMap();
   static initScrollAssist(
     container,
     {
@@ -100,7 +106,7 @@ class T007_Form_Manager {
     } = {}
   ) {
     const parent = container.parentElement;
-    if (!parent || t007FM._SCROLL_ASSIST_DATA.has(container)) return;
+    if (!parent || t007FM._SCROLLERS.has(container)) return;
     const assist = {};
     let scrollId = null,
       last = performance.now(),
@@ -197,37 +203,36 @@ class T007_Form_Manager {
     if (horizontal) ["left", "right"].forEach(addAssist);
     if (vertical) ["up", "down"].forEach(addAssist);
     container.addEventListener("scroll", update);
-    t007FM._SCROLL_ASSIST_OBSERVER.observe(container);
-    t007FM._SCROLL_ASSIST_M_OBSERVER.observe(container, {
+    t007FM._SCROLLER_R_OBSERVER.observe(container);
+    t007FM._SCROLLER_M_OBSERVER.observe(container, {
       childList: true,
       subtree: true,
       characterData: true,
     });
-    t007FM._SCROLL_ASSIST_DATA.set(container, {
+    t007FM._SCROLLERS.set(container, {
       update,
       destroy() {
         stop();
         container.removeEventListener("scroll", update);
-        t007FM._SCROLL_ASSIST_OBSERVER.unobserve(container);
-        t007FM._SCROLL_ASSIST_DATA.delete(container);
+        t007FM._SCROLLER_R_OBSERVER.unobserve(container);
+        t007FM._SCROLLERS.delete(container);
         Object.values(assist).forEach((el) => el.remove());
       },
     });
     update();
-    return t007FM._SCROLL_ASSIST_DATA.get(container);
+    return t007FM._SCROLLERS.get(container);
   }
   static removeScrollAssist(container) {
-    t007FM._SCROLL_ASSIST_DATA.get(container)?.destroy();
+    t007FM._SCROLLERS.get(container)?.destroy();
   }
 
   static observeDOMForFields() {
     new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         for (const node of mutation.addedNodes) {
-          if (node.nodeType !== 1) continue;
           if (
             node?.classList?.contains("t007-input-field") ||
-            node?.querySelector(".t007-input-field")
+            node?.querySelector?.(".t007-input-field")
           ) {
             const fields = [
               ...(node.classList.contains("t007-input-field")

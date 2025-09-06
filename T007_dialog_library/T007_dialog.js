@@ -182,36 +182,32 @@ class t007PromptDialog extends dialog {
   }
 
   async render(question, defaultValue, options = {}) {
-    this.dialog.innerHTML = `
-      <div class="t007-dialog-top-section">
-        <p class="t007-dialog-question">${question}</p>
-      </div>
-      <form class="t007-input-form" novalidate>
-      </form>
-      <div class="t007-dialog-bottom-section">
-        <button class="t007-dialog-confirm-button" type="submit">${
-          options.confirmText || "OK"
-        }</button>
-        <button class="t007-dialog-cancel-button" type="button">${
-          options.cancelText || "Cancel"
-        }</button>
-      </div>
-    `;
-    this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button");
-    this.cancelBtn = this.dialog.querySelector(".t007-dialog-cancel-button");
-    this.confirmBtn.addEventListener("click", this.confirm);
-    this.cancelBtn.addEventListener("click", this.cancel);
-
     await loadResource(
       window.T007_INPUT_JS_SRC ||
         `/T007_TOOLS/T007_input_library/T007_input.js`,
       "script"
     );
-    delete options.confirmText;
-    delete options.cancelText;
     options.value = defaultValue;
+    this.dialog.innerHTML = `
+      <form class="t007-input-form" novalidate>
+        <div class="t007-dialog-top-section">
+          <p class="t007-dialog-question">${question}</p>
+        </div>
+          ${createField?.(options)?.outerHTML}
+        <div class="t007-dialog-bottom-section">
+          <button class="t007-dialog-confirm-button" type="submit">${
+            options.confirmText || "OK"
+          }</button>
+          <button class="t007-dialog-cancel-button" type="button">${
+            options.cancelText || "Cancel"
+          }</button>
+        </div>
+      </form>
+    `;
+    this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button");
+    this.cancelBtn = this.dialog.querySelector(".t007-dialog-cancel-button");
+    this.cancelBtn.addEventListener("click", this.cancel);
     this.form = this.dialog.querySelector("form");
-    this.form.appendChild(createField(options));
     this.form.onSubmit = this.confirm;
     window.handleFormValidation(this.form);
     this.show();

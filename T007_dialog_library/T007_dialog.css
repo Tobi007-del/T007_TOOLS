@@ -86,8 +86,6 @@ body:has(.t007-dialog[open]) {
 
 .t007-dialog {
   margin: auto;
-  flex-direction: column;
-  gap: var(--t007-dialog-gap);
   background: var(--t007-dialog-background);
   width: var(--t007-dialog-width);
   height: var(--t007-dialog-height);
@@ -99,7 +97,12 @@ body:has(.t007-dialog[open]) {
   border-radius: var(--t007-dialog-border-radius);
 }
 
-.t007-dialog[open] {
+.t007-dialog, .t007-dialog form {
+  flex-direction: column;
+  gap: var(--t007-dialog-gap);
+}
+
+.t007-dialog[open], .t007-dialog form {
   display: flex;
 }
 
