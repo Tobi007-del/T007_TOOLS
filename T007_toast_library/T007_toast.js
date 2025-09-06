@@ -1,33 +1,33 @@
-window.TOAST_DEFAULT_OPTIONS = {
-  body: window.TOAST_DEFAULT_OPTIONS?.body ?? "",
-  type: window.TOAST_DEFAULT_OPTIONS?.type ?? "",
-  icon: window.TOAST_DEFAULT_OPTIONS?.icon ?? true,
-  image: window.TOAST_DEFAULT_OPTIONS?.image ?? false,
-  autoClose: window.TOAST_DEFAULT_OPTIONS?.autoClose ?? true,
-  position: window.TOAST_DEFAULT_OPTIONS?.position ?? "top-right",
-  onClose: window.TOAST_DEFAULT_OPTIONS?.onClose ?? function () {},
-  closeButton: window.TOAST_DEFAULT_OPTIONS?.closeButton ?? true,
-  closeOnClick: window.TOAST_DEFAULT_OPTIONS?.closeOnClick ?? false,
-  dragToClose: window.TOAST_DEFAULT_OPTIONS?.dragToClose ?? true,
-  dragToClosePercent: window.TOAST_DEFAULT_OPTIONS?.dragToClosePercent ?? 40,
-  dragToCloseDir: window.TOAST_DEFAULT_OPTIONS?.dragToCloseDir ?? "x",
-  showProgress: window.TOAST_DEFAULT_OPTIONS?.showProgress ?? true,
-  pauseOnHover: window.TOAST_DEFAULT_OPTIONS?.pauseOnHover ?? true,
-  pauseOnFocusLoss: window.TOAST_DEFAULT_OPTIONS?.pauseOnFocusLoss ?? true,
-  renotify: window.TOAST_DEFAULT_OPTIONS?.renotify ?? true,
-  vibrate: window.TOAST_DEFAULT_OPTIONS?.vibrate ?? false,
+window.T007_TOAST_DEFAULT_OPTIONS = {
+  body: window.T007_TOAST_DEFAULT_OPTIONS?.body ?? "",
+  type: window.T007_TOAST_DEFAULT_OPTIONS?.type ?? "",
+  icon: window.T007_TOAST_DEFAULT_OPTIONS?.icon ?? true,
+  image: window.T007_TOAST_DEFAULT_OPTIONS?.image ?? false,
+  autoClose: window.T007_TOAST_DEFAULT_OPTIONS?.autoClose ?? true,
+  position: window.T007_TOAST_DEFAULT_OPTIONS?.position ?? "top-right",
+  onClose: window.T007_TOAST_DEFAULT_OPTIONS?.onClose ?? function () {},
+  closeButton: window.T007_TOAST_DEFAULT_OPTIONS?.closeButton ?? true,
+  closeOnClick: window.T007_TOAST_DEFAULT_OPTIONS?.closeOnClick ?? false,
+  dragToClose: window.T007_TOAST_DEFAULT_OPTIONS?.dragToClose ?? true,
+  dragToClosePercent: window.T007_TOAST_DEFAULT_OPTIONS?.dragToClosePercent ?? 40,
+  dragToCloseDir: window.T007_TOAST_DEFAULT_OPTIONS?.dragToCloseDir ?? "x",
+  showProgress: window.T007_TOAST_DEFAULT_OPTIONS?.showProgress ?? true,
+  pauseOnHover: window.T007_TOAST_DEFAULT_OPTIONS?.pauseOnHover ?? true,
+  pauseOnFocusLoss: window.T007_TOAST_DEFAULT_OPTIONS?.pauseOnFocusLoss ?? true,
+  renotify: window.T007_TOAST_DEFAULT_OPTIONS?.renotify ?? true,
+  vibrate: window.T007_TOAST_DEFAULT_OPTIONS?.vibrate ?? false,
 };
-window.TOAST_DURATIONS = {
-  success: window.TOAST_DURATIONS?.success ?? 2500,
-  error: window.TOAST_DURATIONS?.error ?? 4500,
-  warning: window.TOAST_DURATIONS?.warning ?? 3500,
-  info: window.TOAST_DURATIONS?.info ?? 4000, // default
+window.T007_TOAST_DURATIONS = {
+  success: window.T007_TOAST_DURATIONS?.success ?? 2500,
+  error: window.T007_TOAST_DURATIONS?.error ?? 4500,
+  warning: window.T007_TOAST_DURATIONS?.warning ?? 3500,
+  info: window.T007_TOAST_DURATIONS?.info ?? 4000, // default
 };
-window.TOAST_VIBRATIONS = {
-  success: window.TOAST_VIBRATIONS?.success ?? [100, 50, 100], // Short double buzz
-  warning: window.TOAST_VIBRATIONS?.warning ?? [300, 100, 300], // Two long buzzes
-  error: window.TOAST_VIBRATIONS?.error ?? [500, 200, 500], // Strong long buzz
-  info: window.TOAST_VIBRATIONS?.info ?? [200], // Single short buzz
+window.T007_TOAST_VIBRATIONS = {
+  success: window.T007_TOAST_VIBRATIONS?.success ?? [100, 50, 100], // Short double buzz
+  warning: window.T007_TOAST_VIBRATIONS?.warning ?? [300, 100, 300], // Two long buzzes
+  error: window.T007_TOAST_VIBRATIONS?.error ?? [500, 200, 500], // Strong long buzz
+  info: window.T007_TOAST_VIBRATIONS?.info ?? [200], // Single short buzz
 };
 
 let _ACTIVE_TOASTS = [];
@@ -83,7 +83,7 @@ function clamp(min, amount, max) {
   return Math.min(Math.max(amount, min), max);
 }
 
-class t007Toast {
+class T007_Toast {
   #toastElem;
   #autoCloseInterval;
   #progressInterval;
@@ -106,7 +106,7 @@ class t007Toast {
   constructor(options) {
     this.bindMethods();
     _ACTIVE_TOASTS.push(this);
-    this.options = { ...window.TOAST_DEFAULT_OPTIONS, ...options };
+    this.options = { ...window.T007_TOAST_DEFAULT_OPTIONS, ...options };
     this.#toastElem = document.createElement("div");
     this.#toastElem.classList = `t007-toast ${this.options.type} ${this.options.icon ? "has-icon" : ""}`;
     requestAnimationFrame(() =>
@@ -145,10 +145,10 @@ class t007Toast {
         case "success":
         case "error":
         case "warning":
-          value = window.TOAST_DURATIONS[this.options.type];
+          value = window.T007_TOAST_DURATIONS[this.options.type];
           break;
         default:
-          value = window.TOAST_DURATIONS.info;
+          value = window.T007_TOAST_DURATIONS.info;
       }
     }
     this.#autoClose = value;
@@ -440,10 +440,10 @@ class t007Toast {
         case "success":
         case "error":
         case "warning":
-          value = window.TOAST_VIBRATIONS[this.options.type];
+          value = window.T007_TOAST_VIBRATIONS[this.options.type];
           break;
         default:
-          value = window.TOAST_VIBRATIONS.info;
+          value = window.T007_TOAST_VIBRATIONS.info;
       }
     }
     this.#vibrate = value;
@@ -489,8 +489,8 @@ class t007Toast {
   }
 }
 
-export default (function Toast() {
-  const base = (body, options = {}) => new t007Toast({ ...options, body });
+export default (function t007Toast() {
+  const base = (body, options = {}) => new T007_Toast({ ...options, body });
   base.info = (body, options = {}) => base(body, { ...options, type: "info" });
   base.error = (body, options = {}) =>
     base(body, { ...options, type: "error" });

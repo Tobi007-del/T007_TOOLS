@@ -263,10 +263,7 @@
 
 .t007-toast-image-wrapper {
   position: relative;
-  aspect-ratio: 1 / 1;
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-basis: var(--t007-toast-image-width);
+  flex: 0 0 var(--t007-toast-image-width);
   width: var(--t007-toast-image-width);
   height: var(--t007-toast-image-height);
   border-radius: var(--t007-toast-image-border-radius);
@@ -278,18 +275,19 @@
 }
 
 .t007-toast-image-wrapper:not(:has(.t007-toast-image)) {
+  flex: 0 0 var(--t007-toast-icon-width);
   width: var(--t007-toast-icon-width);
   height: var(--t007-toast-icon-height);
   background: transparent;
-  flex-basis: var(--t007-toast-icon-width);
 }
 
 .t007-toast-icon {
   position: absolute;
   inset: 0;
   margin: auto;
-  width: unset;
-  height: unset;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: var(--t007-toast-icon-font-size);
   line-height: var(--t007-toast-icon-line-height);
 }
