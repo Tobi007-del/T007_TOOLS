@@ -78,26 +78,24 @@ class T007_Form_Manager {
   static _SCROLLER_R_OBSERVER =
     typeof window !== "undefined" &&
     new ResizeObserver((entries) =>
-      entries.forEach(({ target }) =>
-        t007FM._SCROLLERS.get(target)?.update()
-      )
+      entries.forEach(({ target }) => t007FM._SCROLLERS.get(target)?.update())
     );
   static _SCROLLER_M_OBSERVER =
     typeof window !== "undefined" &&
     new MutationObserver((entries) => {
-      const containers = new Set();
+      const els = new Set();
       for (const entry of entries) {
         let node = entry.target;
         while (node && !t007FM._SCROLLERS.has(node)) node = node.parentElement;
-        if (node) containers.add(node);
+        if (node) els.add(node);
       }
-      for (const container of containers) {
-        t007FM._SCROLLERS.get(container)?.update();
+      for (const el of els) {
+        t007FM._SCROLLERS.get(el)?.update();
       }
     });
   static _SCROLLERS = new WeakMap();
   static initScrollAssist(
-    container,
+    el,
     {
       pxPerSecond = 80,
       assistClassName = "t007-input-scroll-assist",
@@ -105,8 +103,8 @@ class T007_Form_Manager {
       horizontal = true,
     } = {}
   ) {
-    const parent = container.parentElement;
-    if (!parent || t007FM._SCROLLERS.has(container)) return;
+    const parent = el?.parentElement;
+    if (!parent || t007FM._SCROLLERS.has(el)) return;
     const assist = {};
     let scrollId = null,
       last = performance.now(),
@@ -118,32 +116,30 @@ class T007_Form_Manager {
       );
       if (horizontal) {
         const w = assist.left?.offsetWidth || assistWidth;
-        const check = hasInteractive ? container.clientWidth < w * 2 : false;
+        const check = hasInteractive ? el.clientWidth < w * 2 : false;
         assist.left.style.display = check
           ? "none"
-          : container.scrollLeft > 0
+          : el.scrollLeft > 0
           ? "block"
           : "none";
         assist.right.style.display = check
           ? "none"
-          : container.scrollLeft + container.clientWidth <
-            container.scrollWidth - 1
+          : el.scrollLeft + el.clientWidth < el.scrollWidth - 1
           ? "block"
           : "none";
         assistWidth = w;
       }
       if (vertical) {
         const h = assist.up?.offsetHeight || assistHeight;
-        const check = hasInteractive ? container.clientHeight < h * 2 : false;
+        const check = hasInteractive ? el.clientHeight < h * 2 : false;
         assist.up.style.display = check
           ? "none"
-          : container.scrollTop > 0
+          : el.scrollTop > 0
           ? "block"
           : "none";
         assist.down.style.display = check
           ? "none"
-          : container.scrollTop + container.clientHeight <
-            container.scrollHeight - 1
+          : el.scrollTop + el.clientHeight < el.scrollHeight - 1
           ? "block"
           : "none";
         assistHeight = h;
@@ -155,19 +151,17 @@ class T007_Form_Manager {
           dt = now - last;
         last = now;
         const d = (pxPerSecond * dt) / 1000;
-        if (dir === "left")
-          container.scrollLeft = Math.max(0, container.scrollLeft - d);
+        if (dir === "left") el.scrollLeft = Math.max(0, el.scrollLeft - d);
         if (dir === "right")
-          container.scrollLeft = Math.min(
-            container.scrollWidth - container.clientWidth,
-            container.scrollLeft + d
+          el.scrollLeft = Math.min(
+            el.scrollWidth - el.clientWidth,
+            el.scrollLeft + d
           );
-        if (dir === "up")
-          container.scrollTop = Math.max(0, container.scrollTop - d);
+        if (dir === "up") el.scrollTop = Math.max(0, el.scrollTop - d);
         if (dir === "down")
-          container.scrollTop = Math.min(
-            container.scrollHeight - container.clientHeight,
-            container.scrollTop + d
+          el.scrollTop = Math.min(
+            el.scrollHeight - el.clientHeight,
+            el.scrollTop + d
           );
         scrollId = requestAnimationFrame(frame);
       };
@@ -179,13 +173,13 @@ class T007_Form_Manager {
       scrollId = null;
     };
     const addAssist = (dir) => {
-      const el = Object.assign(document.createElement("div"), {
+      const div = Object.assign(document.createElement("div"), {
         className: assistClassName,
         style: "display:none",
       });
-      el.dataset.scrollDirection = dir;
+      div.dataset.scrollDirection = dir;
       ["pointerenter", "dragenter"].forEach((e) =>
-        el.addEventListener(e, () => scroll(dir))
+        div.addEventListener(e, () => scroll(dir))
       );
       [
         "pointerleave",
@@ -193,37 +187,37 @@ class T007_Form_Manager {
         "pointercancel",
         "dragleave",
         "dragend",
-      ].forEach((e) => el.addEventListener(e, stop));
+      ].forEach((e) => div.addEventListener(e, stop));
       (dir === "left" || dir === "up"
         ? parent.insertBefore
         : parent.appendChild
-      ).call(parent, el, container);
-      assist[dir] = el;
+      ).call(parent, div, el);
+      assist[dir] = div;
     };
     if (horizontal) ["left", "right"].forEach(addAssist);
     if (vertical) ["up", "down"].forEach(addAssist);
-    container.addEventListener("scroll", update);
-    t007FM._SCROLLER_R_OBSERVER.observe(container);
-    t007FM._SCROLLER_M_OBSERVER.observe(container, {
+    el.addEventListener("scroll", update);
+    t007FM._SCROLLER_R_OBSERVER.observe(el);
+    t007FM._SCROLLER_M_OBSERVER.observe(el, {
       childList: true,
       subtree: true,
       characterData: true,
     });
-    t007FM._SCROLLERS.set(container, {
+    t007FM._SCROLLERS.set(el, {
       update,
       destroy() {
         stop();
-        container.removeEventListener("scroll", update);
-        t007FM._SCROLLER_R_OBSERVER.unobserve(container);
-        t007FM._SCROLLERS.delete(container);
-        Object.values(assist).forEach((el) => el.remove());
+        el.removeEventListener("scroll", update);
+        t007FM._SCROLLER_R_OBSERVER.unobserve(el);
+        t007FM._SCROLLERS.delete(el);
+        Object.values(assist).forEach((a) => a.remove());
       },
     });
     update();
-    return t007FM._SCROLLERS.get(container);
+    return t007FM._SCROLLERS.get(el);
   }
-  static removeScrollAssist(container) {
-    t007FM._SCROLLERS.get(container)?.destroy();
+  static removeScrollAssist(el) {
+    t007FM._SCROLLERS.get(el)?.destroy();
   }
 
   static observeDOMForFields() {
