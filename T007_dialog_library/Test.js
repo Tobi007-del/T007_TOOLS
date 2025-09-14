@@ -29,7 +29,7 @@ window.playGame = async function() {
       userChoice?.toLowerCase?.() === "y" ||
       userChoice?.toUpperCase?.() === "YES"
     ) {
-      await log("🔥 There are five rounds!!! 🔥");
+      await log("🔥 There are three rounds!!! 🔥");
       await playGame();
     } else if (
       userChoice?.toLowerCase?.() === "n" ||
@@ -95,7 +95,7 @@ window.playGame = async function() {
         maxLength: 8,
       });
     }
-    for (let rounds = 1; rounds < 6; rounds++) {
+    for (let rounds = 1; rounds < 4; rounds++) {
       await log(`🎲 Round ${rounds} begins!`);
       await playRound(await getHumanChoice(), getComputerChoice());
     }
