@@ -858,25 +858,10 @@
 }
 
 .t007-input-field:has(
-    .t007-input[type="checkbox"],
-    .t007-input[type="radio"]
-  ).t007-input-error
-  :is(
-    .t007-input-checkbox-wrapper .t007-input-checkbox-box,
-    .t007-input-radio-wrapper .t007-input-radio-box
-  ) {
+    .t007-input:is([type="checkbox"], [type="radio"])[data-error]
+  )
+  :is(.t007-input-checkbox-box, .t007-input-radio-box) {
   border-color: var(--t007-input-error-color);
-}
-
-.t007-input-field:has(
-    .t007-input[type="checkbox"],
-    .t007-input[type="radio"]
-  ).t007-input-success
-  :is(
-    .t007-input-checkbox-wrapper .t007-input-checkbox-box,
-    .t007-input-radio-wrapper .t007-input-radio-box
-  ) {
-  border-color: var(--t007-input-success-color);
 }
 
 .t007-input-checkbox-tag,
@@ -920,9 +905,8 @@
   transition-timing-function: cubic-bezier(0.34, 1.64, 0.64, 1);
 }
 
-.t007-input-field:has(.t007-input[type="checkbox"]:checked)
-  .t007-input-checkbox-tag,
-.t007-input-field:has(.t007-input[type="radio"]:checked) .t007-input-radio-tag {
+.t007-input-field:has(.t007-input:is([type="radio"], [type="checkbox"]):checked)
+  :is(.t007-input-checkbox-tag, .t007-input-radio-tag) {
   opacity: 1;
   scale: 1;
 }
