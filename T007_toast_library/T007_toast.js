@@ -139,7 +139,7 @@ class T007_Toast {
    * @param {boolean | string} value
    */
   set autoClose(value) {
-    if (value === false) return;
+    if (value === false) return this.#toastElem.classList.remove("progress");
     if (value === true) {
       switch (this.options.type) {
         case "success":
@@ -256,11 +256,7 @@ class T007_Toast {
         this.handleToastPointerStart,
         { passive: false },
       );
-      this.#toastElem.addEventListener("pointerup", this.handleToastPointerEnd);
-      this.#toastElem.addEventListener(
-        "pointercancel",
-        this.handleToastPointerEnd,
-      );
+      this.#toastElem.addEventListener("pointerup", this.handleToastPointerUp);
     } else {
       this.#toastElem.removeEventListener(
         "pointerdown",
@@ -269,11 +265,7 @@ class T007_Toast {
       );
       this.#toastElem.removeEventListener(
         "pointerup",
-        this.handleToastPointerEnd,
-      );
-      this.#toastElem.addEventListener(
-        "pointercancel",
-        this.handleToastPointerEnd,
+        this.handleToastPointerUp,
       );
     }
   }
@@ -341,7 +333,7 @@ class T007_Toast {
   /**
    * @param {object} options
    */
-  handleToastPointerEnd(e) {
+  handleToastPointerUp(e) {
     if (
       typeof this.#pointerType === "string" &&
       e.pointerType !== this.#pointerType
@@ -374,7 +366,7 @@ class T007_Toast {
    * @param {boolean} value
    */
   set showProgress(value) {
-    this.#toastElem.classList.toggle("progress", value);
+    this.#toastElem.classList.toggle("progress", value && this.options.autoClose);
     this.#toastElem.style.setProperty("--progress", 1);
 
     if (value) {

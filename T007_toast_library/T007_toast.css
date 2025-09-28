@@ -231,26 +231,24 @@
   --t007-toast-type-color: var(--t007-toast-warning-color);
 }
 
-.t007-toast.progress::before {
+.t007-toast.progress::before,
+.t007-toast.progress::after { 
   content: "";
   position: absolute;
   bottom: 0;
   left: 0;
-  width: calc(100% - var(--progress) * 100%);
   height: var(--t007-toast-progress-height);
-  background: var(--t007-toast-progress-background);
   transition: width ease;
 }
 
-.t007-toast.progress::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
+.t007-toast.progress::before {
+  width: calc(100% - var(--progress) * 100%);
+  background: var(--t007-toast-progress-background);
+}
+
+.t007-toast.progress::after { 
   width: 100%;
-  height: var(--t007-toast-progress-height);
   background: var(--t007-toast-progress-backdrop-background);
-  transition: width ease;
 }
 
 .t007-toast:not(.has-icon)
