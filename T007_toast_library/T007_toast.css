@@ -52,7 +52,7 @@
   --t007-toast-container-flex-direction: column;
 }
 
-@keyframes xSlideBounceIn {
+@keyframes t007-x-slide-bounce-in {
   from {
     transform: translateX(var(--t-from));
   }
@@ -63,7 +63,7 @@
     transform: translateX(var(--t-to));
   }
 }
-@keyframes xSlideBounceOut {
+@keyframes t007-x-slide-bounce-out {
   from {
     transform: translateX(var(--t-to));
   }
@@ -74,7 +74,7 @@
     transform: translateX(var(--t-from));
   }
 }
-@keyframes ySlideBounceIn {
+@keyframes t007-y-slide-bounce-in {
   from {
     transform: translateY(var(--t-from));
   }
@@ -85,7 +85,7 @@
     transform: translateY(var(--t-to));
   }
 }
-@keyframes ySlideBounceOut {
+@keyframes t007-y-slide-bounce-out {
   from {
     transform: translateY(var(--t-to));
   }
@@ -178,19 +178,19 @@
   animation-timing-function: var(--t007-toast-animation-timing-function);
   animation-fill-mode: forwards;
   animation-duration: var(--t007-toast-animation-duration);
-  animation-name: xSlideBounceOut;
+  animation-name: t007-x-slide-bounce-out;
 }
 
 .t007-toast.t007-toast-show {
-  animation-name: xSlideBounceIn;
+  animation-name: t007-x-slide-bounce-in;
 }
 
 .t007-toast-container[data-position$="-center"] .t007-toast {
-  animation-name: ySlideBounceOut;
+  animation-name: t007-y-slide-bounce-out;
 }
 
 .t007-toast-container[data-position$="-center"] .t007-toast.t007-toast-show {
-  animation-name: ySlideBounceIn;
+  animation-name: t007-y-slide-bounce-in;
 }
 
 .t007-toast {
