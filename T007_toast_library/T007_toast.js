@@ -35,7 +35,7 @@ if (typeof window !== "undefined") {
     pauseOnHover: t007.TOAST_DEFAULT_OPTIONS?.pauseOnHover ?? true,
     pauseOnFocusLoss: t007.TOAST_DEFAULT_OPTIONS?.pauseOnFocusLoss ?? true,
     renotify: t007.TOAST_DEFAULT_OPTIONS?.renotify ?? true,
-    tag: t007.TOAST_DEFAULT_OPTIONS?.tag ?? true,
+    // tag: t007.TOAST_DEFAULT_OPTIONS?.tag ?? unique,
     vibrate: t007.TOAST_DEFAULT_OPTIONS?.vibrate ?? false,
   };
   t007.TOAST_DURATIONS = {
@@ -192,7 +192,8 @@ class T007_Toast {
       if (!this.#isPaused) {
         this.#timeVisible += time - lastTime;
         this.onTimeUpdate?.(this.#timeVisible);
-        if (this.#timeVisible >= this.#autoClose) return this.remove("smooth");
+        if (this.#timeVisible >= this.#autoClose)
+          return this.remove("smooth", true);
       }
 
       lastTime = time;
@@ -260,9 +261,8 @@ class T007_Toast {
       </span>
       <button title="Close" type="button" class="t007-toast-cancel-button">&times;</button> 
     `;
-    this.toastElement
-      .querySelector(".t007-toast-cancel-button")
-      .addEventListener("click", this.remove);
+    this.toastElement.querySelector(".t007-toast-cancel-button").onclick = () =>
+      this.remove();
   }
 
   /**
@@ -276,9 +276,7 @@ class T007_Toast {
    * @param {boolean} value
    */
   set closeOnClick(value) {
-    value
-      ? this.toastElement.addEventListener("click", this.remove)
-      : this.toastElement.removeEventListener("click", this.remove);
+    this.toastElement.onclick = value ? () => this.remove() : null;
   }
 
   /**
@@ -320,7 +318,14 @@ class T007_Toast {
       return;
     if (e.touches?.length > 1) return;
     e.stopImmediatePropagation();
-    this.toastElement.setPointerCapture(e.pointerId);
+    !e.target.matches(
+      "button",
+      "[href]",
+      "input",
+      "select",
+      "textarea",
+      '[tabindex]:not([tabindex="-1"])'
+    ) && this.toastElement.setPointerCapture(e.pointerId);
     this.#pointerStartX = this.dragToCloseDir.includes("x")
       ? e.clientX ?? e.targetTouches[0]?.clientX
       : 0;
@@ -504,7 +509,7 @@ class T007_Toast {
     container?.remove();
   }
 
-  remove(manner = "smooth") {
+  remove(manner = "smooth", timeElapsed = false) {
     cancelAnimationFrame(this.#autoCloseInterval);
     cancelAnimationFrame(this.#progressInterval);
     if (manner === "instant") this.cleanUpToast();
@@ -513,7 +518,7 @@ class T007_Toast {
         this.cleanUpToast()
       );
     this.toastElement.classList.remove("t007-toast-show");
-    this.onClose?.(manner === "smooth");
+    this.onClose?.(timeElapsed);
     _ACTIVE_TOASTS = _ACTIVE_TOASTS.filter((toast) => toast !== this);
   }
 }
