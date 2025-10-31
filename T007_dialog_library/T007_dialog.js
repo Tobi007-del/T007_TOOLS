@@ -1,26 +1,29 @@
+if (window) window.t007 ??= {};
+
 export function Alert(message, options) {
   return new Promise(
-    (resolve) => new t007AlertDialog({ message, resolve, options })
+    (resolve) => new T007_Alert_Dialog({ message, resolve, options })
   );
 }
 
 export function Confirm(question, options) {
   return new Promise(
-    (resolve) => new t007ConfirmDialog({ question, resolve, options })
+    (resolve) => new T007_Confirm_Dialog({ question, resolve, options })
   );
 }
 
 export function Prompt(question, defaultValue, options) {
   return new Promise(
     (resolve) =>
-      new t007PromptDialog({ question, defaultValue, resolve, options })
+      new T007_Prompt_Dialog({ question, defaultValue, resolve, options })
   );
 }
 
 if (typeof window !== "undefined") {
-  window.Alert = Alert;
-  window.Confirm = Confirm;
-  window.Prompt = Prompt;
+  window.Alert ??= t007.alert = Alert;
+  window.Confirm ??= t007.confirm = Confirm;
+  window.Prompt ??= t007.prompt = Prompt;
+  window.T007_DIALOG_CSS_SRC ??= `/T007_TOOLS/T007_dialog_library/T007_dialog.css`;
   console.log("%cT007 Dialogs attached to window!", "color: green");
 }
 
@@ -33,17 +36,14 @@ function loadResource(src, type = "style", options = {}) {
     integrity = null,
   } = options;
   if (_RESOURCE_CACHE[src]) return _RESOURCE_CACHE[src];
-  const isLoaded = (() => {
-    if (type === "script") {
-      return Array.from(document.scripts)?.some((s) => s.src?.includes(src));
-    } else if (type === "style") {
-      return Array.from(document.styleSheets)?.some((s) =>
-        s.href?.includes(src)
-      );
-    }
-    return false;
-  })();
-  if (isLoaded) return Promise.resolve(null);
+  if (
+    type === "script"
+      ? [...document.scripts].some((s) => s.src?.includes(src))
+      : type === "style"
+      ? [...document.styleSheets].some((s) => s.href?.includes(src))
+      : false
+  )
+    return Promise.resolve(null);
   _RESOURCE_CACHE[src] = new Promise((resolve, reject) => {
     if (type === "script") {
       const script = document.createElement("script");
@@ -68,12 +68,9 @@ function loadResource(src, type = "style", options = {}) {
   });
   return _RESOURCE_CACHE[src];
 }
-loadResource(
-  window.T007_DIALOG_CSS_SRC ||
-    `/T007_TOOLS/T007_dialog_library/T007_dialog.css`
-);
+loadResource(T007_DIALOG_CSS_SRC);
 
-class dialog {
+class T007_Dialog {
   dialog;
   confirmBtn;
   cancelBtn;
@@ -124,7 +121,7 @@ class dialog {
   }
 }
 
-class t007AlertDialog extends dialog {
+class T007_Alert_Dialog extends T007_Dialog {
   constructor({ message, resolve, options }) {
     super(resolve);
     this.render(message, options);
@@ -147,7 +144,7 @@ class t007AlertDialog extends dialog {
   }
 }
 
-class t007ConfirmDialog extends dialog {
+class T007_Confirm_Dialog extends T007_Dialog {
   constructor({ question, resolve, options }) {
     super(resolve);
     this.render(question, options);
@@ -175,7 +172,7 @@ class t007ConfirmDialog extends dialog {
   }
 }
 
-class t007PromptDialog extends dialog {
+class T007_Prompt_Dialog extends T007_Dialog {
   constructor({ question, defaultValue, resolve, options }) {
     super(resolve);
     this.render(question, defaultValue, options);

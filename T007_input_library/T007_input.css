@@ -17,8 +17,6 @@
   --t007-input-focused-border-style: var(--t007-input-border-style);
   --t007-input-icon-width: unset;
   --t007-input-icon-height: unset;
-  --t007-input-icon-fill: var(--t007-input-color);
-  --t007-input-icon-stroke: unset;
   --t007-input-disabled-opacity: 0.6;
   --t007-input-p-meter-font-size: 0.75rem;
   --t007-input-p-meter-gap: 0.25rem;
@@ -83,6 +81,9 @@
   --t007-input-autofill-background-color: var(
     --t007-input-base-background-color
   );
+  /* icon */
+  --t007-input-icon-fill: var(--t007-input-color);
+  --t007-input-icon-stroke: unset;
 }
 
 /* checkbox input state variables */
@@ -114,9 +115,9 @@
 }
 
 .t007-input-field,
-.t007-input-field *,
-.t007-input-field *::after,
-.t007-input-field *::before {
+.t007-input-field *[class^="t007-input"],
+.t007-input-field *[class^="t007-input"]::after,
+.t007-input-field *[class^="t007-input"]::before {
   box-sizing: border-box;
   font-family: var(--t007-input-font-family);
   transition-property: transform, filter, background-color, color, border, right,
