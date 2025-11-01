@@ -1,19 +1,5 @@
 export function formatHTML(html, indentSize = 4) {
-  const voidTags = new Set([
-    "area",
-    "base",
-    "br",
-    "col",
-    "embed",
-    "hr",
-    "img",
-    "input",
-    "link",
-    "meta",
-    "source",
-    "track",
-    "wbr",
-  ]);
+  const voidTags = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"]);
   const indent = (level) => " ".repeat(level * indentSize);
   const formatted = [];
   const stack = [];
@@ -46,50 +32,31 @@ export function formatHTML(html, indentSize = 4) {
 }
 
 export function highlightHTML(html) {
-  const escape = (str) =>
-    str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const escape = (str) => str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   html = escape(html);
-  html = html.replace(
-    /(?<=&lt;style[^&]*&gt;)(?<styleContent>[\s\S]*?)(?=&lt;\/style&gt;)|(?<=&lt;script[^&]*&gt;)(?<scriptContent>[\s\S]*?)(?=&lt;\/script&gt;)|(?<comment>&lt;!--[\s\S]*?--&gt;)|(?<tag>&lt;\/?[^\s&]+)|(?<attr>[\w-:]+)(?<eq>=)(?<val>\"[^\"]*\"|\'[^\']*\')|(?<closetag>\/?&gt;)/g,
-    (match, ...args) => {
-      const groups = args.at(-1);
-      if (groups.styleContent) 
-        return highlightCSS(groups.styleContent);
-       else if (groups.scriptContent) 
-        return highlightJS(groups.scriptContent);
-       else if (groups.comment) 
-        return `<span class="token comment">${groups.comment}</span>`;
-       else if (groups.tag) 
-        return `<span class="token tag">${groups.tag}</span>`;
-       else if (groups.attr && groups.eq && groups.val) 
-        return `<span class="token attr">${groups.attr}</span><span class="token eq">${groups.eq}</span><span class="token value">${groups.val}</span>`;
-       else if (groups.closetag) 
-        return `<span class="token tag">${groups.closetag}</span>`;
-      return match;
-    }
-  );
+  html = html.replace(/(?<=&lt;style[^&]*&gt;)(?<styleContent>[\s\S]*?)(?=&lt;\/style&gt;)|(?<=&lt;script[^&]*&gt;)(?<scriptContent>[\s\S]*?)(?=&lt;\/script&gt;)|(?<comment>&lt;!--[\s\S]*?--&gt;)|(?<tag>&lt;\/?[^\s&]+)|(?<attr>[\w-:]+)(?<eq>=)(?<val>\"[^\"]*\"|\'[^\']*\')|(?<closetag>\/?&gt;)/g, (match, ...args) => {
+    const groups = args.at(-1);
+    if (groups.styleContent) return highlightCSS(groups.styleContent);
+    else if (groups.scriptContent) return highlightJS(groups.scriptContent);
+    else if (groups.comment) return `<span class="token comment">${groups.comment}</span>`;
+    else if (groups.tag) return `<span class="token tag">${groups.tag}</span>`;
+    else if (groups.attr && groups.eq && groups.val) return `<span class="token attr">${groups.attr}</span><span class="token eq">${groups.eq}</span><span class="token value">${groups.val}</span>`;
+    else if (groups.closetag) return `<span class="token tag">${groups.closetag}</span>`;
+    return match;
+  });
   return html;
 }
 
 export function highlightJSON(json) {
-  return json.replace(
-    /(?<key>"[^"]+")(?=\s*:)|(?<string>"[^"]*")|(?<number>\b\d+(\.\d+)?\b)|(?<boolnull>\btrue\b|\bfalse\b|\bnull\b)|(?<emptyArray>\[\])|(?<emptyObject>\{\})|(?<bracket>[{}\[\]])/g,
-    (match, ...args) => {
-      const groups = args.at(-1);
-      if (groups.key) return `<span class="token key">${groups.key}</span>`;
-      else if (groups.string)
-        return `<span class="token string">${groups.string}</span>`;
-      else if (groups.number)
-        return `<span class="token number">${groups.number}</span>`;
-      else if (groups.boolnull)
-        return `<span class="token boolean">${groups.boolnull}</span>`;
-      else if (groups.emptyArray)
-        return `<span class="token array">${groups.emptyArray}</span>`;
-      else if (groups.emptyObject)
-        return `<span class="token object">${groups.emptyObject}</span>`;
-      else if (groups.bracket)
-        return `<span class="token bracket">${groups.bracket}</span>`;
-      return match;
-    }
-  );
+  return json.replace(/(?<key>"[^"]+")(?=\s*:)|(?<string>"[^"]*")|(?<number>\b\d+(\.\d+)?\b)|(?<boolnull>\btrue\b|\bfalse\b|\bnull\b)|(?<emptyArray>\[\])|(?<emptyObject>\{\})|(?<bracket>[{}\[\]])/g, (match, ...args) => {
+    const groups = args.at(-1);
+    if (groups.key) return `<span class="token key">${groups.key}</span>`;
+    else if (groups.string) return `<span class="token string">${groups.string}</span>`;
+    else if (groups.number) return `<span class="token number">${groups.number}</span>`;
+    else if (groups.boolnull) return `<span class="token boolean">${groups.boolnull}</span>`;
+    else if (groups.emptyArray) return `<span class="token array">${groups.emptyArray}</span>`;
+    else if (groups.emptyObject) return `<span class="token object">${groups.emptyObject}</span>`;
+    else if (groups.bracket) return `<span class="token bracket">${groups.bracket}</span>`;
+    return match;
+  });
 }

@@ -1,9 +1,5 @@
 import { Confirm, Prompt } from "../T007_dialog_library/T007_dialog.js";
-import {
-  formatHTML,
-  highlightHTML,
-  highlightJSON,
-} from "../T007_input_library/T007_code_formatter.js";
+import { formatHTML, highlightHTML, highlightJSON } from "../T007_input_library/T007_code_formatter.js";
 import Toast from "../T007_toast_library/T007_toast.js";
 
 window.onload = () =>
@@ -23,14 +19,8 @@ document.querySelectorAll(".draggable").forEach((item) => {
   });
 });
 
-dropZone.addEventListener(
-  "dragenter",
-  () => draggedType && dropZone.classList.add("dragover"),
-);
-dropZone.addEventListener(
-  "dragleave",
-  () => draggedType && dropZone.classList.add("dragover"),
-);
+dropZone.addEventListener("dragenter", () => draggedType && dropZone.classList.add("dragover"));
+dropZone.addEventListener("dragleave", () => draggedType && dropZone.classList.add("dragover"));
 dropZone.addEventListener("dragover", (e) => e.preventDefault());
 
 dropZone.addEventListener("drop", async (e) => {
@@ -38,25 +28,15 @@ dropZone.addEventListener("drop", async (e) => {
   if (!draggedType) return;
   dropZone.classList.remove("dragover");
 
-  const label = await Prompt(
-    "Enter label for this field:",
-    draggedType.charAt(0).toUpperCase() + draggedType.slice(1),
-  );
+  const label = await Prompt("Enter label for this field:", draggedType.charAt(0).toUpperCase() + draggedType.slice(1));
   if (!label) return (draggedType = null);
 
   const required = await Confirm("Make this field required?");
-  let placeholder = ["textarea", "text", "email", "password"].includes(
-    draggedType,
-  )
-    ? await Prompt("Enter placeholder (optional):", "")
-    : "";
+  let placeholder = ["textarea", "text", "email", "password"].includes(draggedType) ? await Prompt("Enter placeholder (optional):", "") : "";
 
   let options = [];
   if (["select", "radio", "checkbox"].includes(draggedType)) {
-    const opts = await Prompt(
-      "Enter comma-separated options:",
-      "Option 1,Option 2,Option 3",
-    );
+    const opts = await Prompt("Enter comma-separated options:", "Option 1,Option 2,Option 3");
     if (!opts) return;
     options = opts
       .split(",")
@@ -65,25 +45,13 @@ dropZone.addEventListener("drop", async (e) => {
     if (options.length === 0) return;
   }
 
-  const fieldEl = createFieldElement(
-    draggedType,
-    label,
-    required,
-    placeholder,
-    options,
-  );
+  const fieldEl = createFieldElement(draggedType, label, required, placeholder, options);
   addDragReorderHandlers(fieldEl);
   dropZone.appendChild(fieldEl);
   draggedType = null;
 });
 
-function createFieldElement(
-  type,
-  labelText,
-  required,
-  placeholder = "",
-  options = [],
-) {
+function createFieldElement(type, labelText, required, placeholder = "", options = []) {
   const id = `field-${Date.now()}`;
   const div = document.createElement("div");
   div.className = "form-field";
@@ -146,23 +114,15 @@ window.editField = async function editField(id) {
   let placeholder = "";
   if (["text", "email", "password", "textarea"].includes(type)) {
     const input = field.querySelector("input, textarea");
-    placeholder = await Prompt(
-      "Edit placeholder (optional):",
-      input.placeholder || "",
-    );
+    placeholder = await Prompt("Edit placeholder (optional):", input.placeholder || "");
     input.placeholder = placeholder;
   }
 
   const required = await Confirm("Should this field be required?");
 
   if (["select", "radio", "checkbox"].includes(type)) {
-    const currentOptions = Array.from(
-      field.querySelectorAll("option,input"),
-    ).map((el) => el.value || el.textContent);
-    const newOptions = await Prompt(
-      "Edit options (comma-separated):",
-      currentOptions.join(", "),
-    );
+    const currentOptions = Array.from(field.querySelectorAll("option,input")).map((el) => el.value || el.textContent);
+    const newOptions = await Prompt("Edit options (comma-separated):", currentOptions.join(", "));
     if (newOptions) {
       const options = newOptions
         .split(",")
@@ -218,13 +178,7 @@ window.cloneField = function cloneField(id) {
     options = [...inputs].map((i) => i.value).filter(Boolean);
   }
 
-  const cloned = createFieldElement(
-    type,
-    label,
-    isRequired,
-    placeholder,
-    options,
-  );
+  const cloned = createFieldElement(type, label, isRequired, placeholder, options);
   addDragReorderHandlers(cloned);
   dropZone.insertBefore(cloned, field.nextSibling);
 };
@@ -234,10 +188,7 @@ window.toggleCollapse = function toggleCollapse(btn) {
   const label = field.querySelector("label");
   const preview = field.querySelector(".field-preview");
 
-  const contentEls = [...field.children].filter(
-    (el) =>
-      !el.classList.contains("form-actions") && el !== label && el !== preview,
-  );
+  const contentEls = [...field.children].filter((el) => !el.classList.contains("form-actions") && el !== label && el !== preview);
 
   const collapsed = btn.textContent === "⬇️";
   contentEls.forEach((el) => (el.style.display = collapsed ? "" : "none"));
@@ -286,14 +237,7 @@ function getFieldsData() {
       label: field.querySelector("label").textContent,
       required: field.querySelector("[required]") !== null,
       placeholder: field.querySelector("input, textarea")?.placeholder || "",
-      options:
-        field.dataset.type === "select"
-          ? Array.from(field.querySelectorAll("option")).map(
-              (opt) => opt.textContent,
-            )
-          : Array.from(
-              field.querySelectorAll("input[type=radio], input[type=checkbox]"),
-            ).map((input) => input.value),
+      options: field.dataset.type === "select" ? Array.from(field.querySelectorAll("option")).map((opt) => opt.textContent) : Array.from(field.querySelectorAll("input[type=radio], input[type=checkbox]")).map((input) => input.value),
       collapsed: field.dataset.collapsed === "true",
     };
   });
@@ -326,13 +270,7 @@ window.loadFromLocal = function loadFromLocal() {
   const fields = JSON.parse(json);
   dropZone.innerHTML = "";
   fields.forEach((f) => {
-    const el = createFieldElement(
-      f.type,
-      f.label,
-      f.required,
-      f.placeholder || "",
-      f.options || [],
-    );
+    const el = createFieldElement(f.type, f.label, f.required, f.placeholder || "", f.options || []);
     addDragReorderHandlers(el);
     addAutoSaveListeners(el);
     dropZone.appendChild(el);
@@ -378,9 +316,7 @@ dropZone.addEventListener("dragover", (e) => {
 });
 
 function getDragAfterElement(container, y) {
-  const draggableElements = [
-    ...container.querySelectorAll(".form-field:not(.dragging)"),
-  ];
+  const draggableElements = [...container.querySelectorAll(".form-field:not(.dragging)")];
   return draggableElements.reduce(
     (closest, child) => {
       const box = child.getBoundingClientRect();
@@ -391,7 +327,7 @@ function getDragAfterElement(container, y) {
         return closest;
       }
     },
-    { offset: Number.NEGATIVE_INFINITY },
+    { offset: Number.NEGATIVE_INFINITY }
   ).element;
 }
 

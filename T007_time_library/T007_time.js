@@ -30,21 +30,11 @@
     }
 
     fullDate() {
-      return (
-        "(" +
-        this.now() +
-        ") " +
-        this.month() +
-        "/" +
-        this.day() +
-        "/" +
-        this.year()
-      );
+      return "(" + this.now() + ") " + this.month() + "/" + this.day() + "/" + this.year();
     }
 
     error(keyword) {
-      if (keyword === "" || keyword === null || keyword === undefined)
-        return "Please enter a keyword";
+      if (keyword === "" || keyword === null || keyword === undefined) return "Please enter a keyword";
       else return `${keyword} is an invalid keyword`;
     }
   }

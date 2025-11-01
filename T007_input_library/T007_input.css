@@ -6,9 +6,7 @@
   --t007-input-padding: 0.75rem;
   --t007-input-font-size: 1rem;
   --t007-input-floating-label-scale: 0.75;
-  --t007-input-floating-label-font-size: calc(
-    var(--t007-input-font-size) * var(--t007-input-floating-label-scale)
-  );
+  --t007-input-floating-label-font-size: calc(var(--t007-input-font-size) * var(--t007-input-floating-label-scale));
   --t007-input-helper-font-size: 0.7rem;
   --t007-input-border-width: 1px;
   --t007-input-focused-border-width: 2px;
@@ -27,9 +25,7 @@
   --t007-input-p-meter-color-strong: #0a8b1e;
   --t007-input-p-meter-color-very-strong: #39ff14;
   --t007-input-ripple-size: 250%;
-  --t007-input-ripple-color: rgb(
-    from var(--t007-input-checkbox-checked-background) r g b/0.15
-  );
+  --t007-input-ripple-color: rgb(from var(--t007-input-checkbox-checked-background) r g b/0.15);
 }
 
 /* general input state variables */
@@ -43,9 +39,7 @@
   --t007-input-error-color: #d32f2f;
   --t007-input-disabled-color: gray;
   /* label */
-  --t007-input-base-label-color: rgb(
-    from var(--t007-input-base-color) r g b/0.95
-  );
+  --t007-input-base-label-color: rgb(from var(--t007-input-base-color) r g b/0.95);
   --t007-input-hover-label-color: var(--t007-input-base-label-color);
   --t007-input-focused-label-color: var(--t007-input-focused-color);
   --t007-input-filled-label-color: var(--t007-input-base-label-color);
@@ -61,26 +55,18 @@
   /* helper */
   --t007-input-base-helper-color: rgb(from var(--t007-input-color) r g b/0.8);
   --t007-input-hover-helper-color: var(--t007-input-base-helper-color);
-  --t007-input-focused-helper-color: rgb(
-    from var(--t007-input-color) r g b/0.9
-  );
+  --t007-input-focused-helper-color: rgb(from var(--t007-input-color) r g b/0.9);
   --t007-input-filled-helper-color: var(--t007-input-filled-color);
   --t007-input-error-helper-color: var(--t007-input-error-color);
   --t007-input-disabled-helper-color: var(--t007-input-disabled-color);
   /* background */
   --t007-input-base-background-color: transparent;
   --t007-input-hover-background-color: var(--t007-input-base-background-color);
-  --t007-input-focused-background-color: var(
-    --t007-input-base-background-color
-  );
+  --t007-input-focused-background-color: var(--t007-input-base-background-color);
   --t007-input-filled-background-color: var(--t007-input-base-background-color);
   --t007-input-error-background-color: var(--t007-input-base-background-color);
-  --t007-input-disabled-background-color: var(
-    --t007-input-base-background-color
-  );
-  --t007-input-autofill-background-color: var(
-    --t007-input-base-background-color
-  );
+  --t007-input-disabled-background-color: var(--t007-input-base-background-color);
+  --t007-input-autofill-background-color: var(--t007-input-base-background-color);
   /* icon */
   --t007-input-icon-fill: var(--t007-input-color);
   --t007-input-icon-stroke: unset;
@@ -120,8 +106,7 @@
 .t007-input-field *[class^="t007-input"]::before {
   box-sizing: border-box;
   font-family: var(--t007-input-font-family);
-  transition-property: transform, filter, background-color, color, border, right,
-    left, top, bottom, width, height, font-size, scale;
+  transition-property: transform, filter, background-color, color, border, right, left, top, bottom, width, height, font-size, scale;
   transition-duration: 150ms;
   transition-timing-function: ease;
 }
@@ -131,9 +116,7 @@
   --t007-input-current-label-color: var(--t007-input-base-label-color);
   --t007-input-current-value-color: var(--t007-input-base-value-color);
   --t007-input-current-helper-color: var(--t007-input-base-helper-color);
-  --t007-input-current-background-color: var(
-    --t007-input-base-background-color
-  );
+  --t007-input-current-background-color: var(--t007-input-base-background-color);
   width: var(--t007-input-width);
   max-width: 100%;
   padding-top: calc((var(--t007-input-floating-label-font-size) * 1.3) * 0.5);
@@ -141,36 +124,14 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.t007-input-field:where(.t007-input-is-wrapper):where(
-    :has([contenteditable="true"]:not(:empty)):not(
-        :has([contenteditable="true"] > br:only-child)
-      ):not(:has([contenteditable="true"] > :only-child > br:only-child))
-  ),
-.t007-input-field:where(.t007-input-is-wrapper):where(
-    :has([data-wrapper-filled], [contenteditable="true"][data-filled])
-  ),
-.t007-input-field:where(
-    :has(
-        .t007-input:is(
-            [data-filled],
-            :-webkit-autofill,
-            :not(:placeholder-shown):where(
-                :not(select):not([type="date"]):not([type="time"]):not(
-                    [type="datetime-local"]
-                  ):not([type="month"]):not([type="week"]):not(
-                    [type="color"]
-                  ):not([type="range"]):not([type="file"])
-              )
-          )
-      )
-  ) {
+.t007-input-field:where(.t007-input-is-wrapper):where(:has([contenteditable="true"]:not(:empty)):not(:has([contenteditable="true"] > br:only-child)):not(:has([contenteditable="true"] > :only-child > br:only-child))),
+.t007-input-field:where(.t007-input-is-wrapper):where(:has([data-wrapper-filled], [contenteditable="true"][data-filled])),
+.t007-input-field:where(:has(.t007-input:is([data-filled], :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"]))))) {
   --t007-input-current-color: var(--t007-input-filled-color);
   --t007-input-current-label-color: var(--t007-input-filled-label-color);
   --t007-input-current-value-color: var(--t007-input-filled-value-color);
   --t007-input-current-helper-color: var(--t007-input-filled-helper-color);
-  --t007-input-current-background-color: var(
-    --t007-input-filled-background-color
-  );
+  --t007-input-current-background-color: var(--t007-input-filled-background-color);
 }
 
 .t007-input-field:where(:hover) {
@@ -178,35 +139,25 @@
   --t007-input-current-label-color: var(--t007-input-hover-label-color);
   --t007-input-current-value-color: var(--t007-input-hover-value-color);
   --t007-input-current-helper-color: var(--t007-input-hover-helper-color);
-  --t007-input-current-background-color: var(
-    --t007-input-hover-background-color
-  );
+  --t007-input-current-background-color: var(--t007-input-hover-background-color);
 }
 
-.t007-input-field:where(.t007-input-is-wrapper):where(
-    :has([data-wrapper-focused], [contenteditable="true"]:focus)
-  ),
+.t007-input-field:where(.t007-input-is-wrapper):where(:has([data-wrapper-focused], [contenteditable="true"]:focus)),
 .t007-input-field:where(:has(.t007-input:focus)) {
   --t007-input-current-color: var(--t007-input-focused-color);
   --t007-input-current-label-color: var(--t007-input-focused-label-color);
   --t007-input-current-value-color: var(--t007-input-focused-value-color);
   --t007-input-current-helper-color: var(--t007-input-focused-helper-color);
-  --t007-input-current-background-color: var(
-    --t007-input-focused-background-color
-  );
+  --t007-input-current-background-color: var(--t007-input-focused-background-color);
 }
 
-.t007-input-field:where(.t007-input-is-wrapper):where(
-    :has([data-wrapper-error], [contenteditable="true"][data-error])
-  ),
+.t007-input-field:where(.t007-input-is-wrapper):where(:has([data-wrapper-error], [contenteditable="true"][data-error])),
 .t007-input-field:where(:has(.t007-input[data-error])) {
   --t007-input-current-color: var(--t007-input-error-color);
   --t007-input-current-label-color: var(--t007-input-error-label-color);
   --t007-input-current-value-color: var(--t007-input-error-value-color);
   --t007-input-current-helper-color: var(--t007-input-error-helper-color);
-  --t007-input-current-background-color: var(
-    --t007-input-error-background-color
-  );
+  --t007-input-current-background-color: var(--t007-input-error-background-color);
 }
 
 .t007-input-field:has(.t007-input:disabled) {
@@ -214,25 +165,16 @@
   --t007-input-current-label-color: var(--t007-input-disabled-label-color);
   --t007-input-current-value-color: var(--t007-input-disabled-value-color);
   --t007-input-current-helper-color: var(--t007-input-disabled-helper-color);
-  --t007-input-current-background-color: var(
-    --t007-input-disabled-background-color
-  );
+  --t007-input-current-background-color: var(--t007-input-disabled-background-color);
   opacity: var(--t007-input-disabled-opacity);
   cursor: not-allowed;
 }
 
 .t007-input-field:has(.t007-input:-webkit-autofill) {
-  --t007-input-current-background-color: var(
-    --t007-input-autofill-background-color
-  );
+  --t007-input-current-background-color: var(--t007-input-autofill-background-color);
 }
 
-.t007-input-field:where(
-    .t007-input-no-helper:has(
-        .t007-input[type="checkbox"],
-        .t007-input[type="radio"]
-      )
-  ) {
+.t007-input-field:where(.t007-input-no-helper:has(.t007-input[type="checkbox"], .t007-input[type="radio"])) {
   display: contents;
 }
 
@@ -289,12 +231,7 @@
   pointer-events: none;
 }
 
-.t007-input-field.t007-input-is-wrapper:has(
-    [data-wrapper-focused],
-    [contenteditable="true"]:focus
-  )
-  .t007-input-outline
-  > *,
+.t007-input-field.t007-input-is-wrapper:has([data-wrapper-focused], [contenteditable="true"]:focus) .t007-input-outline > *,
 .t007-input-field:has(.t007-input:focus) .t007-input-outline > * {
   border-width: var(--t007-input-focused-border-width);
   border-style: var(--t007-input-focused-border-style);
@@ -326,8 +263,7 @@
   max-width: calc(100% - 0.75rem);
   border-left: none !important;
   border-right: none !important;
-  transition-property: border-bottom, transform, filter, background-color, color,
-    right, left, top, bottom, width, height, font-size, scale;
+  transition-property: border-bottom, transform, filter, background-color, color, right, left, top, bottom, width, height, font-size, scale;
 }
 
 .t007-input-field:has(.t007-input-icon) .t007-input-outline-notch {
@@ -335,36 +271,8 @@
 }
 
 .t007-input-field.t007-input-is-wrapper .t007-input-outline-notch,
-.t007-input-field:has(
-    .t007-input:is(
-        [data-filled],
-        :focus,
-        :-webkit-autofill,
-        :not(:placeholder-shown):where(
-            :not(select):not([type="date"]):not([type="time"]):not(
-                [type="datetime-local"]
-              ):not([type="month"]):not([type="week"]):not([type="color"]):not(
-                [type="range"]
-              ):not([type="file"])
-          )
-      )
-  )
-  .t007-input-outline-notch,
-.t007-input-field:has(
-    .t007-input:is(
-        select,
-        :not([placeholder=""]),
-        [type="date"],
-        [type="time"],
-        [type="datetime-local"],
-        [type="month"],
-        [type="week"],
-        [type="color"],
-        [type="range"],
-        [type="file"]
-      )
-  )
-  .t007-input-outline-notch {
+.t007-input-field:has(.t007-input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .t007-input-outline-notch,
+.t007-input-field:has(.t007-input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .t007-input-outline-notch {
   border-top: none !important;
 }
 
@@ -391,85 +299,19 @@
 }
 
 .t007-input-field.t007-input-is-wrapper .t007-input-floating-label,
-.t007-input-field:has(
-    .t007-input:is(
-        [data-filled],
-        :focus,
-        :-webkit-autofill,
-        :not(:placeholder-shown):where(
-            :not(select):not([type="date"]):not([type="time"]):not(
-                [type="datetime-local"]
-              ):not([type="month"]):not([type="week"]):not([type="color"]):not(
-                [type="range"]
-              ):not([type="file"])
-          )
-      )
-  )
-  .t007-input-floating-label,
-.t007-input-field:has(
-    .t007-input:is(
-        select,
-        :not([placeholder=""]),
-        [type="date"],
-        [type="time"],
-        [type="datetime-local"],
-        [type="month"],
-        [type="week"],
-        [type="color"],
-        [type="range"],
-        [type="file"]
-      )
-  )
-  .t007-input-floating-label {
-  transform: translateY(
-    calc(
-      -1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2))
-    )
-  );
+.t007-input-field:has(.t007-input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .t007-input-floating-label,
+.t007-input-field:has(.t007-input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .t007-input-floating-label {
+  transform: translateY(calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2))));
   font-size: var(--t007-input-floating-label-font-size);
   opacity: 1;
   right: auto;
   max-width: 133%;
 }
 
-.t007-input-field.t007-input-is-wrapper
-  .t007-input-floating-label.t007-input-shake,
-.t007-input-field:has(
-    .t007-input:is(
-        [data-filled],
-        :focus,
-        :-webkit-autofill,
-        :not(:placeholder-shown):where(
-            :not(select):not([type="date"]):not([type="time"]):not(
-                [type="datetime-local"]
-              ):not([type="month"]):not([type="week"]):not([type="color"]):not(
-                [type="range"]
-              ):not([type="file"])
-          )
-      )
-  )
-  .t007-input-floating-label.t007-input-shake,
-.t007-input-field:has(
-    .t007-input:is(
-        select,
-        :not([placeholder=""]),
-        [type="date"],
-        [type="time"],
-        [type="datetime-local"],
-        [type="month"],
-        [type="week"],
-        [type="color"],
-        [type="range"],
-        [type="file"]
-      )
-  )
-  .t007-input-floating-label.t007-input-shake {
-  transform: translateY(
-      calc(
-        -1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2))
-      )
-    )
-    translateX(0.25rem);
+.t007-input-field.t007-input-is-wrapper .t007-input-floating-label.t007-input-shake,
+.t007-input-field:has(.t007-input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .t007-input-floating-label.t007-input-shake,
+.t007-input-field:has(.t007-input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .t007-input-floating-label.t007-input-shake {
+  transform: translateY(calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2)))) translateX(0.25rem);
 }
 
 .t007-input {
@@ -519,16 +361,9 @@
 
 .t007-input-field:has(.t007-input[type="file"]) {
   /* computed values for the selector button */
-  --t007-input-sb-active-margin: calc(
-    (var(--t007-input-floating-label-font-size) * 1.3) / 2
-  );
+  --t007-input-sb-active-margin: calc((var(--t007-input-floating-label-font-size) * 1.3) / 2);
   --t007-input-sb-padding-inline: calc(var(--t007-input-font-size) / 3.5);
-  --t007-input-sb-padding-block: calc(
-    (
-        (var(--t007-input-height) / 2) -
-          ((var(--t007-input-font-size) / 1.25) / 2)
-      ) - ((var(--t007-input-floating-label-font-size) * 1.3) / 2) - 1px
-  );
+  --t007-input-sb-padding-block: calc(((var(--t007-input-height) / 2) - ((var(--t007-input-font-size) / 1.25) / 2)) - ((var(--t007-input-floating-label-font-size) * 1.3) / 2) - 1px);
 }
 
 .t007-input-wrapper:has(.t007-input[type="file"]) {
@@ -557,18 +392,15 @@
   border-width: 1px;
 }
 
-:where(.t007-input[type="file"])::file-selector-button:where(
-    :hover,
-    :focus-visible
-  ) {
+:where(.t007-input[type="file"])::file-selector-button:where(:hover, :focus-visible) {
   filter: brightness(80%);
 }
 
-:where(
-    .t007-input[type="file"].t007-input-image-selected
-  )::file-selector-button {
-  background: center/contain no-repeat var(--t007-input-image-src),
-    linear-gradient(black, black), black;
+:where(.t007-input[type="file"].t007-input-image-selected)::file-selector-button {
+  background:
+    center/contain no-repeat var(--t007-input-image-src),
+    linear-gradient(black, black),
+    black;
   color: transparent;
   padding-block: var(--t007-input-sb-padding-block);
   border: none;
@@ -579,8 +411,7 @@
   -webkit-text-fill-color: var(--t007-input-current-value-color) !important;
 }
 
-.t007-input-field.t007-input-icon-override
-  input::-webkit-calendar-picker-indicator {
+.t007-input-field.t007-input-icon-override input::-webkit-calendar-picker-indicator {
   opacity: 0;
 }
 
@@ -597,10 +428,7 @@
   pointer-events: none;
 }
 
-.t007-input-icon:is(
-    .t007-input-password-hidden-icon,
-    .t007-input-password-visible-icon
-  ) {
+.t007-input-icon:is(.t007-input-password-hidden-icon, .t007-input-password-visible-icon) {
   pointer-events: all;
 }
 
@@ -655,12 +483,7 @@
   min-width: 2rem;
   height: 100%;
   opacity: 0.075;
-  background: linear-gradient(
-    var(--gradient-dir),
-    transparent 0,
-    currentColor 30%,
-    transparent
-  );
+  background: linear-gradient(var(--gradient-dir), transparent 0, currentColor 30%, transparent);
   z-index: 2;
 }
 
@@ -689,8 +512,7 @@
 }
 
 .t007-input-helper-line:has(.t007-input-show) [data-violation="none"],
-.t007-input-helper-line:not(:has(.t007-input-show, [data-violation="none"]))
-  .t007-input-scroll-assist {
+.t007-input-helper-line:not(:has(.t007-input-show, [data-violation="none"])) .t007-input-scroll-assist {
   opacity: 0;
 }
 
@@ -700,14 +522,7 @@
   margin-top: 0.75rem;
 }
 
-.t007-input-field:has(
-    .t007-input:is([type="password"], [type="text"]):is(
-        [data-filled],
-        :-webkit-autofill,
-        :not(:placeholder-shown)
-      )
-  )
-  .t007-input-password-meter {
+.t007-input-field:has(.t007-input:is([type="password"], [type="text"]):is([data-filled], :-webkit-autofill, :not(:placeholder-shown))) .t007-input-password-meter {
   display: block;
 }
 
@@ -720,9 +535,7 @@
 }
 
 .t007-input-password-meter[data-strength-level="4"] {
-  --t007-input-p-meter-current-color: var(
-    --t007-input-p-meter-color-very-strong
-  );
+  --t007-input-p-meter-current-color: var(--t007-input-p-meter-color-very-strong);
 }
 
 .t007-input-password-meter::after {
@@ -765,17 +578,9 @@
 }
 
 .t007-input-password-meter[data-strength-level="1"] .t007-input-p-weak,
-.t007-input-password-meter[data-strength-level="2"]
-  :is(.t007-input-p-weak, .t007-input-p-fair),
-.t007-input-password-meter[data-strength-level="3"]
-  :is(.t007-input-p-weak, .t007-input-p-fair, .t007-input-p-strong),
-.t007-input-password-meter[data-strength-level="4"]
-  :is(
-    .t007-input-p-weak,
-    .t007-input-p-fair,
-    .t007-input-p-strong,
-    .t007-input-p-very-strong
-  ) {
+.t007-input-password-meter[data-strength-level="2"] :is(.t007-input-p-weak, .t007-input-p-fair),
+.t007-input-password-meter[data-strength-level="3"] :is(.t007-input-p-weak, .t007-input-p-fair, .t007-input-p-strong),
+.t007-input-password-meter[data-strength-level="4"] :is(.t007-input-p-weak, .t007-input-p-fair, .t007-input-p-strong, .t007-input-p-very-strong) {
   background-color: var(--t007-input-p-meter-current-color);
 }
 
@@ -847,8 +652,7 @@
   border-radius: 50%;
 }
 
-.t007-input-field:has(.t007-input[type="checkbox"]:checked)
-  .t007-input-checkbox-box {
+.t007-input-field:has(.t007-input[type="checkbox"]:checked) .t007-input-checkbox-box {
   background: var(--t007-input-checkbox-checked-background);
   border-color: var(--t007-input-checkbox-checked-border-color);
 }
@@ -858,10 +662,7 @@
   border-color: var(--t007-input-radio-checked-border-color);
 }
 
-.t007-input-field:has(
-    .t007-input:is([type="checkbox"], [type="radio"])[data-error]
-  )
-  :is(.t007-input-checkbox-box, .t007-input-radio-box) {
+.t007-input-field:has(.t007-input:is([type="checkbox"], [type="radio"])[data-error]) :is(.t007-input-checkbox-box, .t007-input-radio-box) {
   border-color: var(--t007-input-error-color);
 }
 
@@ -880,8 +681,7 @@
   width: 35%;
   height: 70%;
   border: solid var(--t007-input-checkmark-color);
-  border-width: 0 var(--t007-input-checkmark-width)
-    var(--t007-input-checkmark-width) 0;
+  border-width: 0 var(--t007-input-checkmark-width) var(--t007-input-checkmark-width) 0;
   transform: rotate(45deg);
 }
 
@@ -906,8 +706,7 @@
   transition-timing-function: cubic-bezier(0.34, 1.64, 0.64, 1);
 }
 
-.t007-input-field:has(.t007-input:is([type="radio"], [type="checkbox"]):checked)
-  :is(.t007-input-checkbox-tag, .t007-input-radio-tag) {
+.t007-input-field:has(.t007-input:is([type="radio"], [type="checkbox"]):checked) :is(.t007-input-checkbox-tag, .t007-input-radio-tag) {
   opacity: 1;
   scale: 1;
 }
@@ -940,26 +739,17 @@
   pointer-events: none;
 }
 
-.t007-input-rippler:is(
-    :hover,
-    :focus-visible,
-    :has(:focus-visible),
-    :has(~ :focus-visible)
-  )::before,
-.t007-input-field:is(:hover, :has(.t007-input[type="checkbox"]:focus-visible))
-  .t007-input-checkbox-box::before,
-.t007-input-field:is(:hover, :has(.t007-input[type="radio"]:focus-visible))
-  .t007-input-radio-box::before {
+.t007-input-rippler:is(:hover, :focus-visible, :has(:focus-visible), :has(~ :focus-visible))::before,
+.t007-input-field:is(:hover, :has(.t007-input[type="checkbox"]:focus-visible)) .t007-input-checkbox-box::before,
+.t007-input-field:is(:hover, :has(.t007-input[type="radio"]:focus-visible)) .t007-input-radio-box::before {
   width: var(--t007-input-ripple-size);
   height: var(--t007-input-ripple-size);
   opacity: 1;
 }
 
 .t007-input-rippler:is(:checked, :has(:checked), :has(~ :checked))::before,
-.t007-input-field:has(.t007-input[type="checkbox"]:checked)
-  .t007-input-checkbox-box::before,
-.t007-input-field:has(.t007-input[type="radio"]:checked)
-  .t007-input-radio-box::before {
+.t007-input-field:has(.t007-input[type="checkbox"]:checked) .t007-input-checkbox-box::before,
+.t007-input-field:has(.t007-input[type="radio"]:checked) .t007-input-radio-box::before {
   animation: t007-ripple-pulse 350ms ease-out;
 }
 

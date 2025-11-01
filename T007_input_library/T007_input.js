@@ -1,81 +1,13 @@
-if (window) window.t007 ??= {};
+"use strict";
 
 class T007_Form_Manager {
   static forms = document.getElementsByClassName("t007-input-form");
-
-  static violationKeys = [
-    "valueMissing",
-    "typeMismatch",
-    "patternMismatch",
-    "stepMismatch",
-    "tooShort",
-    "tooLong",
-    "rangeUnderflow",
-    "rangeOverflow",
-    "badInput",
-    "customError",
-  ];
-
-  static _RESOURCE_CACHE = {};
-
+  static violationKeys = ["valueMissing", "typeMismatch", "patternMismatch", "stepMismatch", "tooShort", "tooLong", "rangeUnderflow", "rangeOverflow", "badInput", "customError"];
   static init() {
-    t007.FM.mountWindow();
-    t007.FM.loadResource(T007_INPUT_CSS_SRC);
     t007.FM.observeDOMForFields();
     Array.from(t007.FM.forms).forEach(t007.FM.handleFormValidation);
   }
-
-  static mountWindow() {
-    window.createField = t007.FM.createField;
-    window.handleFormValidation = t007.FM.handleFormValidation;
-  }
-
-  static loadResource(src, type = "style", options = {}) {
-    const {
-      module = false,
-      media = null,
-      crossorigin = null,
-      integrity = null,
-    } = options;
-    if (t007.FM._RESOURCE_CACHE[src]) return t007.FM._RESOURCE_CACHE[src];
-    if (
-      type === "script"
-        ? [...document.scripts].some((s) => s.src?.includes(src))
-        : type === "style"
-        ? [...document.styleSheets].some((s) => s.href?.includes(src))
-        : false
-    )
-      return Promise.resolve(null);
-    t007.FM._RESOURCE_CACHE[src] = new Promise((resolve, reject) => {
-      if (type === "script") {
-        const script = document.createElement("script");
-        script.src = src;
-        if (module) script.type = "module";
-        if (crossorigin) script.crossOrigin = crossorigin;
-        if (integrity) script.integrity = integrity;
-        script.onload = () => resolve(script);
-        script.onerror = () => reject(new Error(`Script load error: ${src}`));
-        document.body.append(script);
-      } else if (type === "style") {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = src;
-        if (media) link.media = media;
-        link.onload = () => resolve(link);
-        link.onerror = () => reject(new Error(`Stylesheet load error: ${src}`));
-        document.head.append(link);
-      } else {
-        reject(new Error(`Unsupported type: ${type}`));
-      }
-    });
-    return t007.FM._RESOURCE_CACHE[src];
-  }
-
-  static _SCROLLER_R_OBSERVER =
-    typeof window !== "undefined" &&
-    new ResizeObserver((entries) =>
-      entries.forEach(({ target }) => t007.FM._SCROLLERS.get(target)?.update())
-    );
+  static _SCROLLER_R_OBSERVER = typeof window !== "undefined" && new ResizeObserver((entries) => entries.forEach(({ target }) => t007.FM._SCROLLERS.get(target)?.update()));
   static _SCROLLER_M_OBSERVER =
     typeof window !== "undefined" &&
     new MutationObserver((entries) => {
@@ -90,15 +22,7 @@ class T007_Form_Manager {
       }
     });
   static _SCROLLERS = new WeakMap();
-  static initScrollAssist(
-    el,
-    {
-      pxPerSecond = 80,
-      assistClassName = "t007-input-scroll-assist",
-      vertical = true,
-      horizontal = true,
-    } = {}
-  ) {
+  static initScrollAssist(el, { pxPerSecond = 80, assistClassName = "t007-input-scroll-assist", vertical = true, horizontal = true } = {}) {
     const parent = el?.parentElement;
     if (!parent || t007.FM._SCROLLERS.has(el)) return;
     const assist = {};
@@ -107,37 +31,19 @@ class T007_Form_Manager {
       assistWidth = 20,
       assistHeight = 20;
     const update = () => {
-      const hasInteractive = !!parent.querySelector(
-        'button, a[href], input, select, textarea, [contenteditable="true"], [tabindex]:not([tabindex="-1"])'
-      );
+      const hasInteractive = !!parent.querySelector('button, a[href], input, select, textarea, [contenteditable="true"], [tabindex]:not([tabindex="-1"])');
       if (horizontal) {
         const w = assist.left?.offsetWidth || assistWidth;
         const check = hasInteractive ? el.clientWidth < w * 2 : false;
-        assist.left.style.display = check
-          ? "none"
-          : el.scrollLeft > 0
-          ? "block"
-          : "none";
-        assist.right.style.display = check
-          ? "none"
-          : el.scrollLeft + el.clientWidth < el.scrollWidth - 1
-          ? "block"
-          : "none";
+        assist.left.style.display = check ? "none" : el.scrollLeft > 0 ? "block" : "none";
+        assist.right.style.display = check ? "none" : el.scrollLeft + el.clientWidth < el.scrollWidth - 1 ? "block" : "none";
         assistWidth = w;
       }
       if (vertical) {
         const h = assist.up?.offsetHeight || assistHeight;
         const check = hasInteractive ? el.clientHeight < h * 2 : false;
-        assist.up.style.display = check
-          ? "none"
-          : el.scrollTop > 0
-          ? "block"
-          : "none";
-        assist.down.style.display = check
-          ? "none"
-          : el.scrollTop + el.clientHeight < el.scrollHeight - 1
-          ? "block"
-          : "none";
+        assist.up.style.display = check ? "none" : el.scrollTop > 0 ? "block" : "none";
+        assist.down.style.display = check ? "none" : el.scrollTop + el.clientHeight < el.scrollHeight - 1 ? "block" : "none";
         assistHeight = h;
       }
     };
@@ -148,17 +54,9 @@ class T007_Form_Manager {
         last = now;
         const d = (pxPerSecond * dt) / 1000;
         if (dir === "left") el.scrollLeft = Math.max(0, el.scrollLeft - d);
-        if (dir === "right")
-          el.scrollLeft = Math.min(
-            el.scrollWidth - el.clientWidth,
-            el.scrollLeft + d
-          );
+        if (dir === "right") el.scrollLeft = Math.min(el.scrollWidth - el.clientWidth, el.scrollLeft + d);
         if (dir === "up") el.scrollTop = Math.max(0, el.scrollTop - d);
-        if (dir === "down")
-          el.scrollTop = Math.min(
-            el.scrollHeight - el.clientHeight,
-            el.scrollTop + d
-          );
+        if (dir === "down") el.scrollTop = Math.min(el.scrollHeight - el.clientHeight, el.scrollTop + d);
         scrollId = requestAnimationFrame(frame);
       };
       last = performance.now();
@@ -174,20 +72,9 @@ class T007_Form_Manager {
         style: "display:none",
       });
       div.dataset.scrollDirection = dir;
-      ["pointerenter", "dragenter"].forEach((e) =>
-        div.addEventListener(e, () => scroll(dir))
-      );
-      [
-        "pointerleave",
-        "pointerup",
-        "pointercancel",
-        "dragleave",
-        "dragend",
-      ].forEach((e) => div.addEventListener(e, stop));
-      (dir === "left" || dir === "up"
-        ? parent.insertBefore
-        : parent.appendChild
-      ).call(parent, div, el);
+      ["pointerenter", "dragenter"].forEach((e) => div.addEventListener(e, () => scroll(dir)));
+      ["pointerleave", "pointerup", "pointercancel", "dragleave", "dragend"].forEach((e) => div.addEventListener(e, stop));
+      (dir === "left" || dir === "up" ? parent.insertBefore : parent.appendChild).call(parent, div, el);
       assist[dir] = div;
     };
     if (horizontal) ["left", "right"].forEach(addAssist);
@@ -215,20 +102,12 @@ class T007_Form_Manager {
   static removeScrollAssist(el) {
     t007.FM._SCROLLERS.get(el)?.destroy();
   }
-
   static observeDOMForFields() {
     new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         for (const node of mutation.addedNodes) {
-          if (
-            node?.classList?.contains("t007-input-field") ||
-            node?.querySelector?.(".t007-input-field")
-          ) {
-            const fields = [
-              ...(node.classList.contains("t007-input-field")
-                ? [node]
-                : node.querySelectorAll(".t007-input-field")),
-            ];
+          if (node?.classList?.contains("t007-input-field") || node?.querySelector?.(".t007-input-field")) {
+            const fields = [...(node.classList.contains("t007-input-field") ? [node] : node.querySelectorAll(".t007-input-field"))];
             for (const field of fields) {
               t007.FM.setUpField(field);
             }
@@ -237,7 +116,6 @@ class T007_Form_Manager {
       }
     }).observe(document.body, { childList: true, subtree: true });
   }
-
   static getFilesHelper(files, opts) {
     if (!files || !files.length) return { violation: null, message: "" };
     const totalFiles = files.length;
@@ -245,23 +123,11 @@ class T007_Form_Manager {
     let currFiles = 0;
     const setMaxError = (size, max, n = 0) => ({
       violation: "rangeOverflow",
-      message: n
-        ? `File ${files.length > 1 ? n : ""} size of ${t007.FM.formatSize(
-            size
-          )} exceeds the per file maximum of ${t007.FM.formatSize(max)}`
-        : `Total files size of ${t007.FM.formatSize(
-            size
-          )} exceeds the total maximum of ${t007.FM.formatSize(max)}`,
+      message: n ? `File ${files.length > 1 ? n : ""} size of ${t007.FM.formatSize(size)} exceeds the per file maximum of ${t007.FM.formatSize(max)}` : `Total files size of ${t007.FM.formatSize(size)} exceeds the total maximum of ${t007.FM.formatSize(max)}`,
     });
     const setMinError = (size, min, n = 0) => ({
       violation: "rangeUnderflow",
-      message: n
-        ? `File ${files.length > 1 ? n : ""} size of ${t007.FM.formatSize(
-            size
-          )} is less than the per file minimum of ${t007.FM.formatSize(min)}`
-        : `Total files size of ${t007.FM.formatSize(
-            size
-          )} is less than the total minimum of ${t007.FM.formatSize(min)}`,
+      message: n ? `File ${files.length > 1 ? n : ""} size of ${t007.FM.formatSize(size)} is less than the per file minimum of ${t007.FM.formatSize(min)}` : `Total files size of ${t007.FM.formatSize(size)} is less than the total minimum of ${t007.FM.formatSize(min)}`,
     });
     for (const file of files) {
       currFiles++;
@@ -273,93 +139,55 @@ class T007_Form_Manager {
             .split(",")
             .map((type) => type.trim().replace(/^[*\.]+|[*\.]+$/g, ""))
             .filter(Boolean) || [];
-        if (!acceptedTypes.some((type) => file.type.includes(type))) {
+        if (!acceptedTypes.some((type) => file.type.includes(type)))
           return {
             violation: "typeMismatch",
-            message: `File${currFiles > 1 ? currFiles : ""} type of '${
-              file.type
-            }' is not accepted.`,
+            message: `File${currFiles > 1 ? currFiles : ""} type of '${file.type}' is not accepted.`,
           };
-        }
       }
       // Per file size limits
-      if (opts.maxSize && file.size > opts.maxSize) {
-        return setMaxError(file.size, opts.maxSize, currFiles);
-      }
-      if (opts.minSize && file.size < opts.minSize) {
-        return setMinError(file.size, opts.minSize, currFiles);
-      }
+      if (opts.maxSize && file.size > opts.maxSize) return setMaxError(file.size, opts.maxSize, currFiles);
+      if (opts.minSize && file.size < opts.minSize) return setMinError(file.size, opts.minSize, currFiles);
       // Multi-file checks
       if (opts.multiple) {
-        if (opts.maxTotalSize && totalSize > opts.maxTotalSize) {
-          return setMaxError(totalSize, opts.maxTotalSize);
-        }
-        if (opts.minTotalSize && totalSize < opts.minTotalSize) {
-          return setMinError(totalSize, opts.minTotalSize);
-        }
-        if (opts.maxLength && totalFiles > opts.maxLength) {
+        if (opts.maxTotalSize && totalSize > opts.maxTotalSize) return setMaxError(totalSize, opts.maxTotalSize);
+        if (opts.minTotalSize && totalSize < opts.minTotalSize) return setMinError(totalSize, opts.minTotalSize);
+        if (opts.maxLength && totalFiles > opts.maxLength)
           return {
             violation: "tooLong",
-            message: `Selected ${totalFiles} files exceeds the maximum of ${
-              opts.maxLength
-            } allowed file${opts.maxLength > 1 ? "s" : ""}`,
+            message: `Selected ${totalFiles} files exceeds the maximum of ${opts.maxLength} allowed file${opts.maxLength > 1 ? "s" : ""}`,
           };
-        }
-        if (opts.minLength && totalFiles < opts.minLength) {
+        if (opts.minLength && totalFiles < opts.minLength)
           return {
             violation: "tooShort",
-            message: `Selected ${totalFiles} files is less than the minimum of ${
-              opts.minLength
-            } allowed file${opts.minLength > 1 ? "s" : ""}`,
+            message: `Selected ${totalFiles} files is less than the minimum of ${opts.minLength} allowed file${opts.minLength > 1 ? "s" : ""}`,
           };
-        }
       }
     }
     return { violation: null, message: "" }; // No errors
   }
-
   static formatSize(size) {
     const units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    const exponent = Math.min(
-      Math.floor(Math.log(size) / Math.log(1e3)),
-      units.length - 1
-    );
+    const exponent = Math.min(Math.floor(Math.log(size) / Math.log(1e3)), units.length - 1);
     const approx = size / 1e3 ** exponent;
-    return exponent === 0
-      ? `${size} byte${size > 1 ? "s" : ""}`
-      : `${approx} ${units[exponent]}`;
+    return exponent === 0 ? `${size} byte${size > 1 ? "s" : ""}` : `${approx} ${units[exponent]}`;
   }
-
   static togglePasswordType(input) {
     input.type = input.type === "password" ? "text" : "password";
   }
-
   static toggleFilled(input) {
     if (!input) return;
-    const isFilled =
-      input.type === "checkbox" || input.type === "radio"
-        ? input.checked
-        : input.value !== "" || input.files?.length > 0;
+    const isFilled = input.type === "checkbox" || input.type === "radio" ? input.checked : input.value !== "" || input.files?.length > 0;
     input.toggleAttribute("data-filled", isFilled);
   }
-
   static setFallbackHelper(field) {
-    const helperTextWrapper = field?.querySelector(
-      ".t007-input-helper-text-wrapper"
-    );
-    if (
-      !helperTextWrapper ||
-      helperTextWrapper.querySelector(
-        ".t007-input-helper-text[data-violation='auto']"
-      )
-    )
-      return;
+    const helperTextWrapper = field?.querySelector(".t007-input-helper-text-wrapper");
+    if (!helperTextWrapper || helperTextWrapper.querySelector(".t007-input-helper-text[data-violation='auto']")) return;
     const el = document.createElement("p");
     el.className = "t007-input-helper-text";
     el.setAttribute("data-violation", "auto");
     helperTextWrapper.appendChild(el);
   }
-
   static setFieldListeners(field) {
     if (!field) return;
     const input = field.querySelector(".t007-input"),
@@ -389,20 +217,10 @@ class T007_Form_Manager {
               canvas = document.createElement("canvas"),
               context = canvas.getContext("2d");
             video.ontimeupdate = () => {
-              context.drawImage(
-                video,
-                0,
-                0,
-                video.videoWidth,
-                video.videoHeight
-              );
+              context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
               canvas.toBlob((blob) => resolve(URL.createObjectURL(blob)));
               URL.revokeObjectURL(video.src);
-              video =
-                video.src =
-                video.onloadedmetadata =
-                video.ontimeupdate =
-                  null;
+              video = video.src = video.onloadedmetadata = video.ontimeupdate = null;
             };
             video.onloadeddata = () => (video.currentTime = 3);
             video.src = URL.createObjectURL(file);
@@ -415,17 +233,10 @@ class T007_Form_Manager {
         }
         img.src = src;
       });
-    if (floatingLabel)
-      floatingLabel.ontransitionend = () =>
-        floatingLabel.classList.remove("t007-input-shake");
-    if (eyeOpen && eyeClosed)
-      eyeOpen.onclick = eyeClosed.onclick = () =>
-        t007.FM.togglePasswordType(input);
-    t007.FM.initScrollAssist(
-      field.querySelector(".t007-input-helper-text-wrapper")
-    );
+    if (floatingLabel) floatingLabel.ontransitionend = () => floatingLabel.classList.remove("t007-input-shake");
+    if (eyeOpen && eyeClosed) eyeOpen.onclick = eyeClosed.onclick = () => t007.FM.togglePasswordType(input);
+    t007.FM.initScrollAssist(field.querySelector(".t007-input-helper-text-wrapper"));
   }
-
   static setUpField(field) {
     if (field.dataset.setUp) return;
     t007.FM.toggleFilled(field.querySelector(".t007-input"));
@@ -433,47 +244,14 @@ class T007_Form_Manager {
     t007.FM.setFieldListeners(field);
     field.dataset.setUp = "true";
   }
-
-  // Field Builder Utility
-  static createField({
-    isWrapper = false,
-    label = "",
-    type = "text",
-    placeholder = "",
-    custom = "",
-    minSize,
-    maxSize,
-    minTotalSize,
-    maxTotalSize,
-    options = [],
-    indeterminate = false,
-    eyeToggler = true,
-    passwordMeter = true,
-    helperText = {},
-    className = "",
-    fieldClassName = "",
-    children,
-    startIcon = "",
-    endIcon = "",
-    nativeIcon = "",
-    passwordVisibleIcon = "",
-    passwordHiddenIcon = "",
-    ...otherProps
-  }) {
+  static createField({ isWrapper = false, label = "", type = "text", placeholder = "", custom = "", minSize, maxSize, minTotalSize, maxTotalSize, options = [], indeterminate = false, eyeToggler = true, passwordMeter = true, helperText = {}, className = "", fieldClassName = "", children, startIcon = "", endIcon = "", nativeIcon = "", passwordVisibleIcon = "", passwordHiddenIcon = "", ...otherProps }) {
     const isSelect = type === "select";
     const isTextArea = type === "textarea";
     const isCheckboxOrRadio = type === "checkbox" || type === "radio";
     const field = document.createElement("div");
-    field.className = `t007-input-field ${
-      isWrapper ? "t007-input-is-wrapper" : ""
-    } ${indeterminate ? "t007-input-indeterminate" : ""} ${
-      !!nativeIcon ? "t007-input-icon-override" : ""
-    } ${helperText === false ? "t007-input-no-helper" : ""} ${fieldClassName}`;
-
+    field.className = `t007-input-field ${isWrapper ? "t007-input-is-wrapper" : ""} ${indeterminate ? "t007-input-indeterminate" : ""} ${!!nativeIcon ? "t007-input-icon-override" : ""} ${helperText === false ? "t007-input-no-helper" : ""} ${fieldClassName}`;
     const labelEl = document.createElement("label");
-    labelEl.className = isCheckboxOrRadio
-      ? `t007-input-${type}-wrapper`
-      : "t007-input-wrapper";
+    labelEl.className = isCheckboxOrRadio ? `t007-input-${type}-wrapper` : "t007-input-wrapper";
     field.appendChild(labelEl);
     if (isCheckboxOrRadio) {
       labelEl.innerHTML = `
@@ -494,9 +272,7 @@ class T007_Form_Manager {
       `;
       labelEl.appendChild(outline);
     }
-    const inputEl = document.createElement(
-      isTextArea ? "textarea" : isSelect ? "select" : "input"
-    );
+    const inputEl = document.createElement(isTextArea ? "textarea" : isSelect ? "select" : "input");
     inputEl.className = `t007-input ${className}`;
     if (!isSelect && !isTextArea) inputEl.type = type;
     inputEl.placeholder = placeholder;
@@ -506,18 +282,10 @@ class T007_Form_Manager {
     if (minTotalSize) inputEl.setAttribute("mintotalsize", minTotalSize);
     if (maxTotalSize) inputEl.setAttribute("maxtotalsize", maxTotalSize);
     // Drill other props into input, quite reckless though but necessary
-    Object.entries(otherProps).forEach(([key, val]) =>
-      inputEl.setAttribute(key, val)
-    );
+    Object.entries(otherProps).forEach(([key, val]) => inputEl.setAttribute(key, val));
     // Insert options if select
     if (isSelect && Array.isArray(options)) {
-      inputEl.innerHTML = options
-        .map((opt) =>
-          typeof opt === "string"
-            ? `<option value="${opt}">${opt}</option>`
-            : `<option value="${opt.value}">${opt.option}</option>`
-        )
-        .join("");
+      inputEl.innerHTML = options.map((opt) => (typeof opt === "string" ? `<option value="${opt}">${opt}</option>` : `<option value="${opt.value}">${opt.option}</option>`)).join("");
     }
     // Append main input/textarea/select
     labelEl.appendChild(!isWrapper ? inputEl : children);
@@ -537,8 +305,7 @@ class T007_Form_Manager {
     // Password toggle eye icons
     if (type === "password" && eyeToggler) {
       const visibleIcon = document.createElement("i");
-      visibleIcon.className =
-        "t007-input-icon t007-input-password-visible-icon";
+      visibleIcon.className = "t007-input-icon t007-input-password-visible-icon";
       visibleIcon.setAttribute("aria-label", "Show password");
       visibleIcon.setAttribute("role", "button");
       visibleIcon.innerHTML =
@@ -599,35 +366,21 @@ class T007_Form_Manager {
       `;
       field.appendChild(meter);
     }
-
     return field;
   }
-
   static handleFormValidation(form) {
-    if (
-      !form?.classList.contains("t007-input-form") ||
-      form.dataset?.isValidating
-    )
-      return;
-
+    if (!form?.classList.contains("t007-input-form") || form.dataset?.isValidating) return;
     form.dataset.isValidating = "true";
     form.validateOnClient = validateFormOnClient;
     form.toggleGlobalError = toggleFormGlobalError;
-
     const fields = form.getElementsByClassName("t007-input-field"),
       inputs = form.getElementsByClassName("t007-input");
-
     Array.from(fields).forEach(t007.FM.setUpField);
-
     form.addEventListener("input", ({ target }) => {
       t007.FM.toggleFilled(target);
       validateInput(target);
     });
-
-    form.addEventListener("focusout", ({ target }) =>
-      validateInput(target, true)
-    );
-
+    form.addEventListener("focusout", ({ target }) => validateInput(target, true));
     form.addEventListener("submit", async (e) => {
       toggleSubmitLoader(true);
       try {
@@ -648,11 +401,9 @@ class T007_Form_Manager {
         toggleSubmitLoader(false);
       }
     });
-
     function toggleSubmitLoader(bool) {
       form.classList.toggle("t007-input-submit-loading", bool);
     }
-
     function toggleError(input, bool, flag = false) {
       const field = input.closest(".t007-input-field"),
         floatingLabel = field.querySelector(".t007-input-floating-label");
@@ -664,25 +415,14 @@ class T007_Form_Manager {
       }
       toggleHelper(input, input.hasAttribute("data-error"));
     }
-
     function toggleHelper(input, bool) {
       const field = input.closest(".t007-input-field"),
-        violation =
-          t007.FM.violationKeys.find(
-            (violation) =>
-              input.Validity?.[violation] || input.validity[violation]
-          ) ?? "",
-        helper = field.querySelector(
-          `.t007-input-helper-text[data-violation="${violation}"]`
-        ),
-        fallbackHelper = field.querySelector(
-          `.t007-input-helper-text[data-violation="auto"]`
-        );
+        violation = t007.FM.violationKeys.find((violation) => input.Validity?.[violation] || input.validity[violation]) ?? "",
+        helper = field.querySelector(`.t007-input-helper-text[data-violation="${violation}"]`),
+        fallbackHelper = field.querySelector(`.t007-input-helper-text[data-violation="auto"]`);
       input
         .closest(".t007-input-field")
-        .querySelectorAll(
-          `.t007-input-helper-text:not([data-violation="${violation}"])`
-        )
+        .querySelectorAll(`.t007-input-helper-text:not([data-violation="${violation}"])`)
         .forEach((helper) => helper?.classList.remove("t007-input-show"));
       if (helper) {
         helper.classList.toggle("t007-input-show", bool);
@@ -691,16 +431,12 @@ class T007_Form_Manager {
         fallbackHelper.classList.toggle("t007-input-show", bool);
       }
     }
-
     function forceRevalidate(input) {
       input.checkValidity();
       input.dispatchEvent(new Event("input"));
     }
-
     function updatePasswordMeter(input) {
-      const passwordMeter = input
-        .closest(".t007-input-field")
-        .querySelector(".t007-input-password-meter");
+      const passwordMeter = input.closest(".t007-input-field").querySelector(".t007-input-password-meter");
       if (!passwordMeter) return;
       const value = input.value?.trim();
       let strengthLevel = 0;
@@ -713,45 +449,28 @@ class T007_Form_Manager {
       }
       passwordMeter.dataset.strengthLevel = strengthLevel;
     }
-
     function validateInput(input, flag = false) {
-      if (form.dataset.globalError || !input?.classList.contains("t007-input"))
-        return;
+      if (form.dataset.globalError || !input?.classList.contains("t007-input")) return;
       updatePasswordMeter(input);
       let value, errorBool;
       switch (input.custom ?? input.getAttribute("custom")) {
         case "password":
           value = input.value?.trim();
           if (value === "") break;
-          const confirmPasswordInput = Array.from(inputs).find(
-            (input) =>
-              (input.custom ?? input.getAttribute("custom")) ===
-              "confirm-password"
-          );
+          const confirmPasswordInput = Array.from(inputs).find((input) => (input.custom ?? input.getAttribute("custom")) === "confirm-password");
           if (!confirmPasswordInput) break;
           const confirmPasswordValue = confirmPasswordInput.value?.trim();
-          confirmPasswordInput.setCustomValidity(
-            value !== confirmPasswordValue ? "Both passwords do not match" : ""
-          );
-          toggleError(
-            confirmPasswordInput,
-            value !== confirmPasswordValue,
-            flag
-          );
+          confirmPasswordInput.setCustomValidity(value !== confirmPasswordValue ? "Both passwords do not match" : "");
+          toggleError(confirmPasswordInput, value !== confirmPasswordValue, flag);
           break;
         case "confirm_password":
           value = input.value?.trim();
           if (value === "") break;
-          const passwordInput = Array.from(inputs).find(
-            (input) =>
-              (input.custom ?? input.getAttribute("custom")) === "password"
-          );
+          const passwordInput = Array.from(inputs).find((input) => (input.custom ?? input.getAttribute("custom")) === "password");
           if (!passwordInput) break;
           const passwordValue = passwordInput.value?.trim();
           errorBool = value !== passwordValue;
-          input.setCustomValidity(
-            errorBool ? "Both passwords do not match" : ""
-          );
+          input.setCustomValidity(errorBool ? "Both passwords do not match" : "");
           break;
         case "onward_date":
           if (input.min) break;
@@ -761,23 +480,16 @@ class T007_Form_Manager {
       }
       if (input.type === "file") {
         input.Validity = {};
-        const { violation, message } = t007.FM.getFilesHelper(
-          input.files ?? [],
-          {
-            accept: input.accept,
-            multiple: input.multiple,
-            maxSize: input.maxSize ?? Number(input.getAttribute("maxsize")),
-            minSize: input.minSize ?? Number(input.getAttribute("minsize")),
-            maxTotalSize:
-              input.maxTotalSize ?? Number(input.getAttribute("maxtotalsize")),
-            minTotalSize:
-              input.minTotalSize ?? Number(input.getAttribute("mintotalsize")),
-            maxLength:
-              input.maxLength ?? Number(input.getAttribute("maxlength")),
-            minLength:
-              input.minLength ?? Number(input.getAttribute("minLength")),
-          }
-        );
+        const { violation, message } = t007.FM.getFilesHelper(input.files ?? [], {
+          accept: input.accept,
+          multiple: input.multiple,
+          maxSize: input.maxSize ?? Number(input.getAttribute("maxsize")),
+          minSize: input.minSize ?? Number(input.getAttribute("minsize")),
+          maxTotalSize: input.maxTotalSize ?? Number(input.getAttribute("maxtotalsize")),
+          minTotalSize: input.minTotalSize ?? Number(input.getAttribute("mintotalsize")),
+          maxLength: input.maxLength ?? Number(input.getAttribute("maxlength")),
+          minLength: input.minLength ?? Number(input.getAttribute("minLength")),
+        });
         errorBool = !!message;
         input.setCustomValidity(message);
         if (violation) input.Validity[violation] = true;
@@ -790,28 +502,57 @@ class T007_Form_Manager {
           ?.filter((i) => i.name == input.name)
           ?.forEach((radio) => toggleError(radio, errorBool, flag));
     }
-
     function validateFormOnClient() {
       Array.from(inputs).forEach((input) => validateInput(input, true));
       form.querySelector("input:invalid")?.focus();
       return Array.from(inputs).every((input) => input.checkValidity());
     }
-
     function toggleFormGlobalError(bool) {
       form.toggleAttribute("data-global-error", bool);
       form.querySelectorAll(".t007-input-field").forEach((field) => {
         field.querySelector(".t007-input")?.toggleAttribute("data-error", bool);
-        if (bool)
-          field
-            .querySelector(".t007-input-floating-label")
-            ?.classList.add("t007-input-shake");
+        if (bool) field.querySelector(".t007-input-floating-label")?.classList.add("t007-input-shake");
       });
     }
   }
 }
 
 if (typeof window !== "undefined") {
+  window.t007 ??= { _resourceCache: {} };
   t007.FM = T007_Form_Manager;
   window.T007_INPUT_CSS_SRC ??= `/T007_TOOLS/T007_input_library/T007_input.css`;
+  window.createField ??= t007.FM.createField;
+  window.handleFormValidation ??= t007.FM.handleFormValidation;
+  loadResource(T007_INPUT_CSS_SRC);
   t007.FM.init();
+}
+
+// prettier-ignore
+function isSameURL(src1, src2) {
+  if (typeof src1 !== "string" || typeof src2 !== "string" || !src1 || !src2) return false;
+  try {
+    const u1 = new URL(src1, window.location.href);
+    const u2 = new URL(src2, window.location.href);
+    return decodeURIComponent(u1.origin + u1.pathname) === decodeURIComponent(u2.origin + u2.pathname);
+  } catch {
+    return src1.replace(/\\/g, "/").split("?")[0].trim() === src2.replace(/\\/g, "/").split("?")[0].trim();
+  }
+}
+// prettier-ignore
+function loadResource(src, type = "style", { module, media, crossOrigin, integrity } = {}) {
+  if (t007._resourceCache[src]) return t007._resourceCache[src];
+  if (type === "script" ? [...document.scripts].some((s) => isSameURL(s.src, src)) : type === "style" ? [...document.styleSheets].some((s) => isSameURL(s.href, src)) : false) return Promise.resolve();
+  t007._resourceCache[src] = new Promise((resolve, reject) => {
+    if (type === "script") {
+      const script = Object.assign(document.createElement("script"), { src, type: module ? "module" : "text/javascript", onload: () => resolve(script), onerror: () => reject(new Error(`Script load error: ${src}`)) });
+      if (crossOrigin) script.crossOrigin = crossOrigin;
+      if (integrity) script.integrity = integrity;
+      document.body.append(script);
+    } else if (type === "style") {
+      const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href: src, onload: () => resolve(link), onerror: () => reject(new Error(`Stylesheet load error: ${src}`)) });
+      if (media) link.media = media;
+      document.head.append(link);
+    } else reject(new Error(`Unsupported type: ${type}`));
+  });
+  return t007._resourceCache[src];
 }

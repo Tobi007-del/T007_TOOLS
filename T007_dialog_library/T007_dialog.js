@@ -1,74 +1,4 @@
-if (window) window.t007 ??= {};
-
-export function Alert(message, options) {
-  return new Promise(
-    (resolve) => new T007_Alert_Dialog({ message, resolve, options })
-  );
-}
-
-export function Confirm(question, options) {
-  return new Promise(
-    (resolve) => new T007_Confirm_Dialog({ question, resolve, options })
-  );
-}
-
-export function Prompt(question, defaultValue, options) {
-  return new Promise(
-    (resolve) =>
-      new T007_Prompt_Dialog({ question, defaultValue, resolve, options })
-  );
-}
-
-if (typeof window !== "undefined") {
-  window.Alert ??= t007.alert = Alert;
-  window.Confirm ??= t007.confirm = Confirm;
-  window.Prompt ??= t007.prompt = Prompt;
-  window.T007_DIALOG_CSS_SRC ??= `/T007_TOOLS/T007_dialog_library/T007_dialog.css`;
-  console.log("%cT007 Dialogs attached to window!", "color: green");
-}
-
-const _RESOURCE_CACHE = {};
-function loadResource(src, type = "style", options = {}) {
-  const {
-    module = false,
-    media = null,
-    crossorigin = null,
-    integrity = null,
-  } = options;
-  if (_RESOURCE_CACHE[src]) return _RESOURCE_CACHE[src];
-  if (
-    type === "script"
-      ? [...document.scripts].some((s) => s.src?.includes(src))
-      : type === "style"
-      ? [...document.styleSheets].some((s) => s.href?.includes(src))
-      : false
-  )
-    return Promise.resolve(null);
-  _RESOURCE_CACHE[src] = new Promise((resolve, reject) => {
-    if (type === "script") {
-      const script = document.createElement("script");
-      script.src = src;
-      if (module) script.type = "module";
-      if (crossorigin) script.crossOrigin = crossorigin;
-      if (integrity) script.integrity = integrity;
-      script.onload = () => resolve(script);
-      script.onerror = () => reject(new Error(`Script load error: ${src}`));
-      document.body.append(script);
-    } else if (type === "style") {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = src;
-      if (media) link.media = media;
-      link.onload = () => resolve(link);
-      link.onerror = () => reject(new Error(`Stylesheet load error: ${src}`));
-      document.head.append(link);
-    } else {
-      reject(new Error(`Unsupported type: ${type}`));
-    }
-  });
-  return _RESOURCE_CACHE[src];
-}
-loadResource(T007_DIALOG_CSS_SRC);
+"use_strict";
 
 class T007_Dialog {
   dialog;
@@ -89,12 +19,7 @@ class T007_Dialog {
     while (proto && proto !== Object.prototype) {
       for (const method of Object.getOwnPropertyNames(proto)) {
         const descriptor = Object.getOwnPropertyDescriptor(proto, method);
-        if (
-          method !== "constructor" &&
-          descriptor &&
-          typeof descriptor.value === "function"
-        )
-          this[method] = this[method].bind(this);
+        if (method !== "constructor" && descriptor && typeof descriptor.value === "function") this[method] = this[method].bind(this);
       }
       proto = Object.getPrototypeOf(proto);
     }
@@ -133,9 +58,7 @@ class T007_Alert_Dialog extends T007_Dialog {
         <p class="t007-dialog-question">${message}</p>
       </div>
       <div class="t007-dialog-bottom-section">
-        <button class="t007-dialog-confirm-button" type="button">${
-          options.confirmText || "OK"
-        }</button>
+        <button class="t007-dialog-confirm-button" type="button">${options.confirmText || "OK"}</button>
       </div>
     `;
     this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button");
@@ -156,12 +79,8 @@ class T007_Confirm_Dialog extends T007_Dialog {
         <p class="t007-dialog-question">${question}</p>
       </div>
       <div class="t007-dialog-bottom-section">
-        <button class="t007-dialog-confirm-button" type="button">${
-          options.confirmText || "OK"
-        }</button>
-        <button class="t007-dialog-cancel-button" type="button">${
-          options.cancelText || "Cancel"
-        }</button>
+        <button class="t007-dialog-confirm-button" type="button">${options.confirmText || "OK"}</button>
+        <button class="t007-dialog-cancel-button" type="button">${options.cancelText || "Cancel"}</button>
       </div>
     `;
     this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button");
@@ -179,11 +98,7 @@ class T007_Prompt_Dialog extends T007_Dialog {
   }
 
   async render(question, defaultValue, options = {}) {
-    await loadResource(
-      window.T007_INPUT_JS_SRC ||
-        `/T007_TOOLS/T007_input_library/T007_input.js`,
-      "script"
-    );
+    await loadResource(window.T007_INPUT_JS_SRC, "script");
     options.value = defaultValue;
     this.dialog.innerHTML = `
       <form class="t007-input-form" novalidate>
@@ -192,12 +107,8 @@ class T007_Prompt_Dialog extends T007_Dialog {
         </div>
           ${createField?.(options)?.outerHTML}
         <div class="t007-dialog-bottom-section">
-          <button class="t007-dialog-confirm-button" type="submit">${
-            options.confirmText || "OK"
-          }</button>
-          <button class="t007-dialog-cancel-button" type="button">${
-            options.cancelText || "Cancel"
-          }</button>
+          <button class="t007-dialog-confirm-button" type="submit">${options.confirmText || "OK"}</button>
+          <button class="t007-dialog-cancel-button" type="button">${options.cancelText || "Cancel"}</button>
         </div>
       </form>
     `;
@@ -225,4 +136,57 @@ class T007_Prompt_Dialog extends T007_Dialog {
     this.remove();
     this.resolve(null);
   }
+}
+
+export function Alert(message, options) {
+  return new Promise((resolve) => new T007_Alert_Dialog({ message, resolve, options }));
+}
+
+export function Confirm(question, options) {
+  return new Promise((resolve) => new T007_Confirm_Dialog({ question, resolve, options }));
+}
+
+export function Prompt(question, defaultValue, options) {
+  return new Promise((resolve) => new T007_Prompt_Dialog({ question, defaultValue, resolve, options }));
+}
+
+if (typeof window !== "undefined") {
+  window.t007 ??= { _resourceCache: {} };
+  window.T007_DIALOG_CSS_SRC ??= `/T007_TOOLS/T007_dialog_library/T007_dialog.css`;
+  window.T007_INPUT_JS_SRC ??= `/T007_TOOLS/T007_input_library/T007_input.js`;
+  window.Alert ??= t007.alert = Alert;
+  window.Confirm ??= t007.confirm = Confirm;
+  window.Prompt ??= t007.prompt = Prompt;
+  loadResource(T007_DIALOG_CSS_SRC);
+  console.log("%cT007 Dialogs attached to window!", "color: green");
+}
+
+// prettier-ignore
+function isSameURL(src1, src2) {
+  if (typeof src1 !== "string" || typeof src2 !== "string" || !src1 || !src2) return false;
+  try {
+    const u1 = new URL(src1, window.location.href);
+    const u2 = new URL(src2, window.location.href);
+    return decodeURIComponent(u1.origin + u1.pathname) === decodeURIComponent(u2.origin + u2.pathname);
+  } catch {
+    return src1.replace(/\\/g, "/").split("?")[0].trim() === src2.replace(/\\/g, "/").split("?")[0].trim();
+  }
+}
+// prettier-ignore
+function loadResource(src, type = "style", { module, media, crossOrigin, integrity } = {}) {
+  if (t007._resourceCache[src]) return t007._resourceCache[src];
+  if (type === "script" ? [...document.scripts].some((s) => isSameURL(s.src, src)) : type === "style" ? [...document.styleSheets].some((s) => isSameURL(s.href, src)) : false) return Promise.resolve();
+  t007._resourceCache[src] = new Promise((resolve, reject) => {
+    if (type === "script") {
+      const script = Object.assign(document.createElement("script"), { src, type: module ? "module" : "text/javascript", onload: () => resolve(script), onerror: () => reject(new Error(`Script load error: ${src}`)) });
+      if (crossOrigin) script.crossOrigin = crossOrigin;
+      if (integrity) script.integrity = integrity;
+      document.body.append(script);
+    } else if (type === "style") {
+      const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href: src, onload: () => resolve(link), onerror: () => reject(new Error(`Stylesheet load error: ${src}`)) });
+      if (media) link.media = media;
+      document.head.append(link);
+    } else reject(new Error(`Unsupported type: ${type}`));
+  });
+  return t007._resourceCache[src];
 }
