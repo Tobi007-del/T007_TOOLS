@@ -1,3 +1,5 @@
+"use strict";
+
 (function (env) {
   let init = function (keyword) {
     return new getTime(keyword)[keyword];

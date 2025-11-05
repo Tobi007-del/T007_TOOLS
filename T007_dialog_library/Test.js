@@ -13,17 +13,17 @@ window.showPrompt = async function () {
 };
 
 window.playGame = async function () {
-  async function log(...args) {
-    console.log(args[1] ? `%c ${args[0]}` : args[0], args[1] ?? "");
-    await Alert(args[0]);
+  async function log(...[message, formatting = "", options = {}]) {
+    console.log(`${formatting ? "%c" : ""}${message}`, formatting);
+    await Alert(message, options);
   }
   (async function init() {
     let userChoice = await Prompt("🎮 Would you like to play a game of Rock, Paper, Scissors? ✊ ✋ ✌️", "", { placeholder: "'y' for YES, 'n' for NO", required: true });
     if (userChoice?.toLowerCase?.() === "y" || userChoice?.toUpperCase?.() === "YES") {
       await log("🔥 There are three rounds!!! 🔥");
       await playGame();
-    } else if (userChoice?.toLowerCase?.() === "n" || userChoice?.toUpperCase?.() === "NO") await log("🙃 Reload the page and type in 'y' if you change your mind!");
-    else await log("🤔 I hope you change your mind!");
+    } else if (userChoice?.toLowerCase?.() === "n" || userChoice?.toUpperCase?.() === "NO") await log("🙃 Play again and type in 'y' if you change your mind!", "", { confirmText: "Alright" });
+    else await log("🤔 I hope you change your mind!", "", { confirmText: "Alright" });
   })();
   async function playGame() {
     let humanScore = 0;
@@ -32,22 +32,22 @@ window.playGame = async function () {
       let HC = humanChoice?.toUpperCase?.();
       let CC = computerChoice?.toUpperCase?.();
       if (HC === "ROCK" && CC === "PAPER") {
-        await log("❌ You lose this round! ✋ beats ✊", "color: red;");
+        await log("❌ You lose this round! ✋ beats ✊", "color: red;", { confirmText: "Damn" });
         return computerScore++;
       } else if (HC === "PAPER" && CC === "SCISSORS") {
-        await log("❌ You lose this round! ✌️ beats ✋", "color: red;");
+        await log("❌ You lose this round! ✌️ beats ✋", "color: red;", { confirmText: "Damn" });
         return computerScore++;
       } else if (HC === "SCISSORS" && CC === "ROCK") {
-        await log("❌ You lose this round! ✊ beats ✌️", "color: red;");
+        await log("❌ You lose this round! ✊ beats ✌️", "color: red;", { confirmText: "Damn" });
         return computerScore++;
       } else if (CC === "ROCK" && HC === "PAPER") {
-        await log("✅ You win this round! ✋ beats ✊", "color: green; font-weight: bold;");
+        await log("✅ You win this round! ✋ beats ✊", "color: green; font-weight: bold;", { confirmText: "Cool!" });
         return humanScore++;
       } else if (CC === "PAPER" && HC === "SCISSORS") {
-        await log("✅ You win this round! ✌️ beats ✋", "color: green; font-weight: bold;");
+        await log("✅ You win this round! ✌️ beats ✋", "color: green; font-weight: bold;", { confirmText: "Cool!" });
         return humanScore++;
       } else if (CC === "SCISSORS" && HC === "ROCK") {
-        await log("✅ You win this round! ✊ beats ✌️", "color: green; font-weight: bold;");
+        await log("✅ You win this round! ✊ beats ✌️", "color: green; font-weight: bold;", { confirmText: "Cool!" });
         return humanScore++;
       } else if (CC === HC) await log(`🤝 No Winner! You both chose ${humanChoice}.`, "color: blue;");
       else if (humanChoice) await log(`⚠️ Invalid choice! '${humanChoice}' is not an option.`, "color: purple;");
@@ -63,14 +63,15 @@ window.playGame = async function () {
         required: true,
         minLength: 4,
         maxLength: 8,
+        confirmText: "GO",
       });
     }
     for (let rounds = 1; rounds < 4; rounds++) {
-      await log(`🎲 Round ${rounds} begins!`);
+      await log(`🎲 Round ${rounds} begins!`, "", { confirmText: "Sure" });
       await playRound(await getHumanChoice(), getComputerChoice());
     }
-    if (computerScore > humanScore) await log(`🤖 Computer wins! Score: ${computerScore} 🆚 You: ${humanScore}`, "color: blue; font-weight: bold;");
-    else if (computerScore < humanScore) await log(`🏆 You win! Score: ${humanScore} 🆚 Computer: ${computerScore}`, "color: green; font-weight: bolder;");
-    else if (computerScore === humanScore) await log(`🤝 It's a tie! Both scored ${humanScore}!`, "color: brown;");
+    if (computerScore > humanScore) await log(`🤖 Computer wins! Score: ${computerScore} 🆚 You: ${humanScore}`, "color: blue; font-weight: bold;", { confirmText: "Not fair :(" });
+    else if (computerScore < humanScore) await log(`🏆 You win! Score: ${humanScore} 🆚 Computer: ${computerScore}`, "color: green; font-weight: bolder;", { confirmText: "I'm the best!" });
+    else if (computerScore === humanScore) await log(`🤝 It's a tie! Both scored ${humanScore}!`, "color: brown;", { confirmText: "Too bad :(" });
   }
 };

@@ -148,6 +148,8 @@ body:has(.t007-dialog[open]) {
 .t007-dialog-bottom-section {
   align-self: flex-end;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: var(--t007-dialog-button-gap);
 }
 

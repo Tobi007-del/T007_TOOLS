@@ -1,4 +1,4 @@
-"use_strict";
+"use strict";
 
 class T007_Dialog {
   dialog;
@@ -117,7 +117,7 @@ class T007_Prompt_Dialog extends T007_Dialog {
     this.cancelBtn.addEventListener("click", this.cancel);
     this.form = this.dialog.querySelector("form");
     this.form.onSubmit = this.confirm;
-    window.handleFormValidation(this.form);
+    t007.FM?.handleFormValidation?.(this.form);
     this.show();
   }
 
@@ -154,10 +154,14 @@ if (typeof window !== "undefined") {
   window.t007 ??= { _resourceCache: {} };
   window.T007_DIALOG_CSS_SRC ??= `/T007_TOOLS/T007_dialog_library/T007_dialog.css`;
   window.T007_INPUT_JS_SRC ??= `/T007_TOOLS/T007_input_library/T007_input.js`;
-  window.Alert ??= t007.alert = Alert;
-  window.Confirm ??= t007.confirm = Confirm;
-  window.Prompt ??= t007.prompt = Prompt;
+  t007.alert = Alert;
+  t007.confirm = Confirm;
+  t007.prompt = Prompt;
   loadResource(T007_DIALOG_CSS_SRC);
+  loadResource(window.T007_INPUT_JS_SRC, "script");
+  window.Alert ??= t007.alert;
+  window.Confirm ??= t007.confirm;
+  window.Prompt ??= t007.prompt;
   console.log("%cT007 Dialogs attached to window!", "color: green");
 }
 

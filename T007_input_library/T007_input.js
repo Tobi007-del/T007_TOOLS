@@ -523,6 +523,7 @@ if (typeof window !== "undefined") {
   window.T007_INPUT_CSS_SRC ??= `/T007_TOOLS/T007_input_library/T007_input.css`;
   window.createField ??= t007.FM.createField;
   window.handleFormValidation ??= t007.FM.handleFormValidation;
+  console.log("%cT007 Input helpers attached to window!", "color: green");
   loadResource(T007_INPUT_CSS_SRC);
   t007.FM.init();
 }
