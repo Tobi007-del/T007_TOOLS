@@ -18,8 +18,7 @@ class T007_Dialog {
     let proto = Object.getPrototypeOf(this);
     while (proto && proto !== Object.prototype) {
       for (const method of Object.getOwnPropertyNames(proto)) {
-        const descriptor = Object.getOwnPropertyDescriptor(proto, method);
-        if (method !== "constructor" && descriptor && typeof descriptor.value === "function") this[method] = this[method].bind(this);
+        if (method !== "constructor" && typeof Object.getOwnPropertyDescriptor(proto, method)?.value === "function") this[method] = this[method].bind(this);
       }
       proto = Object.getPrototypeOf(proto);
     }

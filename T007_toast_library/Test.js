@@ -3,9 +3,16 @@ import Toast from "./T007_toast.js";
 //just testing all possible positions
 const positions = ["top-right", "top-left", "top-center", "bottom-right", "bottom-left", "bottom-center", "center-right", "center-left", "center-center"];
 window.showToast = function showToast() {
-  Toast("Hello, I'm Tobi007", {
+  Toast.info("Hello, I'm Tobi007", {
     position: positions[Math.floor(Math.random() * positions.length)],
     image: "../assets/images/my_profile_s.jpeg",
+  });
+};
+window.showPromiseToast = function showToast() {
+  Toast.promise(undefined, {
+    pending: { render: "Identity loading...", position: positions[Math.floor(Math.random() * positions.length)] },
+    success: { render: "Call me, Tobi007", image: "../assets/images/my_profile_s.jpeg" },
+    error: "Identity fetch failed",
   });
 };
 
