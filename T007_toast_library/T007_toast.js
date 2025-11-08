@@ -15,7 +15,7 @@ class T007_Toast {
     this.bindMethods();
     this.opts = { ...options };
     this.id = this.opts.id || uid();
-    t007._TOASTS.set(this.id, this);
+    t007.toasts.set(this.id, this);
     this.toastElement = Object.assign(document.createElement("div"), { className: `t007-toast ${this.opts.type}` });
     requestAnimationFrame(() => this.toastElement.classList.add("t007-toast-show"));
     this.update(this.opts);
@@ -48,7 +48,7 @@ class T007_Toast {
   set type(value) {
     this.toastElement.classList.remove("info", "success", "error", "warning");
     value && this.toastElement.classList.add(value);
-    this.updateACV();
+    this._updateACV();
     if (value) this.icon = this.opts.icon;
   }
   set bodyHTML(value) {
@@ -58,7 +58,7 @@ class T007_Toast {
   set render(value) {
     const bodyText = () => this.toastElement.querySelector(".t007-toast-body-text");
     if (value) {
-      this.setUpBodyHTML();
+      this._setUpBodyHTML();
       this.toastElement.querySelector(".t007-toast-body").append(bodyText() || Object.assign(document.createElement("p"), { className: "t007-toast-body-text" }));
       bodyText().innerHTML = typeof value === "function" ? value() : value;
     } else bodyText()?.remove();
@@ -66,7 +66,7 @@ class T007_Toast {
   set image(value) {
     const image = () => this.toastElement.querySelector(".t007-toast-image");
     if (value) {
-      this.setUpBodyHTML();
+      this._setUpBodyHTML();
       this.toastElement.querySelector(".t007-toast-image-wrapper").prepend(image() || Object.assign(document.createElement("img"), { className: "t007-toast-image", alt: "toast-image" }));
       image().src = value;
     } else image()?.remove();
@@ -75,16 +75,16 @@ class T007_Toast {
     if (this.opts.isLoading) return;
     const icon = () => this.toastElement.querySelector(".t007-toast-icon:not(.t007-toast-loader)");
     if (value) {
-      this.setUpBodyHTML();
+      this._setUpBodyHTML();
       this.toastElement.querySelector(".t007-toast-image-wrapper").appendChild(icon() || Object.assign(document.createElement("span"), { className: "t007-toast-icon" }));
-      icon().innerHTML = typeof value === "string" ? value : this.getDefaultIconHTML();
+      icon().innerHTML = typeof value === "string" ? value : this._getDefaultIconHTML();
     } else icon()?.remove();
   }
   set isLoading(value) {
     const loader = () => this.toastElement.querySelector(".t007-toast-loader"),
       loadingIconHTML = `<svg class="no-css-fill" width="24" height="24" viewBox="0 0 16 16" fill="none" style="scale:0.75;"><g fill-rule="evenodd" clip-rule="evenodd"><path fill="whitesmoke" d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8"/><path fill="gray" d="M7.25.75A.75.75 0 0 1 8 0a8 8 0 0 1 8 8 .75.75 0 0 1-1.5 0A6.5 6.5 0 0 0 8 1.5a.75.75 0 0 1-.75-.75"/></g><animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0" to="360" dur="600ms" repeatCount="indefinite"/></svg>`;
     if (value) {
-      this.setUpBodyHTML();
+      this._setUpBodyHTML();
       this.toastElement.querySelectorAll(".t007-toast-icon:not(.t007-toast-loader)").forEach((i) => i.remove());
       this.toastElement.querySelector(".t007-toast-image-wrapper").appendChild(loader() || Object.assign(document.createElement("span"), { className: "t007-toast-icon t007-toast-loader" }));
       loader().innerHTML = typeof value === "string" ? value : loadingIconHTML;
@@ -100,9 +100,10 @@ class T007_Toast {
     } else btn?.remove();
   }
   set autoClose(value) {
-    if (value === false) return this.toastElement.classList.remove("progress");
+    if (!value) this.toastElement.classList.remove("progress");
     else this.hideProgressBar = this.opts.hideProgressBar;
-    this.updateACV();
+    cancelAnimationFrame(this.#autoCloseInterval);
+    this._updateACV();
     this.#timeVisible = 0;
     let lastTime;
     const loop = (time) => {
@@ -122,11 +123,11 @@ class T007_Toast {
       lastTime = time;
       this.#autoCloseInterval = requestAnimationFrame(loop);
     };
-    this.#autoCloseInterval = requestAnimationFrame(loop);
+    if (value) this.#autoCloseInterval = requestAnimationFrame(loop);
   }
   set position(value) {
     const currentContainer = this.toastElement.parentElement;
-    const container = this.opts.rootElement.querySelector(`.t007-toast-container[data-position="${value}"]`) || this.createContainer(value);
+    const container = this.opts.rootElement.querySelector(`.t007-toast-container[data-position="${value}"]`) || this._createContainer(value);
     container.append(this.toastElement);
     if (!(currentContainer == null || currentContainer.hasChildNodes())) currentContainer.remove();
   }
@@ -136,6 +137,7 @@ class T007_Toast {
   set hideProgressBar(value) {
     this.toastElement.classList.toggle("progress", !(this.opts.autoClose === false || value));
     this.toastElement.style.setProperty("--progress", 1);
+    cancelAnimationFrame(this.#progressInterval);
     const loop = () => {
       if (!this.#isPaused) this.toastElement.style.setProperty("--progress", this.#timeVisible / this.#autoClose);
       this.#progressInterval = requestAnimationFrame(loop);
@@ -151,20 +153,20 @@ class T007_Toast {
     value ? document.addEventListener("visibilitychange", this.#visiblityChange) : document.removeEventListener("visibilitychange", this.#visiblityChange);
   }
   set renotify(value) {
-    value && this.opts.tag && t007._TOASTS.entries().forEach(([id, toast]) => id !== this.id && (toast.opts.tag ?? 1) === (this.opts.tag ?? 0) && toast.remove("instant"));
+    value && this.opts.tag && t007.toasts.entries().forEach(([id, toast]) => id !== this.id && (toast.opts.tag ?? 1) === (this.opts.tag ?? 0) && toast.remove("instant"));
   }
   set vibrate(value) {
     if (!("vibrate" in navigator)) return;
     if (value === false) return;
-    this.updateACV();
+    this._updateACV();
     navigator.vibrate(this.#vibrate);
   }
   set dragToClose(value) {
     this.toastElement.dataset.pointerType = this._pointerType = value;
-    this.toastElement.onpointerdown = value ? this.handleToastPointerStart : null;
-    this.toastElement.onpointerup = value ? this.handleToastPointerUp : null;
+    this.toastElement.onpointerdown = value ? this._handleToastPointerStart : null;
+    this.toastElement.onpointerup = value ? this._handleToastPointerUp : null;
   }
-  handleToastPointerStart(e) {
+  _handleToastPointerStart(e) {
     if (typeof this._pointerType === "string" && e.pointerType !== this._pointerType) return;
     if (e.touches?.length > 1) return;
     e.stopImmediatePropagation();
@@ -172,10 +174,10 @@ class T007_Toast {
     this._pointerStartX = this.opts.dragToCloseDir.includes("x") ? (e.clientX ?? e.targetTouches[0]?.clientX) : 0;
     this._pointerStartY = this.opts.dragToCloseDir.includes("y") ? (e.clientY ?? e.targetTouches[0]?.clientY) : 0;
     this._pointerTicker = false;
-    this.toastElement.addEventListener("pointermove", this.handleToastPointerMove, { passive: false });
+    this.toastElement.addEventListener("pointermove", this._handleToastPointerMove, { passive: false });
     this.#isPaused = true;
   }
-  handleToastPointerMove(e) {
+  _handleToastPointerMove(e) {
     e.preventDefault();
     e.stopImmediatePropagation();
     if (this._pointerTicker) return;
@@ -193,12 +195,12 @@ class T007_Toast {
     });
     this._pointerTicker = true;
   }
-  handleToastPointerUp(e) {
+  _handleToastPointerUp(e) {
     if (typeof this._pointerType === "string" && e.pointerType !== this._pointerType) return;
     cancelAnimationFrame(this._pointerRAF);
     if (this.opts.dragToCloseDir.includes("x") ? Math.abs(this._pointerDeltaX) > this.toastElement.offsetWidth * (this.opts.dragToClosePercent.x ?? this.opts.dragToClosePercent / 100) : Math.abs(this._pointerDeltaY) > this.toastElement.offsetHeight * (this.opts.dragToClosePercent.y ?? this.opts.dragToClosePercent / 100)) return this.remove("instant");
     this._pointerTicker = false;
-    this.toastElement.removeEventListener("pointermove", this.handleToastPointerMove, { passive: false });
+    this.toastElement.removeEventListener("pointermove", this._handleToastPointerMove, { passive: false });
     this.toastElement.style.removeProperty("transition");
     this.toastElement.style.removeProperty("transform");
     this.toastElement.style.removeProperty("opacity");
@@ -208,13 +210,13 @@ class T007_Toast {
     document.removeEventListener("visibilitychange", this.#visiblityChange);
     cancelAnimationFrame(this.#autoCloseInterval);
     cancelAnimationFrame(this.#progressInterval);
-    if (manner === "instant") this.cleanUpToast();
-    else this.toastElement.onanimationend = this.cleanUpToast;
+    if (manner === "instant") this._cleanUpToast();
+    else this.toastElement.onanimationend = this._cleanUpToast;
     this.toastElement.classList.remove("t007-toast-show");
     this.onClose?.(timeElapsed);
-    if (!this.opts.isLoading) t007._TOASTS.delete(this.id);
+    if (!this.opts.isLoading) t007.toasts.delete(this.id);
   }
-  updateACV() {
+  _updateACV() {
     const setACV = (value) => {
       this.#autoClose = this.opts.autoClose === true ? t007.TOAST_DURATIONS[value] : this.opts.autoClose;
       this.#vibrate = this.opts.vibrate === true ? TOAST_VIBRATIONS[value] : this.opts.vibrate;
@@ -229,7 +231,7 @@ class T007_Toast {
         setACV("info");
     }
   }
-  createContainer(position) {
+  _createContainer(position) {
     const container = document.createElement("div");
     container.classList.add("t007-toast-container");
     container.style.setProperty("--t007-toast-container-position", this.opts.rootElement === document.body ? "fixed" : "absolute");
@@ -237,13 +239,13 @@ class T007_Toast {
     this.opts.rootElement.append(container);
     return container;
   }
-  setUpBodyHTML() {
+  _setUpBodyHTML() {
     this.toastElement.querySelectorAll(".t007-toast > *:not(.t007-toast-image-wrapper, .t007-toast-body, .t007-toast-cancel-button)").forEach((el) => el.remove());
     const imageWrapper = () => this.toastElement.querySelector(".t007-toast-image-wrapper");
     if (!imageWrapper()) this.toastElement.prepend(Object.assign(document.createElement("div"), { className: "t007-toast-image-wrapper" }));
     if (!this.toastElement.querySelector(".t007-toast-body")) imageWrapper().insertAdjacentElement("afterend", Object.assign(document.createElement("div"), { className: "t007-toast-body" }));
   }
-  getDefaultIconHTML() {
+  _getDefaultIconHTML() {
     const type = this.opts.type;
     let defaultIconHTML = "";
     switch (type) {
@@ -262,7 +264,7 @@ class T007_Toast {
     }
     return defaultIconHTML;
   }
-  cleanUpToast() {
+  _cleanUpToast() {
     const container = this.toastElement.parentElement;
     this.toastElement.remove();
     if (!container?.hasChildNodes()) container?.remove();
@@ -274,7 +276,7 @@ const Toaster = (defOptions = {}) => {
   const defaults = () => ({ ...t007.TOAST_DEFAULT_OPTIONS, ...defOptions });
   const base = (render, options = {}) => new T007_Toast({ ...defaults(), ...options, render }).id;
   base.update = (id, options) => {
-    const toast = t007._TOASTS.get(id),
+    const toast = t007.toasts.get(id),
       allOpts = { ...toast?.opts, ...options };
     return !!toast && (toast.destroyed ? base(allOpts.render, allOpts) : toast.update(options));
   };
@@ -282,7 +284,7 @@ const Toaster = (defOptions = {}) => {
     (action) =>
       (base[action] = (renderOrId, options = {}) => {
         options = { ...options, type: action === "warn" ? "warning" : action };
-        const toast = t007._TOASTS.get(renderOrId);
+        const toast = t007.toasts.get(renderOrId);
         if (!toast) return base(renderOrId, options);
         const { autoClose, closeButton, closeOnClick, dragToClose } = defaults();
         return base.update(renderOrId, { ...(toast.opts.isLoading ? { autoClose, closeButton, closeOnClick, dragToClose } : {}), ...options, isLoading: false });
@@ -315,7 +317,7 @@ const Toaster = (defOptions = {}) => {
     return promise;
   };
   base.dismiss = function (id, manner) {
-    return !arguments.length ? t007._TOASTS.values().forEach((toast) => toast.remove()) : t007._TOASTS.get(id)?.remove(manner);
+    return !arguments.length ? t007.toasts.values().forEach((toast) => toast.remove()) : t007.toasts.get(id)?.remove(manner);
   };
   return base;
 };
@@ -327,7 +329,7 @@ if (typeof window !== "undefined") {
   window.t007 ??= { _resourceCache: {} };
   t007.toast = Toast;
   t007.toaster = Toaster;
-  t007._TOASTS = new Map();
+  t007.toasts = new Map();
   t007.TOAST_DEFAULT_OPTIONS ??= {};
   t007.TOAST_DURATIONS = {};
   t007.TOAST_VIBRATIONS = {};
