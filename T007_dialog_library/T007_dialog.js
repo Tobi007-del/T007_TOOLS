@@ -15,7 +15,7 @@ class T007_Dialog {
   }
 
   bindMethods() {
-    let proto = Object.getPrototypeOf(this);
+    let proto = this;
     while (proto && proto !== Object.prototype) {
       for (const method of Object.getOwnPropertyNames(proto)) {
         if (method !== "constructor" && typeof Object.getOwnPropertyDescriptor(proto, method)?.value === "function") this[method] = this[method].bind(this);

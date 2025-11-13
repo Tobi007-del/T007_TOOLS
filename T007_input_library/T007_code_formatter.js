@@ -12,21 +12,14 @@ export function formatHTML(html, indentSize = 4) {
     .filter(Boolean);
   for (const token of tokens) {
     if (token.startsWith("</")) {
-      // Closing tag: decrease indent first
-      if (stack.length) stack.pop();
+      if (stack.length) stack.pop(); // Closing tag: decrease indent first
       formatted.push(indent(stack.length) + token);
     } else if (token.startsWith("<") && token.endsWith(">")) {
       const tagNameMatch = token.match(/^<\s*([^\s>\/]+)/);
       const tagName = tagNameMatch?.[1]?.toLowerCase();
       formatted.push(indent(stack.length) + token);
-      if (tagName && !voidTags.has(tagName) && !token.endsWith("/>")) {
-        // Only increase indent for non-void, non-self-closing tags
-        stack.push(tagName);
-      }
-    } else {
-      // Text node
-      formatted.push(indent(stack.length) + token);
-    }
+      if (tagName && !voidTags.has(tagName) && !token.endsWith("/>")) stack.push(tagName); // Only increase indent for non-void, non-self-closing tags
+    } else formatted.push(indent(stack.length) + token); // Text node
   }
   return formatted.join("\n");
 }
@@ -40,7 +33,12 @@ export function highlightHTML(html) {
     else if (groups.scriptContent) return highlightJS(groups.scriptContent);
     else if (groups.comment) return `<span class="token comment">${groups.comment}</span>`;
     else if (groups.tag) return `<span class="token tag">${groups.tag}</span>`;
-    else if (groups.attr && groups.eq && groups.val) return `<span class="token attr">${groups.attr}</span><span class="token eq">${groups.eq}</span><span class="token value">${groups.val}</span>`;
+    else if (groups.attr && groups.eq && groups.val)
+      return `
+      <span class="token attr">${groups.attr}</span>
+      <span class="token eq">${groups.eq}</span>
+      <span class="token value">${groups.val}</span>
+    `;
     else if (groups.closetag) return `<span class="token tag">${groups.closetag}</span>`;
     return match;
   });
