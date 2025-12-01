@@ -33,12 +33,7 @@ export function highlightHTML(html) {
     else if (groups.scriptContent) return highlightJS(groups.scriptContent);
     else if (groups.comment) return `<span class="token comment">${groups.comment}</span>`;
     else if (groups.tag) return `<span class="token tag">${groups.tag}</span>`;
-    else if (groups.attr && groups.eq && groups.val)
-      return `
-      <span class="token attr">${groups.attr}</span>
-      <span class="token eq">${groups.eq}</span>
-      <span class="token value">${groups.val}</span>
-    `;
+    else if (groups.attr && groups.eq && groups.val) return `<span class="token attr">${groups.attr}</span><span class="token eq">${groups.eq}</span><span class="token value">${groups.val}</span>`;
     else if (groups.closetag) return `<span class="token tag">${groups.closetag}</span>`;
     return match;
   });
