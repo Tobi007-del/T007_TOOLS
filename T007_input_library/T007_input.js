@@ -249,7 +249,7 @@ class T007_Form_Manager {
     const isTextArea = type === "textarea";
     const isCheckboxOrRadio = type === "checkbox" || type === "radio";
     const field = document.createElement("div");
-    field.className = `t007-input-field ${isWrapper ? "t007-input-is-wrapper" : ""} ${indeterminate ? "t007-input-indeterminate" : ""} ${!!nativeIcon ? "t007-input-icon-override" : ""} ${helperText === false ? "t007-input-no-helper" : ""} ${fieldClassName}`;
+    field.className = `t007-input-field${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${!!nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}${fieldClassName ? ` ${fieldClassName}` : ""}`;
     const labelEl = document.createElement("label");
     labelEl.className = isCheckboxOrRadio ? `t007-input-${type}-wrapper` : "t007-input-wrapper";
     field.appendChild(labelEl);
@@ -273,7 +273,7 @@ class T007_Form_Manager {
       labelEl.appendChild(outline);
     }
     const inputEl = document.createElement(isTextArea ? "textarea" : isSelect ? "select" : "input");
-    inputEl.className = `t007-input ${className}`;
+    inputEl.className = `t007-input${className ? ` ${className}` : ""}`;
     if (!isSelect && !isTextArea) inputEl.type = type;
     inputEl.placeholder = placeholder;
     if (custom) inputEl.setAttribute("custom", custom);
