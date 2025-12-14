@@ -6,6 +6,9 @@ window.showToast = function showToast() {
   Toast.info("Hello, I'm Tobi007", {
     position: positions[Math.floor(Math.random() * positions.length)],
     image: "../assets/images/my_profile_s.jpeg",
+    actions: {
+      Visit: () => window.open("https://github.com/Tobi007-del", "_blank"),
+    },
   });
 };
 window.showPromiseToast = function showToast() {

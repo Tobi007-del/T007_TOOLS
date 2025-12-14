@@ -53,6 +53,11 @@
   padding: 0;
 }
 
+.t007-dialog *:disabled {
+  filter: grayscale(100%);
+  cursor: not-allowed;
+}
+
 .t007-dialog *:focus {
   outline-style: dashed;
   outline-offset: 0.1rem;
