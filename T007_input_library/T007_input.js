@@ -1,14 +1,14 @@
 "use strict";
 
-class T007_Form_Manager {
-  static forms = document.getElementsByClassName("t007-input-form");
-  static violationKeys = ["valueMissing", "typeMismatch", "patternMismatch", "stepMismatch", "tooShort", "tooLong", "rangeUnderflow", "rangeOverflow", "badInput", "customError"];
-  static init() {
+var T007_Form_Manager = {
+  forms: document.getElementsByClassName("t007-input-form"),
+  violationKeys: ["valueMissing", "typeMismatch", "patternMismatch", "stepMismatch", "tooShort", "tooLong", "rangeUnderflow", "rangeOverflow", "badInput", "customError"],
+  init() {
     t007.FM.observeDOMForFields();
     Array.from(t007.FM.forms).forEach(t007.FM.handleFormValidation);
-  }
-  static _SCROLLER_R_OBSERVER = typeof window !== "undefined" && new ResizeObserver((entries) => entries.forEach(({ target }) => t007.FM._SCROLLERS.get(target)?.update()));
-  static _SCROLLER_M_OBSERVER =
+  },
+  _SCROLLER_R_OBSERVER: typeof window !== "undefined" && new ResizeObserver((entries) => entries.forEach(({ target }) => t007.FM._SCROLLERS.get(target)?.update())),
+  _SCROLLER_M_OBSERVER:
     typeof window !== "undefined" &&
     new MutationObserver((entries) => {
       const els = new Set();
@@ -17,12 +17,10 @@ class T007_Form_Manager {
         while (node && !t007.FM._SCROLLERS.has(node)) node = node.parentElement;
         if (node) els.add(node);
       }
-      for (const el of els) {
-        t007.FM._SCROLLERS.get(el)?.update();
-      }
-    });
-  static _SCROLLERS = new WeakMap();
-  static initScrollAssist(el, { pxPerSecond = 80, assistClassName = "t007-input-scroll-assist", vertical = true, horizontal = true } = {}) {
+      for (const el of els) t007.FM._SCROLLERS.get(el)?.update();
+    }),
+  _SCROLLERS: new WeakMap(),
+  initScrollAssist(el, { pxPerSecond = 80, assistClassName = "t007-input-scroll-assist", vertical = true, horizontal = true } = {}) {
     const parent = el?.parentElement;
     if (!parent || t007.FM._SCROLLERS.has(el)) return;
     const assist = {};
@@ -62,30 +60,20 @@ class T007_Form_Manager {
       last = performance.now();
       frame();
     };
-    const stop = () => {
-      if (scrollId) cancelAnimationFrame(scrollId);
-      scrollId = null;
-    };
+    const stop = () => (cancelAnimationFrame(scrollId), (scrollId = null));
     const addAssist = (dir) => {
-      const div = Object.assign(document.createElement("div"), {
-        className: assistClassName,
-        style: "display:none",
-      });
+      const div = Object.assign(document.createElement("div"), { className: assistClassName, style: "display:none" });
       div.dataset.scrollDirection = dir;
       ["pointerenter", "dragenter"].forEach((e) => div.addEventListener(e, () => scroll(dir)));
       ["pointerleave", "pointerup", "pointercancel", "dragleave", "dragend"].forEach((e) => div.addEventListener(e, stop));
-      (dir === "left" || dir === "up" ? parent.insertBefore : parent.appendChild).call(parent, div, el);
+      (dir === "left" || dir === "up" ? parent.insertBefore : parent.append).call(parent, div, el);
       assist[dir] = div;
     };
     if (horizontal) ["left", "right"].forEach(addAssist);
     if (vertical) ["up", "down"].forEach(addAssist);
     el.addEventListener("scroll", update);
     t007.FM._SCROLLER_R_OBSERVER.observe(el);
-    t007.FM._SCROLLER_M_OBSERVER.observe(el, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
+    t007.FM._SCROLLER_M_OBSERVER.observe(el, { childList: true, subtree: true, characterData: true });
     t007.FM._SCROLLERS.set(el, {
       update,
       destroy() {
@@ -98,37 +86,25 @@ class T007_Form_Manager {
     });
     update();
     return t007.FM._SCROLLERS.get(el);
-  }
-  static removeScrollAssist(el) {
-    t007.FM._SCROLLERS.get(el)?.destroy();
-  }
-  static observeDOMForFields() {
+  },
+  removeScrollAssist: (el) => t007.FM._SCROLLERS.get(el)?.destroy(),
+  observeDOMForFields() {
     new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         for (const node of mutation.addedNodes) {
-          if (node?.classList?.contains("t007-input-field") || node?.querySelector?.(".t007-input-field")) {
-            const fields = [...(node.classList.contains("t007-input-field") ? [node] : node.querySelectorAll(".t007-input-field"))];
-            for (const field of fields) {
-              t007.FM.setUpField(field);
-            }
-          }
+          if (!node.tagName || !(node?.classList?.contains("t007-input-field") || node?.querySelector?.(".t007-input-field"))) continue;
+          for (const field of [...(node.querySelector(".t007-input-field") ? node.querySelectorAll(".t007-input-field") : [node])]) t007.FM.setUpField(field);
         }
       }
     }).observe(document.body, { childList: true, subtree: true });
-  }
-  static getFilesHelper(files, opts) {
+  },
+  getFilesHelper(files, opts) {
     if (!files || !files.length) return { violation: null, message: "" };
     const totalFiles = files.length;
     let totalSize = 0;
     let currFiles = 0;
-    const setMaxError = (size, max, n = 0) => ({
-      violation: "rangeOverflow",
-      message: n ? `File ${files.length > 1 ? n : ""} size of ${t007.FM.formatSize(size)} exceeds the per file maximum of ${t007.FM.formatSize(max)}` : `Total files size of ${t007.FM.formatSize(size)} exceeds the total maximum of ${t007.FM.formatSize(max)}`,
-    });
-    const setMinError = (size, min, n = 0) => ({
-      violation: "rangeUnderflow",
-      message: n ? `File ${files.length > 1 ? n : ""} size of ${t007.FM.formatSize(size)} is less than the per file minimum of ${t007.FM.formatSize(min)}` : `Total files size of ${t007.FM.formatSize(size)} is less than the total minimum of ${t007.FM.formatSize(min)}`,
-    });
+    const setMaxError = (size, max, n = 0) => ({ violation: "rangeOverflow", message: n ? `File ${files.length > 1 ? n : ""} size of ${t007.FM.formatSize(size)} exceeds the per file maximum of ${t007.FM.formatSize(max)}` : `Total files size of ${t007.FM.formatSize(size)} exceeds the total maximum of ${t007.FM.formatSize(max)}` });
+    const setMinError = (size, min, n = 0) => ({ violation: "rangeUnderflow", message: n ? `File ${files.length > 1 ? n : ""} size of ${t007.FM.formatSize(size)} is less than the per file minimum of ${t007.FM.formatSize(min)}` : `Total files size of ${t007.FM.formatSize(size)} is less than the total minimum of ${t007.FM.formatSize(min)}` });
     for (const file of files) {
       currFiles++;
       totalSize += file.size;
@@ -139,11 +115,7 @@ class T007_Form_Manager {
             .split(",")
             .map((type) => type.trim().replace(/^[*\.]+|[*\.]+$/g, ""))
             .filter(Boolean) || [];
-        if (!acceptedTypes.some((type) => file.type.includes(type)))
-          return {
-            violation: "typeMismatch",
-            message: `File${currFiles > 1 ? currFiles : ""} type of '${file.type}' is not accepted.`,
-          };
+        if (!acceptedTypes.some((type) => file.type.includes(type))) return { violation: "typeMismatch", message: `File${currFiles > 1 ? currFiles : ""} type of '${file.type}' is not accepted.` };
       }
       // Per file size limits
       if (opts.maxSize && file.size > opts.maxSize) return setMaxError(file.size, opts.maxSize, currFiles);
@@ -152,43 +124,29 @@ class T007_Form_Manager {
       if (opts.multiple) {
         if (opts.maxTotalSize && totalSize > opts.maxTotalSize) return setMaxError(totalSize, opts.maxTotalSize);
         if (opts.minTotalSize && totalSize < opts.minTotalSize) return setMinError(totalSize, opts.minTotalSize);
-        if (opts.maxLength && totalFiles > opts.maxLength)
-          return {
-            violation: "tooLong",
-            message: `Selected ${totalFiles} files exceeds the maximum of ${opts.maxLength} allowed file${opts.maxLength > 1 ? "s" : ""}`,
-          };
-        if (opts.minLength && totalFiles < opts.minLength)
-          return {
-            violation: "tooShort",
-            message: `Selected ${totalFiles} files is less than the minimum of ${opts.minLength} allowed file${opts.minLength > 1 ? "s" : ""}`,
-          };
+        if (opts.maxLength && totalFiles > opts.maxLength) return { violation: "tooLong", message: `Selected ${totalFiles} files exceeds the maximum of ${opts.maxLength} allowed file${opts.maxLength == 1 ? "" : "s"}` };
+        if (opts.minLength && totalFiles < opts.minLength) return { violation: "tooShort", message: `Selected ${totalFiles} files is less than the minimum of ${opts.minLength} allowed file${opts.minLength == 1 ? "" : "s"}` };
       }
     }
     return { violation: null, message: "" }; // No errors
-  }
-  static formatSize(size) {
-    const units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    const exponent = Math.min(Math.floor(Math.log(size) / Math.log(1e3)), units.length - 1);
-    const approx = size / 1e3 ** exponent;
-    return exponent === 0 ? `${size} byte${size > 1 ? "s" : ""}` : `${approx} ${units[exponent]}`;
-  }
-  static togglePasswordType(input) {
-    input.type = input.type === "password" ? "text" : "password";
-  }
-  static toggleFilled(input) {
-    if (!input) return;
-    const isFilled = input.type === "checkbox" || input.type === "radio" ? input.checked : input.value !== "" || input.files?.length > 0;
-    input.toggleAttribute("data-filled", isFilled);
-  }
-  static setFallbackHelper(field) {
+  },
+  formatSize(size, decimals = 3, base = 1e3) {
+    if (size < base) return `${size} byte${size == 1 ? "" : "s"}`;
+    const units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+      exponent = Math.min(Math.floor(Math.log(size) / Math.log(base)), units.length - 1);
+    return `${(size / Math.pow(base, exponent)).toFixed(decimals).replace(/\.0+$/, "")} ${units[exponent]}`;
+  },
+  togglePasswordType: (input) => (input.type = input.type === "password" ? "text" : "password"),
+  toggleFilled: (input) => input?.toggleAttribute("data-filled", input.type === "checkbox" || input.type === "radio" ? input.checked : input.value !== "" || input.files?.length > 0),
+  setFallbackHelper(field) {
     const helperTextWrapper = field?.querySelector(".t007-input-helper-text-wrapper");
     if (!helperTextWrapper || helperTextWrapper.querySelector(".t007-input-helper-text[data-violation='auto']")) return;
     const el = document.createElement("p");
     el.className = "t007-input-helper-text";
     el.setAttribute("data-violation", "auto");
-    helperTextWrapper.appendChild(el);
-  }
-  static setFieldListeners(field) {
+    helperTextWrapper.append(el);
+  },
+  setFieldListeners(field) {
     if (!field) return;
     const input = field.querySelector(".t007-input"),
       floatingLabel = field.querySelector(".t007-input-floating-label"),
@@ -209,9 +167,8 @@ class T007_Form_Manager {
           URL.revokeObjectURL(src);
         };
         let src;
-        if (file?.type?.startsWith("image")) {
-          src = URL.createObjectURL(file);
-        } else if (file?.type?.startsWith("video")) {
+        if (file?.type?.startsWith("image")) src = URL.createObjectURL(file);
+        else if (file?.type?.startsWith("video")) {
           src = await new Promise((resolve) => {
             let video = document.createElement("video"),
               canvas = document.createElement("canvas"),
@@ -228,7 +185,7 @@ class T007_Form_Manager {
         }
         if (!src) {
           input.style.removeProperty("--t007-input-image-src");
-          input.classList.remove("t007-image-selected");
+          input.classList.remove("t007-input-image-selected");
           return;
         }
         img.src = src;
@@ -236,15 +193,15 @@ class T007_Form_Manager {
     if (floatingLabel) floatingLabel.ontransitionend = () => floatingLabel.classList.remove("t007-input-shake");
     if (eyeOpen && eyeClosed) eyeOpen.onclick = eyeClosed.onclick = () => t007.FM.togglePasswordType(input);
     t007.FM.initScrollAssist(field.querySelector(".t007-input-helper-text-wrapper"));
-  }
-  static setUpField(field) {
+  },
+  setUpField(field) {
     if (field.dataset.setUp) return;
     t007.FM.toggleFilled(field.querySelector(".t007-input"));
     t007.FM.setFallbackHelper(field);
     t007.FM.setFieldListeners(field);
     field.dataset.setUp = "true";
-  }
-  static createField({ isWrapper = false, label = "", type = "text", placeholder = "", custom = "", minSize, maxSize, minTotalSize, maxTotalSize, options = [], indeterminate = false, eyeToggler = true, passwordMeter = true, helperText = {}, className = "", fieldClassName = "", children, startIcon = "", endIcon = "", nativeIcon = "", passwordVisibleIcon = "", passwordHiddenIcon = "", ...otherProps }) {
+  },
+  createField({ isWrapper = false, label = "", type = "text", placeholder = "", custom = "", minSize, maxSize, minTotalSize, maxTotalSize, options = [], indeterminate = false, eyeToggler = true, passwordMeter = true, helperText = {}, className = "", fieldClassName = "", children, startIcon = "", endIcon = "", nativeIcon = "", passwordVisibleIcon = "", passwordHiddenIcon = "", ...otherProps }) {
     const isSelect = type === "select";
     const isTextArea = type === "textarea";
     const isCheckboxOrRadio = type === "checkbox" || type === "radio";
@@ -252,7 +209,7 @@ class T007_Form_Manager {
     field.className = `t007-input-field${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${!!nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}${fieldClassName ? ` ${fieldClassName}` : ""}`;
     const labelEl = document.createElement("label");
     labelEl.className = isCheckboxOrRadio ? `t007-input-${type}-wrapper` : "t007-input-wrapper";
-    field.appendChild(labelEl);
+    field.append(labelEl);
     if (isCheckboxOrRadio) {
       labelEl.innerHTML = `
         <span class="t007-input-${type}-box">
@@ -270,9 +227,11 @@ class T007_Form_Manager {
         </span>
         <span class="t007-input-outline-trailing"></span>
       `;
-      labelEl.appendChild(outline);
+      labelEl.append(outline);
     }
     const inputEl = document.createElement(isTextArea ? "textarea" : isSelect ? "select" : "input");
+    // Insert options if select
+    if (isSelect && Array.isArray(options)) inputEl.innerHTML = options.map((opt) => (typeof opt === "string" ? `<option value="${opt}">${opt}</option>` : `<option value="${opt.value}">${opt.option}</option>`)).join("");
     inputEl.className = `t007-input${className ? ` ${className}` : ""}`;
     if (!isSelect && !isTextArea) inputEl.type = type;
     inputEl.placeholder = placeholder;
@@ -282,25 +241,21 @@ class T007_Form_Manager {
     if (minTotalSize) inputEl.setAttribute("mintotalsize", minTotalSize);
     if (maxTotalSize) inputEl.setAttribute("maxtotalsize", maxTotalSize);
     // Drill other props into input, quite reckless though but necessary
-    Object.entries(otherProps).forEach(([key, val]) => inputEl.setAttribute(key, val));
-    // Insert options if select
-    if (isSelect && Array.isArray(options)) {
-      inputEl.innerHTML = options.map((opt) => (typeof opt === "string" ? `<option value="${opt}">${opt}</option>` : `<option value="${opt.value}">${opt.option}</option>`)).join("");
-    }
+    Object.entries(otherProps).forEach(([key, val]) => (inputEl[key] = val));
     // Append main input/textarea/select
-    labelEl.appendChild(!isWrapper ? inputEl : children);
+    labelEl.append(!isWrapper ? inputEl : children);
     // Native or end icon for date/time/month/datetime-local
     const nativeTypes = ["date", "time", "month", "datetime-local"];
     if (nativeTypes.includes(type) && nativeIcon) {
       const icon = document.createElement("i");
       icon.className = "t007-input-icon";
       icon.innerHTML = nativeIcon;
-      labelEl.appendChild(icon);
+      labelEl.append(icon);
     } else if (endIcon) {
       const icon = document.createElement("i");
       icon.className = "t007-input-icon";
       icon.innerHTML = endIcon;
-      labelEl.appendChild(icon);
+      labelEl.append(icon);
     }
     // Password toggle eye icons
     if (type === "password" && eyeToggler) {
@@ -312,7 +267,7 @@ class T007_Form_Manager {
         passwordVisibleIcon ||
         /* Default open eye SVG */
         `<svg width="24" height="24"><path fill="rgba(0,0,0,.54)" d="M12 16q1.875 0 3.188-1.312Q16.5 13.375 16.5 11.5q0-1.875-1.312-3.188Q13.875 7 12 7q-1.875 0-3.188 1.312Q7.5 9.625 7.5 11.5q0 1.875 1.312 3.188Q10.125 16 12 16Zm0-1.8q-1.125 0-1.912-.788Q9.3 12.625 9.3 11.5t.788-1.913Q10.875 8.8 12 8.8t1.913.787q.787.788.787 1.913t-.787 1.912q-.788.788-1.913.788Zm0 4.8q-3.65 0-6.65-2.038-3-2.037-4.35-5.462 1.35-3.425 4.35-5.463Q8.35 4 12 4q3.65 0 6.65 2.037 3 2.038 4.35 5.463-1.35 3.425-4.35 5.462Q15.65 19 12 19Z"/></svg>`;
-      labelEl.appendChild(visibleIcon);
+      labelEl.append(visibleIcon);
       const hiddenIcon = document.createElement("i");
       hiddenIcon.className = "t007-input-icon t007-input-password-hidden-icon";
       hiddenIcon.setAttribute("aria-label", "Hide password");
@@ -321,7 +276,7 @@ class T007_Form_Manager {
         passwordHiddenIcon ||
         /* Default closed eye SVG */
         `<svg width="24" height="24"><path fill="rgba(0,0,0,.54)" d="m19.8 22.6-4.2-4.15q-.875.275-1.762.413Q12.95 19 12 19q-3.775 0-6.725-2.087Q2.325 14.825 1 11.5q.525-1.325 1.325-2.463Q3.125 7.9 4.15 7L1.4 4.2l1.4-1.4 18.4 18.4ZM12 16q.275 0 .512-.025.238-.025.513-.1l-5.4-5.4q-.075.275-.1.513-.025.237-.025.512 0 1.875 1.312 3.188Q10.125 16 12 16Zm7.3.45-3.175-3.15q.175-.425.275-.862.1-.438.1-.938 0-1.875-1.312-3.188Q13.875 7 12 7q-.5 0-.938.1-.437.1-.862.3L7.65 4.85q1.025-.425 2.1-.638Q10.825 4 12 4q3.775 0 6.725 2.087Q21.675 8.175 23 11.5q-.575 1.475-1.512 2.738Q20.55 15.5 19.3 16.45Zm-4.625-4.6-3-3q.7-.125 1.288.112.587.238 1.012.688.425.45.613 1.038.187.587.087 1.162Z"/></svg>`;
-      labelEl.appendChild(hiddenIcon);
+      labelEl.append(hiddenIcon);
     }
     // Helper line
     if (helperText !== false) {
@@ -335,7 +290,7 @@ class T007_Form_Manager {
         info.className = "t007-input-helper-text";
         info.setAttribute("data-violation", "none");
         info.textContent = helperText.info;
-        helperWrapper.appendChild(info);
+        helperWrapper.append(info);
       }
       // Violation texts
       if (typeof window !== "undefined" && t007.FM?.violationKeys) {
@@ -343,13 +298,14 @@ class T007_Form_Manager {
           if (!helperText[key]) return;
           const el = document.createElement("p");
           el.className = "t007-input-helper-text";
+          el.setAttribute("data-violation", "t007-input-error");
           el.setAttribute("data-violation", key);
           el.textContent = helperText[key];
-          helperWrapper.appendChild(el);
+          helperWrapper.append(el);
         });
       }
-      helperLine.appendChild(helperWrapper);
-      field.appendChild(helperLine);
+      helperLine.append(helperWrapper);
+      field.append(helperLine);
     }
     // Password strength meter
     if (passwordMeter && type === "password") {
@@ -364,11 +320,11 @@ class T007_Form_Manager {
           <div class="t007-input-p-very-strong"></div>
         </div>
       `;
-      field.appendChild(meter);
+      field.append(meter);
     }
     return field;
-  }
-  static handleFormValidation(form) {
+  },
+  handleFormValidation(form) {
     if (!form?.classList.contains("t007-input-form") || form.dataset?.isValidating) return;
     form.dataset.isValidating = "true";
     form.validateOnClient = validateFormOnClient;
@@ -388,18 +344,14 @@ class T007_Form_Manager {
         if (!validateFormOnClient()) return;
         if (form.validateOnServer && !(await form.validateOnServer())) {
           toggleFormGlobalError(true);
-          form.addEventListener("input", () => toggleFormGlobalError(false), {
-            once: true,
-            useCapture: true,
-          });
+          form.addEventListener("input", () => toggleFormGlobalError(false), { once: true, useCapture: true });
           return;
         }
         form.onSubmit ? form.onSubmit() : form.submit();
       } catch (error) {
         console.error(error);
-      } finally {
-        toggleSubmitLoader(false);
       }
+      toggleSubmitLoader(false);
     });
     function toggleSubmitLoader(bool) {
       form.classList.toggle("t007-input-submit-loading", bool);
@@ -410,9 +362,7 @@ class T007_Form_Manager {
       if (bool && flag) {
         input.setAttribute("data-error", "");
         floatingLabel?.classList.add("t007-input-shake");
-      } else if (!bool) {
-        input.removeAttribute("data-error");
-      }
+      } else if (!bool) input.removeAttribute("data-error");
       toggleHelper(input, input.hasAttribute("data-error"));
     }
     function toggleHelper(input, bool) {
@@ -424,9 +374,8 @@ class T007_Form_Manager {
         .closest(".t007-input-field")
         .querySelectorAll(`.t007-input-helper-text:not([data-violation="${violation}"])`)
         .forEach((helper) => helper?.classList.remove("t007-input-show"));
-      if (helper) {
-        helper.classList.toggle("t007-input-show", bool);
-      } else if (fallbackHelper) {
+      if (helper) helper.classList.toggle("t007-input-show", bool);
+      else if (fallbackHelper) {
         fallbackHelper.textContent = input.validationMessage;
         fallbackHelper.classList.toggle("t007-input-show", bool);
       }
@@ -514,8 +463,8 @@ class T007_Form_Manager {
         if (bool) field.querySelector(".t007-input-floating-label")?.classList.add("t007-input-shake");
       });
     }
-  }
-}
+  },
+};
 
 if (typeof window !== "undefined") {
   window.t007 ??= { _resourceCache: {} };
@@ -523,7 +472,7 @@ if (typeof window !== "undefined") {
   window.T007_INPUT_CSS_SRC ??= `/T007_TOOLS/T007_input_library/T007_input.css`;
   window.createField ??= t007.FM.createField;
   window.handleFormValidation ??= t007.FM.handleFormValidation;
-  console.log("%cT007 Input helpers attached to window!", "color: green");
+  console.log("%cT007 Input helpers attached to window!", "color: darkturquoise");
   loadResource(T007_INPUT_CSS_SRC);
   t007.FM.init();
 }

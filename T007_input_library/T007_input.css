@@ -3,22 +3,15 @@
   --t007-input-font-family: inherit;
   --t007-input-width: 100%;
   --t007-input-height: 3rem;
-  --t007-input-padding: 0.75rem;
   --t007-input-font-size: 1rem;
   --t007-input-floating-label-scale: 0.75;
-  --t007-input-floating-label-font-size: calc(var(--t007-input-font-size) * var(--t007-input-floating-label-scale));
-  --t007-input-helper-font-size: 0.7rem;
   --t007-input-border-width: 1px;
   --t007-input-focused-border-width: 2px;
-  --t007-input-border-radius: 0.25rem;
   --t007-input-border-style: solid;
   --t007-input-focused-border-style: var(--t007-input-border-style);
   --t007-input-icon-width: unset;
   --t007-input-icon-height: unset;
   --t007-input-disabled-opacity: 0.6;
-  --t007-input-p-meter-font-size: 0.75rem;
-  --t007-input-p-meter-gap: 0.25rem;
-  --t007-input-p-meter-height: 0.25rem;
   --t007-input-p-meter-border-radius: unset;
   --t007-input-p-meter-color-weak: #b81a0a;
   --t007-input-p-meter-color-fair: #f68b1e;
@@ -70,15 +63,26 @@
   /* icon */
   --t007-input-icon-fill: var(--t007-input-color);
   --t007-input-icon-stroke: unset;
+  /* derived */
+  --t007-input-padding: calc(var(--t007-input-height) / 4);
+  --t007-input-floating-label-font-size: calc(var(--t007-input-font-size) * var(--t007-input-floating-label-scale));
+  --t007-input-helper-font-size: calc(var(--t007-input-font-size) * 0.7);
+  --t007-input-border-radius: calc(var(--t007-input-height) / 12);
+  --t007-input-p-meter-font-size: calc(var(--t007-input-font-size) * 0.75);
+  --t007-input-p-meter-gap: calc(var(--t007-input-font-size) * 0.25);
+  --t007-input-p-meter-height: calc(var(--t007-input-font-size) * 0.25);
+  --t007-input-checkbox-font-size: calc(var(--t007-input-font-size) * 0.9);
+  --t007-input-checkbox-gap: calc(var(--t007-input-font-size) * 0.5);
+  --t007-input-checkbox-size: calc(var(--t007-input-font-size) * 0.85);
+  --t007-input-radio-font-size: calc(var(--t007-input-font-size) * 0.9);
+  --t007-input-radio-gap: calc(var(--t007-input-font-size) * 0.5);
+  --t007-input-radio-size: calc(var(--t007-input-font-size) * 0.85);
 }
 
 /* checkbox input state variables */
 :where(:root) {
-  --t007-input-checkbox-font-size: 0.9rem;
-  --t007-input-checkbox-gap: 0.5rem;
   --t007-input-checkmark-color: white;
   --t007-input-checkmark-width: 2px;
-  --t007-input-checkbox-size: 0.85rem;
   --t007-input-checkbox-background: whitesmoke;
   --t007-input-checkbox-checked-background: dodgerblue;
   --t007-input-checkbox-border-color: #707070;
@@ -89,10 +93,7 @@
 
 /* radio input state variables */
 :where(:root) {
-  --t007-input-radio-font-size: 0.9rem;
-  --t007-input-radio-gap: 0.5rem;
   --t007-input-radio-color: dodgerblue;
-  --t007-input-radio-size: 0.85rem;
   --t007-input-radio-background: whitesmoke;
   --t007-input-radio-border-color: #707070;
   --t007-input-radio-checked-border-color: dodgerblue;

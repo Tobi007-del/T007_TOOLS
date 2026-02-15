@@ -1,4 +1,4 @@
-:root {
+:where(:root) {
   --t007-dialog-font-family: inherit;
   --t007-dialog-unit: 1rem;
   --t007-dialog-background: rgb(20, 20, 20);
@@ -15,8 +15,10 @@
   --t007-dialog-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5), -2px -2px 6px rgba(0, 0, 0, 0.5);
   --t007-dialog-backdrop-background: rgba(0, 0, 0, 0.2);
   --t007-dialog-backdrop-blur: blur(6px);
+  --t007-dialog-message-color: whitesmoke;
   --t007-dialog-message-font-size: 0.9rem;
   --t007-dialog-button-font-size: 0.8rem;
+  --t007-dialog-button-text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
   --t007-dialog-button-min-width: 4.7rem;
   --t007-dialog-button-width: unset;
   --t007-dialog-button-max-width: unset;
@@ -27,18 +29,20 @@
   --t007-dialog-button-padding-block: 0.5rem;
   --t007-dialog-button-border-radius: 1.25rem;
   --t007-dialog-button-gap: 0.65rem;
-  --t007-dialog-message-color: whitesmoke;
-  --t007-confirm-button-color: grey;
-  --t007-confirm-button-background: greenyellow;
-  --t007-cancel-button-color: greenyellow;
-  --t007-cancel-button-background: grey;
   --t007-button-outline-width: 0.15rem;
   --t007-button-outline-style: solid;
-  --t007-confirm-button-outline-color: grey;
-  --t007-cancel-button-outline-color: greenyellow;
 }
 
-.t007-dialog .t007-input-field {
+:where(:root, .t007-dialog) {
+  --t007-confirm-button-color: grey;
+  --t007-confirm-button-background: var(--t007-cancel-button-color);
+  --t007-cancel-button-color: greenyellow;
+  --t007-cancel-button-background: var(--t007-confirm-button-color);
+  --t007-confirm-button-outline-color: var(--t007-confirm-button-color);
+  --t007-cancel-button-outline-color: var(--t007-cancel-button-color);
+}
+
+:where(.t007-dialog) .t007-input-field {
   --t007-input-color: var(--t007-dialog-message-color);
 }
 
@@ -84,7 +88,7 @@
   filter: brightness(1.15);
 }
 
-body:has(.t007-dialog[open]) {
+:is(html, body):has(.t007-dialog[open]) {
   overflow: hidden;
 }
 
@@ -169,6 +173,7 @@ body:has(.t007-dialog[open]) {
   padding-inline: var(--t007-dialog-button-padding-inline);
   padding-block: var(--t007-dialog-button-padding-block);
   border-radius: var(--t007-dialog-button-border-radius);
+  text-shadow: var(--t007-dialog-button-text-shadow);
   transition: 100ms ease;
 }
 
