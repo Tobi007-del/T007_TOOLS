@@ -3,8 +3,9 @@ import Toast from "./T007_toast.js";
 //just testing all possible positions
 const positions = ["top-right", "top-left", "top-center", "bottom-right", "bottom-left", "bottom-center", "center-right", "center-left", "center-center"];
 window.showToast = function showToast() {
-  Toast.info("Hello, I'm Tobi007", {
+  Toast("Hello, I'm Tobi007", {
     position: positions[Math.floor(Math.random() * positions.length)],
+    icon: "👋",
     image: "../assets/images/my_profile_s.jpeg",
     actions: {
       Visit: () => window.open("https://github.com/Tobi007-del", "_blank"),
