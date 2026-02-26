@@ -202,8 +202,8 @@ window.copyExportedCode = function copyExportedCode() {
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard
       .writeText(text)
-      .then(() => Toast.success("Exported Code Copied to Clipboard"))
-      .catch((err) => Toast.error("Could not copy Exported Code to Clipboard"));
+      .then(() => Toast.success("Exported Code Copied to Clipboard", { tag: "export-copy" }))
+      .catch((err) => Toast.error("Could not copy Exported Code to Clipboard", { tag: "export-no-copy" }));
   } else {
     const textarea = document.createElement("textarea");
     textarea.value = text;
@@ -226,7 +226,7 @@ window.exportFormHTML = function exportFormHTML() {
   const HTML = getFieldsHTML();
   document.getElementById("output").dataset.code = HTML;
   document.getElementById("output").innerHTML = highlightHTML(HTML);
-  Toast.success("Exported HTML Code Below");
+  Toast.success("Exported HTML Code Below", { tag: "export-HTML" });
 };
 
 function getFieldsData() {
@@ -254,13 +254,13 @@ window.exportFormJSON = function exportFormJSON() {
   const json = JSON.stringify(data, null, 2);
   document.getElementById("output").dataset.code = json;
   document.getElementById("output").innerHTML = highlightJSON(json);
-  Toast.success("Exported JSON Code Below");
+  Toast.success("Exported JSON Code Below", { tag: "export-JSON" });
 };
 
 window.saveToLocal = function saveToLocal(e) {
   localStorage.setItem("savedForm", JSON.stringify(getFieldsData()));
   if (document.activeElement.tagName == "BUTTON") {
-    Toast.success("Saved Session to Local Storage");
+    Toast.success("Saved Session to Local Storage", { tag: "save" });
   }
 };
 
@@ -279,15 +279,15 @@ window.loadFromLocal = function loadFromLocal() {
       toggleCollapse(btn);
     }
   });
-  Toast.success("Loaded session from Local Storage");
+  Toast.success("Loaded session from Local Storage", { tag: "load" });
 };
 
 window.submitForm = function submitForm() {
-  Toast.info("Simulating Form Submission");
+  Toast.info("Simulating Form Submission", { tag: "submit" });
 };
 
 window.resetForm = function submitForm() {
-  Toast.success("Provided Form Data Removed");
+  Toast.success("Provided Form Data Removed", { tag: "reset" });
 };
 
 function addAutoSaveListeners(fieldEl) {
