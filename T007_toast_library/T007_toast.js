@@ -26,7 +26,7 @@ class T007_Toast {
     if (!options || typeof options !== "object") return this.opts.id;
     try {
       this.opts = { ...this.opts, ...options };
-      const run = () => Object.entries(options).forEach(([key, value]) => (this[key] = value));
+      const run = () => Object.keys(options).forEach((key) => (this[key] = options[key]));
       "number" !== typeof this.opts.delay ? run() : this.queue.push(setTimeout(run, this.opts.delay));
       this.opts.delay = null;
     } catch (err) {
@@ -456,8 +456,8 @@ function loadResource(src, type = "style", { module, media, crossOrigin, integri
         else (delete t007._resourceCache[src], reject(new Error(`${type} load failed after ${attempts} attempts: ${src}`))); // Final fail: clear cache so user can manually retry
       };
       const url = retryKey && remaining < attempts ? `${src}${src.includes("?") ? "&" : "?"}_${retryKey}=${Date.now()}` : src;
-      if (type === "script") document.body.append((el = createEl("script", { src: url, type: module ? "module" : "text/javascript", crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, onload: () => resolve(el), onerror })));
-      else if (type === "style") document.head.append((el = createEl("link", { rel: "stylesheet", href: url, media, crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, onload: () => resolve(el), onerror })));
+      if (type === "script") document.body.append((el = createEl("script", { src: url, type: module ? "module" : "text/javascript", crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, onload: () => resolve(el), onerror }) || ""));
+      else if (type === "style") document.head.append((el = createEl("link", { rel: "stylesheet", href: url, media, crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, onload: () => resolve(el), onerror }) || ""));
       else reject(new Error(`Unsupported resource type: ${type}`));
     })(attempts);
   });

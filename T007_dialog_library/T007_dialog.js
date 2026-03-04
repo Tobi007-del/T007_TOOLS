@@ -84,18 +84,17 @@ class T007_Prompt_Dialog extends T007_Dialog {
         <div class="t007-dialog-top-section">
           <p class="t007-dialog-question">${question}</p>
         </div>
-          ${createField?.(options)?.outerHTML}
         <div class="t007-dialog-bottom-section">
           <button class="t007-dialog-confirm-button" type="submit">${options.confirmText || "OK"}</button>
           <button class="t007-dialog-cancel-button" type="button">${options.cancelText || "Cancel"}</button>
         </div>
       </form>
     `;
+    (this.form = this.dialog.querySelector("form")).lastElementChild.insertAdjacentElement("beforebegin", t007.FM?.createField(options) || createEl("input", options));
+    this.form.onSubmit = this.confirm;
     this.confirmBtn = this.dialog.querySelector(".t007-dialog-confirm-button");
     this.cancelBtn = this.dialog.querySelector(".t007-dialog-cancel-button");
     this.cancelBtn.addEventListener("click", this.cancel);
-    this.form = this.dialog.querySelector("form");
-    this.form.onSubmit = this.confirm;
     t007.FM?.handleFormValidation?.(this.form);
     this.show();
   }
@@ -177,8 +176,8 @@ function loadResource(src, type = "style", { module, media, crossOrigin, integri
         else (delete t007._resourceCache[src], reject(new Error(`${type} load failed after ${attempts} attempts: ${src}`))); // Final fail: clear cache so user can manually retry
       };
       const url = retryKey && remaining < attempts ? `${src}${src.includes("?") ? "&" : "?"}_${retryKey}=${Date.now()}` : src;
-      if (type === "script") document.body.append((el = createEl("script", { src: url, type: module ? "module" : "text/javascript", crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, onload: () => resolve(el), onerror })));
-      else if (type === "style") document.head.append((el = createEl("link", { rel: "stylesheet", href: url, media, crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, onload: () => resolve(el), onerror })));
+      if (type === "script") document.body.append((el = createEl("script", { src: url, type: module ? "module" : "text/javascript", crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, onload: () => resolve(el), onerror }) || ""));
+      else if (type === "style") document.head.append((el = createEl("link", { rel: "stylesheet", href: url, media, crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, onload: () => resolve(el), onerror }) || ""));
       else reject(new Error(`Unsupported resource type: ${type}`));
     })(attempts);
   });
