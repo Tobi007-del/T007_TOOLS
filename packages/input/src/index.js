@@ -1,3 +1,4 @@
+import "./css/index.css";
 import { createEl, loadResource, initScrollAssist } from "@t007/utils";
 
 var formManager = {

@@ -1,3 +1,4 @@
+import "./css/index.css";
 import { clamp, uid, bindAllMethods, createEl, loadResource } from "@t007/utils";
 
 class T007_Toast {

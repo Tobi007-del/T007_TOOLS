@@ -1,6 +1,6 @@
 {
   "name": "@t007/dialog",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A lightweight, pure JS dialog system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -18,28 +18,28 @@
   "module": "./dist/index.js",
   "unpkg": "./dist/index.global.js",
   "jsdelivr": "./dist/index.global.js",
-  "types": "./src/ts/types/index.d.ts",
-  "style": "./src/css/index.css",
+  "types": "./dist/index.d.ts",
+  "style": "./dist/index.css",
   "sideEffects": [
     "*.css"
   ],
   "exports": {
     ".": {
-      "types": "./src/ts/types/index.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./standalone": "./dist/standalone.js",
     "./global": "./dist/index.global.js",
-    "./style.css": "./src/css/index.css"
+    "./style.css": "./dist/index.css"
   },
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts"
   },
   "files": [
     "dist",
-    "./src/ts/types/index.d.ts",
-    "./src/css/index.css"
+    "./dist/index.d.ts",
+    "./dist/index.css"
   ],
   "keywords": [
     "t007",
