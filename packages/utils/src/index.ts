@@ -16,7 +16,7 @@ if (typeof window !== "undefined") {
   window.T007_INPUT_JS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/input@latest`;
   window.T007_DIALOG_JS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/dialog@latest`;
   
-  window.T007_TOAST_CSS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/style.css`;
-  window.T007_INPUT_CSS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/input@latest/dist/style.css`;
-  window.T007_DIALOG_CSS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/dialog@latest/dist/style.css`;
+  window.T007_TOAST_CSS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/toast@latest/style.css`;
+  window.T007_INPUT_CSS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/input@latest/style.css`;
+  window.T007_DIALOG_CSS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/dialog@latest/style.css`;
 }

@@ -1,5 +1,5 @@
-import { confirm, prompt } from "https://cdn.jsdelivr.net/npm/@t007/dialog@latest/dist/index.js";
-import Toast from "https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/index.js";
+import { confirm, prompt } from "https://cdn.jsdelivr.net/npm/@t007/dialog@latest/dist/standalone.js";
+import Toast from "https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/standalone.js";
 import { formatHTML, highlightHTML, highlightJSON } from "formatter.js";
 
 window.onload = () =>

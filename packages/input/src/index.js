@@ -1,6 +1,6 @@
 import { createEl, loadResource, initScrollAssist } from "@t007/utils";
 
-var T007_Form_Manager = {
+var formManager = {
   forms: document.getElementsByClassName("t007-input-form"),
   violationKeys: ["valueMissing", "typeMismatch", "patternMismatch", "stepMismatch", "tooShort", "tooLong", "rangeUnderflow", "rangeOverflow", "badInput", "customError"],
   init() {
@@ -332,10 +332,13 @@ var T007_Form_Manager = {
   },
 };
 
+const { field, handleFormValidation } = formManager;
+export { formManager, field, handleFormValidation };
+
 if (typeof window !== "undefined") {
-  t007.FM = T007_Form_Manager;
-  t007.field = t007.FM.field;
-  t007.handleFormValidation = t007.FM.handleFormValidation;
+  t007.FM = formManager;
+  t007.field = field;
+  t007.handleFormValidation = handleFormValidation;
   window.field ??= t007.field;
   window.handleFormValidation ??= t007.handleFormValidation;
   console.log("%cT007 Input helpers attached to window!", "color: darkturquoise");

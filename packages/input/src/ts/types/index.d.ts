@@ -27,7 +27,7 @@ export interface FieldOptions extends Partial<
   passwordHiddenIcon?: string;
 }
 
-export interface T007FormManager {
+export interface FormManager {
   forms: HTMLCollectionOf<HTMLFormElement>;
   violationKeys: string[];
   init(): void;
@@ -47,15 +47,15 @@ export interface T007FormManager {
 }
 
 // BUNDLE EXPORTS & GLOBAL DECLARATIONS
-export const T007_Form_Manager: T007FormManager;
-export const field = T007FormManager["field"];
-export const handleFormValidation = T007FormManager["handleFormValidation"];
+export const formManager: FormManager;
+export const field = FormManager["field"];
+export const handleFormValidation = FormManager["handleFormValidation"];
 
 declare global {
   interface T007Namespace {
-    FM: T007FormManager;
-    field?: T007FormManager["field"];
-    handleFormValidation?: T007FormManager["handleFormValidation"];
+    FM: FormManager;
+    field?: FormManager["field"];
+    handleFormValidation?: FormManager["handleFormValidation"];
   }
 
   interface Window {

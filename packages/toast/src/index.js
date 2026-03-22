@@ -380,6 +380,7 @@ export const toasting = {
     return t007.toasts.values().filter((toast) => (!arguments.length ? true : toast.id.startsWith(idPrefix)));
   },
 };
+
 export const toaster = (defOptions = {}, idPrefix = "t007_toast_") => {
   const defaults = () => ({ ...t007.TOAST_DEFAULT_OPTIONS, ...defOptions }),
     base = (render, options = {}) =>
