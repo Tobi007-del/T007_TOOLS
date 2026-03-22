@@ -1,0 +1,14 @@
+{
+  "name": "t007-tools",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+"scripts": {
+    "build": "npm run build -w @t007/utils && npm run build --workspaces"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
