@@ -14,5 +14,6 @@ export {
   mergeObjs,
   getTrailPaths,
   getTrailRecords,
+  deepClone,
   nuke
 } from "./utils/obj";

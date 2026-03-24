@@ -1,6 +1,6 @@
-import { confirm, prompt } from "https://cdn.jsdelivr.net/npm/@t007/dialog@latest/dist/standalone.js";
-import Toast from "https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/standalone.js";
-import { formatHTML, highlightHTML, highlightJSON } from "./formatter.js";
+import { confirm, prompt } from "https://cdn.jsdelivr.net/npm/@t007/dialog@latest/dist/standalone.min.js";
+import Toast from "https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/standalone.min.js";
+import { formatHTML, highlightHTML, highlightJSON } from "../../../assets/scripts/formatter.js";
 
 window.onload = () =>
   Toast.info("This is a Form Builder to test my Custom Form Library", {

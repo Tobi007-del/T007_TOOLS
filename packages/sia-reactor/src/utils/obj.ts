@@ -139,6 +139,16 @@ export function getTrailRecords<T extends object>(obj: T, path: WildPaths<T>): [
   return record;
 }
 
+// Cloning
+export function deepClone<T>(obj: T, crossRealms?: boolean, visited = new WeakMap()): T {
+  if (!(isStrictObj(obj, crossRealms) || isArr(obj)) || visited.has(obj)) return obj; // no circular references
+  const clone: any = isArr(obj) ? [] : {};
+  visited.set(obj, clone);
+  const keys = Object.keys(obj);
+  for (let i = 0, len = keys.length; i < len; i++) clone[keys[i]] = deepClone((obj as any)[keys[i]], crossRealms, visited);
+  return clone;
+} // POJO|Arr Deep cloner
+
 // Destruction
 export function nuke(target: any): void {
   let proto = target;

@@ -1,4 +1,6 @@
-# ⚡️ t007-tools
+# ⚡️ t007-tools 
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A high-performance, zero-dependency vanilla JavaScript UI ecosystem and state management engine.
 
@@ -8,13 +10,13 @@ Built for speed, modularity, and seamless developer experience, `t007-tools` pro
 
 This monorepo is divided into decoupled packages that can be used independently or beautifully orchestrated together.
 
-| Package                 | Description                                                                 |
-| ----------------------- | --------------------------------------------------------------------------- |
-| **`sia-reactor`** | State, Intent, and Architecture (SIA) engine for complex event propagation. |
-| **`@t007/toast`**       | Blazing fast, animated, promise-ready toast notifications.                  |
-| **`@t007/dialog`**      | Accessible, fully-featured modal and dialog system.                         |
-| **`@t007/input`**       | Advanced form validation, file-upload, and input masking manager.           |
-| **`@t007/utils`**       | Zero-dependency DOM and object utilities powering the ecosystem.            |
+| Package            | Description                                                                 |
+| ------------------ | --------------------------------------------------------------------------- |
+| **`sia-reactor`**  | State, Intent, and Architecture (SIA) engine for complex event propagation. |
+| **`@t007/toast`**  | Blazing fast, animated, promise-ready toast notifications.                  |
+| **`@t007/dialog`** | Accessible, fully-featured modal and dialog system.                         |
+| **`@t007/input`**  | Advanced form validation, file-upload, and input masking manager.           |
+| **`@t007/utils`**  | Zero-dependency DOM and object utilities powering the ecosystem.            |
 
 ## 🚀 Installation
 
@@ -22,3 +24,4 @@ You can install any tool individually via NPM:
 
 ```bash
 npm install @t007/toast @t007/dialog
+```

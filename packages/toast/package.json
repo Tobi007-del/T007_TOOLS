@@ -1,17 +1,17 @@
 {
   "name": "@t007/toast",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A lightweight, pure JS toast system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tobi007-del/t007-tools.git",
+    "url": "git+https://github.com/Tobi007-del/t007-tools.git",
     "directory": "packages/toast"
   },
-  "homepage": "https://github.com/tobi007-del/t007-tools/tree/main/packages/toast#readme",
+  "homepage": "https://github.com/Tobi007-del/t007-tools/blob/main/packages/toast#readme",
   "bugs": {
-    "url": "https://github.com/tobi007-del/t007-tools/issues"
+    "url": "https://github.com/Tobi007-del/t007-tools/issues"
   },
   "type": "module",
   "main": "./dist/index.js",
@@ -34,23 +34,22 @@
     "./style.css": "./dist/index.css"
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts"
+    "build": "tsup --config ../../tsup.config.ts",
+    "prepublishOnly": "shx cp ../../LICENSE ."
   },
   "files": [
-    "dist",
-    "./dist/index.d.ts",
-    "./dist/index.css"
+    "dist"
   ],
   "keywords": [
     "t007",
+    "ecosystem",
+    "ui",
+    "vanilla-js",
     "toast",
     "snackbar",
     "notification",
     "alert",
-    "promise",
-    "ui",
-    "vanilla-js",
-    "zero-dependency"
+    "promise"
   ],
   "dependencies": {
     "@t007/utils": "*"

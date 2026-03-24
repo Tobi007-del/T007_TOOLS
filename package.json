@@ -4,11 +4,17 @@
   "workspaces": [
     "packages/*"
   ],
-"scripts": {
-    "build": "npm run build -w @t007/utils && npm run build --workspaces"
+  "scripts": {
+    "build": "npm run build -w @t007/utils && npm run build --workspaces",
+    "change": "changeset",
+    "bump": "changeset version",
+    "release": "npm run build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.30.0",
+    "shx": "^0.4.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
-  }
+  },
+  "version": "0.0.1"
 }

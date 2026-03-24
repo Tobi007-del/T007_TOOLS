@@ -1,12 +1,12 @@
 "use strict";
-import { Reactor, TERMINATOR } from "https://cdn.jsdelivr.net/npm/sia-reactor@latest/dist/index.js";
-import log from "./logger.js";
+import { Reactor, TERMINATOR } from "https://cdn.jsdelivr.net/npm/sia-reactor@latest/dist/index.min.js";
+import log from "../../../assets/scripts/logger.js";
 
-// Helper to let the microtask queue flush between tests
-const nextTick = () => new Promise((resolve) => setTimeout(resolve, 10));
+const nextTick = () => new Promise((resolve) => setTimeout(resolve, 10)); // Helper to let the microtask queue flush between tests
 
-async function runReactorStressSuite() {
-  log(`%c🧪 INITIALIZING S.I.A. REACTOR GRAND MASTER STRESS SUITE`, "color: #E91E63; font-size: 16px; font-weight: bold;");
+window.runTests = async () => {
+  document.querySelectorAll("button").forEach((btn) => (btn.disabled = true));
+  log(`%c🧪 INITIALIZING S.I.A. REACTOR GRAND MASTER STRESS SUITE`, "color: #E91E63; font-size: 16px; font-weight: bold; padding-bottom: 4px;");
   log(`Testing deep UI state trees, event routing, batching, and DAG mutations...\n`);
 
   let passed = 0;
@@ -155,6 +155,5 @@ async function runReactorStressSuite() {
     log(`%c💀 FAILED: ${failed} tests did not pass. Check the engine.`, "color: #F44336; font-weight: bold;");
   }
   log(`---------------------------------------------------------------------------\n`);
-}
-
-window.addEventListener("load", () => setTimeout(runReactorStressSuite, 1000));
+  document.querySelectorAll("button").forEach((btn) => (btn.disabled = false));
+};

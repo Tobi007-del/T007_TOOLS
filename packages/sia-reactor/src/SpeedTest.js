@@ -1,7 +1,7 @@
 "use strict";
-import log from "./logger.js";
-import { Reactor } from "https://cdn.jsdelivr.net/npm/sia-reactor@latest/dist/index.js";
-import { Reactor as OldReactor } from "./fossil.js";
+import log from "../../../assets/scripts/logger.js";
+import { Reactor } from "https://cdn.jsdelivr.net/npm/sia-reactor@latest/dist/index.min.js";
+import { Reactor as OldReactor } from "./Fossil.js";
 window.Reactor ??= Reactor;
 window.OldReactor ??= OldReactor;
 
@@ -13,12 +13,11 @@ var TEST_WARMUP_ITERATIONS = 200_000;
 var TEST_ITERATIONS = 1_000_000;
 var TEST_CYCLES = 5;
 
-const btn = document.querySelector("button");
 const breathe = () => new Promise((resolve) => setTimeout(resolve, 50));
 
 window.runBenchmark = async function runBenchmark() {
-  btn.disabled = true;
-  log(`%c🧪 S.I.A. REACTOR PERFORMANCE EVALUATION`, "font-weight: bold; font-size: 16px; color: #4CAF50; padding-bottom: 4px;");
+  document.querySelectorAll("button").forEach((btn) => (btn.disabled = true));
+  log(`%c🧪 S.I.A. REACTOR PERFORMANCE EVALUATION`, "color: #E91E63; font-size: 16px; font-weight: bold; padding-bottom: 4px;");
   log(`Initializing suite: ${TEST_CYCLES} cycles of ${TEST_ITERATIONS.toLocaleString()} operations...\n`);
 
   window.rawObj = { val: 0 };
@@ -142,7 +141,7 @@ window.runBenchmark = async function runBenchmark() {
   log(`%c\n🎯 CONCLUSION:`, "color: #FF9800; font-weight: bold;");
   log(`At ~${newStats.opsSec.toLocaleString()} ops/sec, the Reactor can process ${opsPerFrame.toLocaleString()} reactive state changes within a frame.`);
   log(`---------------------------------------------------------------------------\n`);
-  btn.disabled = false;
+  document.querySelectorAll("button").forEach((btn) => (btn.disabled = false));
 };
 
 window.addEventListener("load", () => setTimeout(runBenchmark, 2000));

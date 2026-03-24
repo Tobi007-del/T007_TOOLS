@@ -128,10 +128,11 @@ export class Reactor<T extends object> {
   public config: Omit<ReactorOptions<T>, "debug" | "referenceTracking" | "lineageTracing" | "smartCloning">;
   public core: T; // `?:`s | pay the ~800 byte price upfront for what u might never use
   protected isLogging = false; // keeping track so API getter doesn't slow down internal iterations in any way
-  protected isTracing = false;
-  protected isTracking = false;
+  protected isTracing = false; // Lineage Tracing
+  protected isTracking = false; // Reference Tracking
   protected isSCloning = false; // Smart Cloning
-  protected isBatching = false;
+  protected isBatching = false; // Async Batching
+  protected isCascading = false; // Setter Cascading
 
   constructor(obj: T = {} as T, options?: ReactorOptions<T>) {
     (this as any)[INERTIA] = true;
@@ -193,7 +194,7 @@ export class Reactor<T extends object> {
           safeValue = value?.[RAW] || value;
           unchanged = Object.is(safeValue, safeOldValue);
         }
-        if (!indiffable && unchanged) return true;
+        if (!indiffable && unchanged && !this.isCascading) return true;
         this.log(`✏️ [SET Trap] Initiated for "${safeKey}" on "${paths}"`);
         if (this.config.set) terminated = (value = this.config.set(object as PathBranchValue<T>, key as PathKey<T>, value, oldValue, receiver, paths)) === TERMINATOR;
         if (this.setters) {
@@ -530,7 +531,9 @@ export class Reactor<T extends object> {
     if ((type !== "set" && type !== "delete") || !(isStrictObj(news, this.config.crossRealms) || isArr(news)) || (objSafe ? !(isStrictObj(olds, this.config.crossRealms) || isArr(olds)) : false)) return;
     const obj = objSafe ? mergeObjs(olds!, news) : news, // don't set objSafe for arrays, merger doesn't play nice
       keys = Object.keys(obj);
+    this.isCascading = true;
     for (let i = 0, len = keys.length; i < len; i++) setAny(this.core, (path + "." + keys[i]) as Paths<T>, (obj as any)[keys[i]]); // smart progressive enhancement for objects; !*
+    this.isCascading = false;
   }
   public reset(): void {
     (this.getters?.clear(), this.setters?.clear(), this.deleters?.clear(), this.watchers?.clear(), this.listeners?.clear(), this.queue?.clear(), this.batch?.clear());
@@ -541,7 +544,7 @@ export class Reactor<T extends object> {
   }
 
   get canLog(): boolean {
-    return this.log === R_LOG; // more accurate check for public API just in case :)
+    return this.isLogging;
   }
   set canLog(value: boolean) {
     this.log = (this.isLogging = value) ? R_LOG : NOOP;

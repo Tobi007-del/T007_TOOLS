@@ -1,0 +1,236 @@
+# @t007/toast
+
+> A high-performance, physics-driven vanilla JavaScript toast notification system. Features multi-touch drag-to-close gestures, hardware-accelerated animations, and a seamless Promise-resolution API.
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![NPM Version](https://img.shields.io/npm/v/@t007/toast.svg)](https://www.npmjs.com/package/@t007/toast)
+
+[Live Demo](https://tobi007-del.github.io/t007-tools/packages/toast/src/index.html) | [Report Bug](https://github.com/Tobi007-del/t007-tools/issues)
+
+---
+
+## Table of contents
+
+- [@t007/toast](#t007toast)
+  - [Table of contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Demo \& Screenshots](#demo--screenshots)
+  - [Features](#features)
+  - [Tech Stack](#tech-stack)
+  - [Getting Started](#getting-started)
+  - [Usage](#usage)
+  - [API Reference](#api-reference)
+  - [Advanced Customization](#advanced-customization)
+  - [Author](#author)
+  - [Acknowledgments](#acknowledgments)
+
+---
+
+## Overview
+
+**@t007/toast** is not just another notification library. It is a highly optimized, requestAnimationFrame-driven notification engine that mimics native mobile OS behaviors. It handles complex pointer gestures, pauses on window blur/hover, and manages a dynamic queue to prevent screen flooding.
+
+### Why @t007/toast?
+
+- ✅ **Physics-Driven Gestures:** Native-feeling "drag-to-close" utilizing Pointer Events (`x`, `y`, and directional configuration).
+- ✅ **Intelligent Lifecycle:** Automatically pauses the auto-close timer and progress bar when hovered or when the browser tab loses focus.
+- ✅ **Promise Integration:** Pass an async operation and the toast will automatically transition from "loading" to "success" or "error".
+- ✅ **Haptic Feedback:** Optional built-in `navigator.vibrate` integration for physical feedback on mobile devices.
+- ✅ **Zero Frameworks:** Pure vanilla JS, meaning it works flawlessly in React, Vue, Angular, or raw HTML.
+
+---
+
+## Demo & Screenshots
+
+### Standard Toast Notifications
+Features built-in SVG icons, custom actions, and smooth hardware-accelerated animations.
+<img src="https://raw.githubusercontent.com/Tobi007-del/t007-tools/refs/heads/main/assets/images/toast_library_toast_preview.png" alt="Toast Preview" width="600" />
+
+---
+
+## Features
+
+- **9 Positioning Zones**: Anchor toasts anywhere on the screen (e.g., `top-right`, `bottom-center`, `center-center`).
+- **Dynamic Updating**: Update the text, icon, or type of an active toast without breaking its animation loop.
+- **Queue Management**: Strict enforcement of `maxToasts` and `renotify` to keep the UI clean.
+- **Custom Hardware Vibrations**: Unique vibration patterns for different alert types (`success`, `error`, `warning`).
+
+---
+
+## Tech Stack
+
+### Built with
+
+- Vanilla JavaScript (ES6+)
+- `requestAnimationFrame` Time Loops
+- Pointer Events API
+- Vibration API
+- Bundled via `tsup` (ESM, CJS, IIFE outputs)
+
+---
+
+## Getting Started
+
+### Installation
+
+Install via your preferred package manager:
+
+```bash
+npm install @t007/toast @t007/utils
+# or
+yarn add @t007/toast @t007/utils
+# or
+pnpm add @t007/toast @t007/utils
+````
+
+-----
+
+## Usage
+
+### Modern Bundlers (ESM)
+
+```javascript
+import '@t007/toast/style.css';
+import toast from '@t007/toast';  // also attached to window.t007
+
+// 1. Simple success toast
+toast.success("File uploaded successfully!");
+
+// 2. Error toast with custom actions
+toast.error("Connection failed", {
+  position: "bottom-right",
+  actions: {
+    "Retry": (e, instance) => {
+      console.log("Retrying...");
+      instance._remove();
+    }
+  }
+});
+
+// 3. Promise Handling
+const myFetch = fetch('[https://api.example.com/data](https://api.example.com/data)');
+
+toast.promise(myFetch, {
+  pending: "Loading data...",
+  success: "Data loaded successfully!",
+  error: "Failed to load data."
+});
+```
+
+### CDN / Browser (Global)
+
+If you are not using a bundler, the library automatically injects itself into the global `t007` object and provides the convenient `window.Toast` fallback.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/index.min.css">
+</head>
+<body>
+  
+  <button id="notifyBtn">Show Toast</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/@t007/toast@latest"></script>
+  
+  <script>
+    document.getElementById('notifyBtn').addEventListener('click', () => {
+      Toast.info("System running smoothly.", {
+        pauseOnHover: true,
+        dragToClose: true
+      }); // or use `t007.toast -> t007.toast.info()`
+    });
+  </script>
+</body>
+</html>
+```
+
+-----
+
+## API Reference
+
+### Basic Toasts
+
+Trigger toasts based on their severity. Returns the unique `id` of the generated toast.
+
+  - `toast(render, options)` (Default / Info)
+  - `toast.info(render, options)`
+  - `toast.success(render, options)`
+  - `toast.warn(render, options)`
+  - `toast.error(render, options)`
+
+### Toast Updating
+
+You can dynamically update a toast that is currently on the screen.
+
+```javascript
+const toastId = toast.loading("Processing...");
+
+// Later in your code...
+toast.update(toastId, {
+  render: "Processing complete!",
+  type: "success",
+  isLoading: false,
+  autoClose: 3000
+});
+```
+
+### Promise Handling
+
+Automatically maps a JavaScript Promise to the lifecycle of a toast.
+
+```javascript
+toast.promise(promiseFunction, {
+  pending: { render: "Waiting...", type: "info" },
+  success: { render: (res) => `Success: ${res.data}`, type: "success" },
+  error: { render: (err) => `Failed: ${err.message}`, type: "error" }
+});
+```
+
+### Configuration Options
+
+The second argument of any toast call accepts a massive configuration object.
+
+| Property           | Type           | Default       | Description                                               |
+| ------------------ | -------------- | ------------- | --------------------------------------------------------- |
+| `position`         | String         | `"top-right"` | The screen anchor point.                                  |
+| `autoClose`        | Boolean/Number | `true`        | MS to close, or false to disable.                         |
+| `dragToClose`      | Boolean/String | `true`        | Allows swipe-to-dismiss via Pointer Events.               |
+| `dragToCloseDir`   | String         | `"x"`         | Direction allowed for swiping (`x`, `y`, `x\|y`).         |
+| `pauseOnHover`     | Boolean        | `true`        | Pauses timer when mouse enters toast.                     |
+| `pauseOnFocusLoss` | Boolean        | `true`        | Pauses timer when window loses focus.                     |
+| `vibrate`          | Boolean/Array  | `false`       | Triggers device haptic feedback based on severity.        |
+| `actions`          | Object         | `null`        | Key/Value object of button labels and callback functions. |
+
+*(See source code for global configuration overrides via `t007.TOAST_DEFAULT_OPTIONS`).*
+
+-----
+
+## Advanced Customization
+
+### The Global Config
+
+You can override the default behavior for all toasts globally:
+
+```javascript
+window.t007.TOAST_DEFAULT_OPTIONS.position = "bottom-center";
+window.t007.TOAST_DEFAULT_OPTIONS.vibrate = true;
+
+// Custom Durations
+window.t007.TOAST_DURATIONS.error = 10000; // Leave errors up for 10 seconds
+```
+
+### CSS Variables
+
+You can easily override the progress bar, animations, and container spacing by targeting `.t007-toast` in your stylesheet.
+
+-----
+
+## Author
+
+  - Developer - [Oketade Oluwatobiloba (Tobi007-del)](https://github.com/Tobi007-del)
+  - Project - [t007-tools](https://github.com/Tobi007-del/t007-tools)
+
+## Acknowledgments
+
+Designed to bring native mobile OS notification physics to the web. Part of the `@t007` utility ecosystem.
