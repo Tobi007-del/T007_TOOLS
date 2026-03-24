@@ -33,6 +33,9 @@
     "./global": "./dist/index.global.js",
     "./style.css": "./dist/index.css"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts",
     "prepublishOnly": "shx cp ../../LICENSE ."

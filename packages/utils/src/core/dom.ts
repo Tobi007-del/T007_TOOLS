@@ -21,7 +21,7 @@ export type LoadResourceOptions = Partial<{
 export function createEl<K extends keyof HTMLElementTagNameMap>(tag: K, props?: Partial<HTMLElementTagNameMap[K]>, dataset?: Dataset, styles?: Style): HTMLElementTagNameMap[K];
 export function createEl(tag: string, props?: Partial<HTMLElement>, dataset?: Dataset, styles?: Style): HTMLElement | null;
 export function createEl(tag: string, props?: Record<string, unknown>, dataset?: Dataset, styles?: Style, el = tag ? document?.createElement(tag) : null): HTMLElement | null {
-  return (assignEl(el, props, dataset, styles), el);
+  return assignEl(el, props, dataset, styles), el;
 }
 
 export function assignEl<K extends keyof HTMLElementTagNameMap>(el?: HTMLElementTagNameMap[K], props?: Partial<HTMLElementTagNameMap[K]>, dataset?: Dataset, styles?: Style): void;
@@ -36,7 +36,7 @@ export function assignEl(el?: HTMLElement | null, props?: Record<string, unknown
 // Resource Loading
 export const VIRTUAL_RESOURCE: unique symbol = Symbol.for("T007_VIRTUAL_RESOURCE");
 export function loadResource(req: string | symbol, type: ResourceType = "style", { module, media, crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, attempts = 3, retryKey = false }: LoadResourceOptions = {}, w = window): Promise<HTMLElement | void> {
-  w.t007._resourceCache ??= {};
+  (w.t007 ??= {} as any), (w.t007._resourceCache ??= {});
   if (req === VIRTUAL_RESOURCE || "symbol" === typeof req) return Promise.resolve();
   const src = req as string;
   if (w.t007._resourceCache[src]) return w.t007._resourceCache[src]; // set crossorigin on (links|scripts) if provided due to document.(styleSheets|scripts)

@@ -35,6 +35,9 @@
       "default": "./dist/utils.js"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup src/index.ts src/utils.ts src/types.ts --format cjs,esm,iife --global-name sia --dts --clean --no-splitting",
     "prepublishOnly": "shx cp ../../LICENSE ."
