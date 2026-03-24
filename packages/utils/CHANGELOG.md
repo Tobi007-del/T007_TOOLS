@@ -1,5 +1,11 @@
 # @t007/utils
 
+## 0.0.7
+
+### Patch Changes
+
+- cdfe244: Initializing t007 on desired window when loading resources
+
 ## 0.0.6
 
 ### Patch Changes
