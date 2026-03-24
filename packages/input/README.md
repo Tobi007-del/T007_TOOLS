@@ -24,6 +24,7 @@
   - [Customization](#customization)
   - [Author](#author)
   - [Acknowledgments](#acknowledgments)
+  - [Star History](#star-history)
 
 ---
 
@@ -239,3 +240,9 @@ You can deeply customize the look and feel by overriding the built-in CSS variab
 ## Acknowledgments
 
 Built to provide a robust, dependency-free form validation engine that rivals heavyweight frontend frameworks. Part of the `@t007` utility ecosystem.
+
+## Star History
+
+If you find this project useful, please consider giving it a star! ⭐
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Tobi007-del/t007-tools&type=Date)](https://github.com/Tobi007-del/t007-tools)

@@ -20,6 +20,7 @@
   - [Usage](#usage)
   - [Author](#author)
   - [Acknowledgments](#acknowledgments)
+  - [Star History](#star-history)
 
 ---
 
@@ -98,3 +99,9 @@ await loadResource('https://cdn.example.com/styles.css, 'link');
 ## Acknowledgments
 
 The invisible backbone of the `@t007` ecosystem. Engineered to make complex DOM operations feel effortless.
+
+## Star History
+
+If you find this project useful, please consider giving it a star! ⭐
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Tobi007-del/t007-tools&type=Date)](https://github.com/Tobi007-del/t007-tools)

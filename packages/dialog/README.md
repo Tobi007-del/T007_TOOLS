@@ -23,6 +23,7 @@
   - [Customization](#customization)
   - [Author](#author)
   - [Acknowledgments](#acknowledgments)
+  - [Star History](#star-history)
 
 ---
 
@@ -224,3 +225,9 @@ Example override:
 ## Acknowledgments
 
 Built to support modern web applications requiring non-blocking, highly customizable UI interfaces. Part of the `@t007` utility ecosystem.
+
+## Star History
+
+If you find this project useful, please consider giving it a star! ⭐
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Tobi007-del/t007-tools&type=Date)](https://github.com/Tobi007-del/t007-tools)
