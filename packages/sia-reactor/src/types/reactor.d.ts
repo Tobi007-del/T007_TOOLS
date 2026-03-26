@@ -7,7 +7,7 @@ import {
   ReactorEvent,
 } from "../core/reactor";
 import type { Paths, WildPaths, ChildPaths, PathValue, PathBranchValue, PathKey } from "./obj";
-import { Reactive } from "../tools/mixins";
+import { Reactive } from "../utils/mixins";
 
 // ===========================================================================
 // CORE MARKERS & STATE WRAPPERS
@@ -78,23 +78,23 @@ interface OverrideEvPart<PL extends { target: { path: any; value: any; oldValue?
 
 export type Getter<T, P extends WildPaths<T> = WildPaths<T>> = (
   value: PathValue<T, P>,
-  payload: Payload<T, P>,
+  payload: Payload<T, P>
 ) => PathValue<T, P> | undefined;
 
 export type Setter<T, P extends WildPaths<T> = WildPaths<T>> = (
   value: PathValue<T, P>,
   terminated: boolean,
-  payload: Payload<T, P>,
+  payload: Payload<T, P>
 ) => PathValue<T, P> | typeof TERMINATOR | undefined;
 
 export type Deleter<T, P extends WildPaths<T> = WildPaths<T>> = (
   terminated: boolean,
-  payload: Payload<T, P>,
+  payload: Payload<T, P>
 ) => typeof TERMINATOR | undefined;
 
 export type Watcher<T, P extends WildPaths<T> = WildPaths<T>> = (
   value: PathValue<T, P>,
-  payload: Payload<T, P>,
+  payload: Payload<T, P>
 ) => void;
 
 export type Listener<T, P extends WildPaths<T> = WildPaths<T>> = (event: REvent<T, P>) => void;
@@ -158,7 +158,7 @@ export interface ReactorOptions<T extends object, P extends Paths<T> = Paths<T>>
     key: PathKey<T, P>,
     value: PathValue<T, P>,
     receiver: Reactive<T>,
-    path: Paths<T> | Paths<T>[],
+    path: Paths<T> | Paths<T>[]
   ) => PathValue<T, P> | undefined;
   set?: (
     object: PathBranchValue<T, P>,
@@ -166,20 +166,22 @@ export interface ReactorOptions<T extends object, P extends Paths<T> = Paths<T>>
     value: PathValue<T, P>,
     oldValue: PathValue<T, P>,
     receiver: Reactive<T>,
-    path: Paths<T> | Paths<T>[],
+    path: Paths<T> | Paths<T>[]
   ) => PathValue<T, P> | typeof TERMINATOR | undefined;
   delete?: (
     object: PathBranchValue<T, P>,
     key: PathKey<T, P>,
     oldValue: PathValue<T, P>,
     receiver: Reactive<T>,
-    path: Paths<T> | Paths<T>[],
+    path: Paths<T> | Paths<T>[]
   ) => typeof TERMINATOR | undefined;
   debug?: boolean;
   crossRealms?: boolean; // needed for object type detection if using across realms e.g, iframes or other environments
-  smartCloning?: boolean; // one-time set for structural sharing, needs `.referenceTracking: true`
+  smartCloning?: boolean; // 1-time set for structural sharing, needs `.referenceTracking: true`
   eventBubbling?: boolean; // default true, set to false to prevent bubbling (not recommended if you want power)
-  lineageTracing?: boolean; // one-time set for tree walking to search for refs on property access, needs `.referenceTracking = true`
-  batchingFunction?: (cb: () => void) => void; // one-time set for listener's notifications, e.g: `queueMicrotask`, `unstable_batchedUpdates` from ReactDOM
-  referenceTracking?: boolean; // one-time set to activate
+  lineageTracing?: boolean; // 1-time set for tree walking to search for refs on property access, needs `.referenceTracking = true`
+  preserveContext?: boolean; // set to true to use Reflect API in traps, incur an ~8x slowdown when mediation layer is powerful enough
+  equalityFunction?: (a: any, b: any) => boolean; // used in setters and for adapters custom control, e.g: `Object.is` {default}
+  batchingFunction?: (cb: () => void) => void; // custom set for listener's notifications, e.g: `queueMicrotask` {default}, `unstable_batchedUpdates` from ReactDOM
+  referenceTracking?: boolean; // 1-time set to activate
 } // debating making use of the Reflect API opt-in

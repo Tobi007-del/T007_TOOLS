@@ -54,6 +54,7 @@ export const handleFormValidation = FormManager["handleFormValidation"];
 declare global {
   interface T007Namespace {
     FM: FormManager;
+    formManager: FormManager;
     field?: FormManager["field"];
     handleFormValidation?: FormManager["handleFormValidation"];
   }

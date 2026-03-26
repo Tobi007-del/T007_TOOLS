@@ -13,6 +13,7 @@ import { isStrictObj, isArr, mergeObjs, getTrailPaths, getTrailRecords, parseEvO
  * 6. no unorthodox string deduplication or caching since string interning is native to JS
  * 6. `cord` is an alias for record and `es` for entries, avoided object pooling incase of logs
  * 7. it's all progressive: light at creation then grows during the user of desired features
+ * 8. Reflect API was avoided, incurred an ~8x slowdown when used; mediation layer is powerful enough
  **/
 
 // ===========================================================================
@@ -136,7 +137,7 @@ export class Reactor<T extends object> {
 
   constructor(obj: T = {} as T, options?: ReactorOptions<T>) {
     (this as any)[INERTIA] = true;
-    this.config = { crossRealms: false, eventBubbling: true, batchingFunction: R_BATCH, ...options };
+    this.config = { crossRealms: false, eventBubbling: true, preserveContext: false, equalityFunction: Object.is, batchingFunction: R_BATCH, ...options };
     this.core = this.proxied(obj);
     if (!options) return;
     this.canLog = !!options.debug;
@@ -157,7 +158,7 @@ export class Reactor<T extends object> {
       // Robust Proxy handler
       get: (object, key, receiver) => {
         if (key === RAW) return object;
-        let value = (object as any)[key];
+        let value = !this.config.preserveContext ? (object as any)[key] : Reflect.get(object, key, receiver);
         const safeKey = String(key),
           fullPath = this.isTracing ? undefined : ((path ? path + "." + safeKey : safeKey) as Paths<T>),
           paths = this.isTracing ? this.trace(object, safeKey) : fullPath!;
@@ -188,11 +189,11 @@ export class Reactor<T extends object> {
           fullPath = this.isTracing ? undefined : ((path ? path + "." + safeKey : safeKey) as Paths<T>),
           paths = this.isTracing ? this.trace(object, safeKey) : fullPath!,
           loopLen = this.isTracing ? paths.length : 1,
-          oldValue = (object as any)[key];
+          oldValue = !this.config.preserveContext ? (object as any)[key] : Reflect.get(object, key, receiver);
         if (this.isTracking || !indiffable) {
           safeOldValue = oldValue?.[RAW] || oldValue;
           safeValue = value?.[RAW] || value;
-          unchanged = Object.is(safeValue, safeOldValue);
+          unchanged = this.config.equalityFunction!(safeValue, safeOldValue);
         }
         if (!indiffable && unchanged && !this.isCascading) return true;
         this.log(`✏️ [SET Trap] Initiated for "${safeKey}" on "${paths}"`);
@@ -215,9 +216,9 @@ export class Reactor<T extends object> {
             if (!(terminated ||= payload.terminated!)) value = result;
           } // Mediators
         }
-        if (terminated) return (this.log(`🛡️ [SET Mediator] Terminated on "${paths}"`), true); // soft rejection if terminated: `true`
-        (object as any)[key] = value;
-        if (this.isTracking && !unchanged) (this.isSCloning && this.stamp(object), (this.unlink(safeOldValue, object, safeKey), this.link(safeValue, object, safeKey)));
+        if (terminated) return this.log(`🛡️ [SET Mediator] Terminated on "${paths}"`), true; // soft rejection if terminated: `true`
+        !this.config.preserveContext ? ((object as any)[key] = value) : Reflect.set(object, key, value, receiver);
+        if (this.isTracking && !unchanged) this.isSCloning && this.stamp(object), (this.unlink(safeOldValue, object, safeKey), this.link(safeValue, object, safeKey));
         if (this.watchers || this.listeners)
           for (let i = 0; i < loopLen; i++) {
             const currPath = (this.isTracking ? paths[i] : fullPath!) as Paths<T>,
@@ -234,7 +235,7 @@ export class Reactor<T extends object> {
           fullPath = this.isTracing ? undefined : ((path ? path + "." + safeKey : safeKey) as Paths<T>),
           paths = this.isTracing ? this.trace(object, safeKey) : fullPath!,
           loopLen = this.isTracing ? paths.length : 1,
-          oldValue = (object as any)[key];
+          oldValue = !this.config.preserveContext ? (object as any)[key] : Reflect.get(object, key, receiver);
         this.log(`🗑️ [DELETE Trap] Initiated for "${safeKey}" on "${paths}"`);
         if (this.config.delete) terminated = (value = this.config.delete(object as PathBranchValue<T>, key as PathKey<T>, oldValue, receiver, paths)) === TERMINATOR;
         if (this.deleters) {
@@ -254,9 +255,9 @@ export class Reactor<T extends object> {
             if (!(terminated ||= payload.terminated!)) value = result;
           } // Mediators
         }
-        if (terminated) return (this.log(`🛡️ [DELETE Mediator] Terminated on "${paths}"`), true); // soft rejection if terminated: `true`
-        delete (object as any)[key];
-        if (this.isTracking) (this.isSCloning && this.stamp(object), this.unlink(oldValue?.[RAW] || oldValue, object, safeKey));
+        if (terminated) return this.log(`🛡️ [DELETE Mediator] Terminated on "${paths}"`), true; // soft rejection if terminated: `true`
+        !this.config.preserveContext ? delete (object as any)[key] : Reflect.deleteProperty(object, key);
+        if (this.isTracking) this.isSCloning && this.stamp(object), this.unlink(oldValue?.[RAW] || oldValue, object, safeKey);
         if (this.watchers || this.listeners)
           for (let i = 0; i < loopLen; i++) {
             const currPath = (this.isTracking ? paths[i] : fullPath!) as Paths<T>,
@@ -266,11 +267,11 @@ export class Reactor<T extends object> {
         return true;
       },
     });
-    return (this.proxyCache.set(obj, proxy), proxy) as O;
+    return this.proxyCache.set(obj, proxy), proxy;
   }
 
   protected trace(target: object, path: string, paths: string[] = [], visited = new WeakSet<object>()): Paths<T>[] {
-    if (Object.is(target, (this.core as any)[RAW] || this.core)) return (paths.push(path), paths as Paths<T>[]);
+    if (Object.is(target, (this.core as any)[RAW] || this.core)) return paths.push(path), paths as Paths<T>[];
     if (visited.has(target)) return paths as Paths<T>[]; // Stop infinite loops
     visited.add(target);
     const es = this.lineage!.get(target);
@@ -308,7 +309,7 @@ export class Reactor<T extends object> {
     for (let i = !isGet ? 0 : cords.length - 1, len = !isGet ? cords.length : -1; i !== len; i += !isGet ? 1 : -1) {
       const response: any = isGet ? (cords[i] as GetterRecord<T>).cb(value, payload) : isSet ? (cords[i] as SetterRecord<T>).cb(value, terminated, payload) : (cords[i] as DeleterRecord<T>).cb(terminated, payload); // all will mediate
       if (isGet || !(terminated ||= payload.terminated = response === TERMINATOR)) value = response as PathValue<T, P>;
-      if (cords[i].once) (cords.splice(i--, 1), !cords.length && mediators!.delete(path));
+      if (cords[i].once) cords.splice(i--, 1), !cords.length && mediators!.delete(path);
     }
     return value; // set - FIFO, get - LIFO
   }
@@ -320,26 +321,26 @@ export class Reactor<T extends object> {
       if (cords)
         for (let i = 0, len = cords.length; i < len; i++) {
           cords[i].cb(payload.target.value, payload); // watchers do not terminate as they're after the OP
-          if (cords[i].once) (cords.splice(i--, 1), !cords.length && this.watchers!.delete(path));
+          if (cords[i].once) cords.splice(i--, 1), !cords.length && this.watchers!.delete(path);
         }
       if (wildcords)
         for (let i = 0, len = wildcords.length; i < len; i++) {
           wildcords[i].cb(payload.target.value, payload);
-          if (wildcords[i].once) (wildcords.splice(i--, 1), !wildcords.length && this.watchers!.delete("*"));
+          if (wildcords[i].once) wildcords.splice(i--, 1), !wildcords.length && this.watchers!.delete("*");
         }
     }
     this.listeners && this.schedule(path, payload); // batch is undefined till listeners are available
   }
   protected schedule<P extends Paths<T>>(path: P, payload: Payload<T, P>): void {
     this.batch ??= new Map<Paths<T>, Payload<T>>();
-    (this.batch.set(path, payload), !this.isBatching && this.initBatching());
+    this.batch.set(path, payload), !this.isBatching && this.initBatching();
   }
   protected initBatching(): void {
-    ((this.isBatching = true), this.config.batchingFunction!(() => this.flush())); // do the `!isBatching` check outisde so the func cost is only on first batch
+    (this.isBatching = true), this.config.batchingFunction!(() => this.flush()); // do the `!isBatching` check outisde so the func cost is only on first batch
   }
   protected flush(): void {
-    ((this.isBatching = false), this.batch && this.tick(this.batch.keys())); // not slowing dis down with a `?.size` since it's like always filled, rather pay the empty iterator cost once when empty
-    if (this.queue?.size) for (const task of this.queue) (task(), this.queue.delete(task)); // you can still stall with an empty batch, and slowing dis down with `?.size`; almost always empty
+    (this.isBatching = false), this.batch && this.tick(this.batch.keys()); // not slowing dis down with a `?.size` since it's like always filled, rather pay the empty iterator cost once when empty
+    if (this.queue?.size) for (const task of this.queue) task(), this.queue.delete(task); // you can still stall with an empty batch, and slowing dis down with `?.size`; almost always empty
   }
 
   protected wave(path: Paths<T>, payload: Payload<T>): void {
@@ -373,11 +374,11 @@ export class Reactor<T extends object> {
       if (e.immediatePropagationStopped) break;
       if (cords[i].capture !== isCapture) continue;
       if (cords[i].depth !== undefined) {
-        ((tDepth ??= this.getDepth(e.target.path)), (lDepth ??= this.getDepth(path))); // calc if ever needed
+        (tDepth ??= this.getDepth(e.target.path)), (lDepth ??= this.getDepth(path)); // calc if ever needed
         if (tDepth > lDepth + cords[i].depth!) continue;
       }
       cords[i].cb(e);
-      if (cords[i].once) (cords.splice(i--, 1), !cords.length && this.listeners!.delete(path));
+      if (cords[i].once) cords.splice(i--, 1), !cords.length && this.listeners!.delete(path);
     }
   }
 
@@ -393,7 +394,7 @@ export class Reactor<T extends object> {
       }
   }
   public stall(task: () => any): void {
-    ((this.queue ??= new Set()).add(task), !this.isBatching && this.initBatching());
+    (this.queue ??= new Set()).add(task), !this.isBatching && this.initBatching();
   }
   public nostall(task: () => any): boolean | undefined {
     return this.queue?.delete(task);
@@ -413,7 +414,7 @@ export class Reactor<T extends object> {
     visited.set(obj, clone);
     const keys = Object.keys(obj);
     for (let i = 0, len = keys.length; i < len; i++) clone[keys[i]] = this.clone((obj as any)[keys[i]], raw, visited);
-    if (!raw && this.isSCloning) (this.snapshotCache!.set(obj, clone), ((obj as any)[SSVERSION] = version));
+    if (!raw && this.isSCloning) this.snapshotCache!.set(obj, clone), ((obj as any)[SSVERSION] = version);
     return clone;
   }
   public getDepth(p: string, d = !p ? 0 : 1): number {
@@ -449,51 +450,51 @@ export class Reactor<T extends object> {
   protected syncDrop<P extends WildPaths<T>>(store: Map<WildPaths<T>, any[]> | undefined, path: P, cb: any): boolean | undefined {
     const cords = store?.get(path);
     if (!cords) return undefined;
-    for (let i = 0, len = cords.length; i < len; i++) if (Object.is(cords[i].cb, cb)) return (cords[i].sclup?.(), cords.splice(i--, 1), !cords.length && store!.delete(path), true);
+    for (let i = 0, len = cords.length; i < len; i++) if (Object.is(cords[i].cb, cb)) return cords[i].sclup?.(), cords.splice(i--, 1), !cords.length && store!.delete(path), true;
     return false;
   }
 
-  public get<P extends WildPaths<T>>(path: P, cb: Getter<T, P>, opts?: SyncOptions): Reactor<T>["noget"] {
-    return this.syncAdd("get", path, cb, opts, (imm) => (imm !== "auto" || inAny(this.core, path)) && getAny(this.core, path as Paths<T>)) as Reactor<T>["noget"]; // a progressive enhancment for gets that are virtual and should not affect init
+  public get<P extends WildPaths<T>>(path: P, cb: Getter<T, P>, opts?: SyncOptions): GetterRecord<T>["clup"] {
+    return this.syncAdd("get", path, cb, opts, (imm) => (imm !== "auto" || inAny(this.core, path)) && getAny(this.core, path as Paths<T>)); // a progressive enhancment for gets that are virtual and should not affect init
   }
-  public gonce<P extends WildPaths<T>>(path: P, cb: Getter<T, P>, opts?: SyncOptions): Reactor<T>["noget"] {
+  public gonce<P extends WildPaths<T>>(path: P, cb: Getter<T, P>, opts?: SyncOptions): GetterRecord<T>["clup"] {
     return this.get<P>(path, cb, { ...parseEvOpts(opts, EV_OPTS.MEDIATOR), once: true });
   }
   public noget<P extends WildPaths<T>>(path: P, cb: Getter<T, P>): boolean | undefined {
     return this.syncDrop(this.getters, path, cb);
   }
 
-  public set<P extends WildPaths<T>>(path: P, cb: Setter<T, P>, opts?: SyncOptions): Reactor<T>["noset"] {
-    return this.syncAdd("set", path, cb, opts, (imm) => (imm !== "auto" || inAny(this.core, path)) && setAny(this.core, path as Paths<T>, getAny(this.core, path as Paths<T>)!)) as Reactor<T>["noset"];
+  public set<P extends WildPaths<T>>(path: P, cb: Setter<T, P>, opts?: SyncOptions): SetterRecord<T>["clup"] {
+    return this.syncAdd("set", path, cb, opts, (imm) => (imm !== "auto" || inAny(this.core, path)) && setAny(this.core, path as Paths<T>, getAny(this.core, path as Paths<T>)!));
   }
-  public sonce<P extends WildPaths<T>>(path: P, cb: Setter<T, P>, opts?: SyncOptions): Reactor<T>["noset"] {
+  public sonce<P extends WildPaths<T>>(path: P, cb: Setter<T, P>, opts?: SyncOptions): SetterRecord<T>["clup"] {
     return this.set<P>(path, cb, Object.assign(parseEvOpts(opts, EV_OPTS.MEDIATOR), { once: true }));
   }
   public noset<P extends WildPaths<T>>(path: P, cb: Setter<T, P>): boolean | undefined {
     return this.syncDrop(this.setters, path, cb);
   }
 
-  public delete<P extends WildPaths<T>>(path: P, cb: Deleter<T, P>, opts?: SyncOptions): Reactor<T>["nodelete"] {
-    return this.syncAdd("delete", path, cb, opts, (imm) => (imm !== "auto" || inAny(this.core, path)) && deleteAny(this.core, path as Paths<T>, undefined)) as Reactor<T>["nodelete"];
+  public delete<P extends WildPaths<T>>(path: P, cb: Deleter<T, P>, opts?: SyncOptions): DeleterRecord<T>["clup"] {
+    return this.syncAdd("delete", path, cb, opts, (imm) => (imm !== "auto" || inAny(this.core, path)) && deleteAny(this.core, path as Paths<T>, undefined));
   }
-  public donce<P extends WildPaths<T>>(path: P, cb: Deleter<T, P>, opts?: SyncOptions): Reactor<T>["nodelete"] {
+  public donce<P extends WildPaths<T>>(path: P, cb: Deleter<T, P>, opts?: SyncOptions): DeleterRecord<T>["clup"] {
     return this.delete<P>(path, cb, Object.assign(parseEvOpts(opts, EV_OPTS.MEDIATOR), { once: true }));
   }
   public nodelete<P extends WildPaths<T>>(path: P, cb: Deleter<T, P>): boolean | undefined {
     return this.syncDrop(this.deleters, path, cb);
   }
 
-  public watch<P extends WildPaths<T>>(path: P, cb: Watcher<T, P>, opts?: SyncOptions): Reactor<T>["nowatch"] {
-    return this.syncAdd("watch", path, cb, opts, (imm) => imm !== "auto" && inAny(this.core, path) && ((target) => cb(target.value, { type: "init", target, currentTarget: target, root: this.core, rejectable: false } as Payload<T, P>))(this.getContext(path))) as Reactor<T>["nowatch"];
+  public watch<P extends WildPaths<T>>(path: P, cb: Watcher<T, P>, opts?: SyncOptions): WatcherRecord<T>["clup"] {
+    return this.syncAdd("watch", path, cb, opts, (imm) => imm !== "auto" && inAny(this.core, path) && ((target) => cb(target.value, { type: "init", target, currentTarget: target, root: this.core, rejectable: false } as Payload<T, P>))(this.getContext(path)));
   }
-  public wonce<P extends WildPaths<T>>(path: P, cb: Watcher<T, P>, opts?: SyncOptions): Reactor<T>["nowatch"] {
+  public wonce<P extends WildPaths<T>>(path: P, cb: Watcher<T, P>, opts?: SyncOptions): WatcherRecord<T>["clup"] {
     return this.watch<P>(path, cb, Object.assign(parseEvOpts(opts, EV_OPTS.MEDIATOR), { once: true }));
   }
   public nowatch<P extends WildPaths<T>>(path: P, cb: Watcher<T, P>): boolean | undefined {
     return this.syncDrop(this.watchers, path, cb);
   }
 
-  public on<P extends WildPaths<T>>(path: P, cb: Listener<T, P>, options?: ListenerOptions): Reactor<T>["off"] {
+  public on<P extends WildPaths<T>>(path: P, cb: Listener<T, P>, options?: ListenerOptions): ListenerRecord<T>["clup"] {
     this.listeners ??= new Map<WildPaths<T>, Array<ListenerRecord<T>>>();
     const { capture = false, once = false, signal, immediate = false, depth } = parseEvOpts(options, EV_OPTS.LISTENER);
     let cords = this.listeners.get(path),
@@ -513,14 +514,14 @@ export class Reactor<T extends object> {
     (cords ?? (this.listeners.set(path, (cords = [])), cords)).push(cord);
     return this.bind(cord, signal);
   }
-  public once<P extends WildPaths<T>>(path: P, cb: Listener<T, P>, options?: ListenerOptions): Reactor<T>["off"] {
+  public once<P extends WildPaths<T>>(path: P, cb: Listener<T, P>, options?: ListenerOptions): ListenerRecord<T>["clup"] {
     return this.on<P>(path, cb, Object.assign(parseEvOpts(options, EV_OPTS.LISTENER), { once: true }));
   }
   public off<P extends WildPaths<T>>(path: P, cb: Listener<T, P>, options?: ListenerOptions): boolean | undefined {
     const cords = this.listeners?.get(path);
     if (!cords) return undefined;
     const { capture } = parseEvOpts(options, EV_OPTS.LISTENER);
-    for (let i = 0, len = cords.length; i < len; i++) if (Object.is(cords[i].cb, cb) && cords[i].capture === capture) return (cords[i].sclup?.(), cords.splice(i--, 1), !cords.length && this.listeners!.delete(path), true);
+    for (let i = 0, len = cords.length; i < len; i++) if (Object.is(cords[i].cb, cb) && cords[i].capture === capture) return cords[i].sclup?.(), cords.splice(i--, 1), !cords.length && this.listeners!.delete(path), true;
     return false;
   }
 
@@ -536,11 +537,11 @@ export class Reactor<T extends object> {
     this.isCascading = false;
   }
   public reset(): void {
-    (this.getters?.clear(), this.setters?.clear(), this.deleters?.clear(), this.watchers?.clear(), this.listeners?.clear(), this.queue?.clear(), this.batch?.clear());
-    ((this.isBatching = false), (this.proxyCache = new WeakMap()));
+    this.getters?.clear(), this.setters?.clear(), this.deleters?.clear(), this.watchers?.clear(), this.listeners?.clear(), this.queue?.clear(), this.batch?.clear();
+    (this.isBatching = false), (this.proxyCache = new WeakMap());
   }
   public destroy(): void {
-    (this.reset(), nuke(this));
+    this.reset(), nuke(this);
   }
 
   get canLog(): boolean {

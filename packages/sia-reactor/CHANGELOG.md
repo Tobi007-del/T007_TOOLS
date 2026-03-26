@@ -1,5 +1,11 @@
 # sia-reactor
 
+## 0.0.9
+
+### Patch Changes
+
+- Cleanups and maintainance along with API possiblity tests
+
 ## 0.0.8
 
 ### Patch Changes

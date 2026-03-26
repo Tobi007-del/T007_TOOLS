@@ -1,6 +1,6 @@
 {
   "name": "sia-reactor",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "The Programmable Data DOM. A high-performance State Intent Architecture (S.I.A.) Engine with zero-allocation loops, event propagation, and structural sharing.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -33,13 +33,19 @@
       "import": "./dist/utils.js",
       "require": "./dist/utils.cjs",
       "default": "./dist/utils.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
+      "require": "./dist/react.cjs",
+      "default": "./dist/react.js"
     }
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsup src/index.ts src/utils.ts src/types.ts --format cjs,esm,iife --global-name sia --dts --clean --no-splitting",
+    "build": "tsup src/index.ts src/utils.ts src/react.ts --format cjs,esm,iife --global-name sia --dts --clean",
     "prepublishOnly": "shx cp ../../LICENSE ."
   },
   "files": [
@@ -65,7 +71,11 @@
     "performance"
   ],
   "devDependencies": {
+    "@types/react": "^18.0.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
   }
 }

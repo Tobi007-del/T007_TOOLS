@@ -1,4 +1,5 @@
 import type { DeepMerge, Unflatten, WildPaths, Paths, PathValue } from "../types/obj";
+
 const arrRx = /^([^\[\]]+)\[(\d+)\]$/;
 
 // Type Guards

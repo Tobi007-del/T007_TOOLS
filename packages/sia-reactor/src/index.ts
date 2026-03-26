@@ -18,7 +18,7 @@ export {
   isVolatile,
   getVersion,
   getSnapshotVersion
-} from "./tools/mixins";
+} from "./utils/mixins";
 
 export type {
   Inert,
@@ -52,7 +52,7 @@ export type {
 export type { 
   Reactive, 
   ReactivePrefs 
-} from "./tools/mixins";
+} from "./utils/mixins";
 
 export type {
   Paths,

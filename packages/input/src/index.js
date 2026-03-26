@@ -337,7 +337,7 @@ const { field, handleFormValidation } = formManager;
 export { formManager, field, handleFormValidation };
 
 if (typeof window !== "undefined") {
-  t007.FM = formManager;
+  t007.FM = t007.formManager = formManager;
   t007.field = field;
   t007.handleFormValidation = handleFormValidation;
   window.field ??= t007.field;
