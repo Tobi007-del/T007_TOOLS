@@ -1,15 +1,19 @@
 // Type Guards
 export { isDef } from "sia-reactor/utils";
 
-export function isSym<T = symbol>(val: any): val is T {
+export function isSym<T extends symbol = symbol>(val: any): val is T {
   return "symbol" === typeof val;
 }
 
-export function isNum<T = number>(val: any): val is T {
+export function isBool<T extends boolean = boolean>(val: any): val is T {
+  return "boolean" === typeof val;
+}
+
+export function isNum<T extends number = number>(val: any): val is T {
   return "number" === typeof val;
 }
 
-export function isStr<T = string>(val: any): val is T {
+export function isStr<T extends string = string>(val: any): val is T {
   return "string" === typeof val;
 }
 
@@ -23,7 +27,7 @@ export function isIter<T = unknown>(obj: any): obj is Iterable<T> {
   return obj != null && "function" === typeof obj[Symbol.iterator];
 }
 
-export function isFunc<T = Function>(val: any): val is T {
+export function isFunc<T extends Function = Function>(val: any): val is T {
   return "function" === typeof val;
 }
 

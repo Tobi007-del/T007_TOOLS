@@ -1,11 +1,19 @@
 # @t007/utils
 
+## 0.0.10
+
+### Patch Changes
+
+- ts fixes and cleanups
+- Updated dependencies
+  - sia-reactor@0.0.12
+
 ## 0.0.9
 
 ### Patch Changes
 
 - Borrowing utils from S.I.A Reactor
- 
+
 ## 0.0.8
 
 ### Patch Changes
