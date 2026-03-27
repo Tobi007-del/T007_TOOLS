@@ -1,5 +1,5 @@
 import "./css/index.css";
-import { clamp, uid, bindAllMethods, createEl, loadResource } from "@t007/utils";
+import { isDef, isStr, isNum, isObj, isFunc, clamp, uid, bindAllMethods, createEl, loadResource } from "@t007/utils";
 
 class T007_Toast {
   #autoCloseInterval;
@@ -15,7 +15,7 @@ class T007_Toast {
     this.opts = { ...options };
     this.id = this.opts.id ??= uid(this.opts.idPrefix ?? "t007_toast_");
     t007.toasts.set(this.id, this);
-    "number" !== typeof this.opts.delay ? this.init() : this.queue.push(setTimeout(this.init, this.opts.delay));
+    !isNum(this.opts.delay) ? this.init() : this.queue.push(setTimeout(this.init, this.opts.delay));
     this.update(this.opts);
   }
   init() {
@@ -24,11 +24,11 @@ class T007_Toast {
     this.destroyed = false;
   }
   update(options) {
-    if (!options || typeof options !== "object") return this.opts.id;
+    if (!options || isObj(options)) return this.opts.id;
     try {
       this.opts = { ...this.opts, ...options };
       const run = () => Object.keys(options).forEach((key) => (this[key] = options[key]));
-      "number" !== typeof this.opts.delay ? run() : this.queue.push(setTimeout(run, this.opts.delay));
+      !isNum(this.opts.delay) ? run() : this.queue.push(setTimeout(run, this.opts.delay));
       this.opts.delay = null;
     } catch (err) {
       console.error("toast update failed:", err);
@@ -51,7 +51,7 @@ class T007_Toast {
   }
   set bodyHTML(value) {
     this.toastElement.querySelectorAll(".t007-toast > *:not(.t007-toast-cancel-button)").forEach((el) => el.remove());
-    this.toastElement.insertAdjacentHTML("afterbegin", `${value ? (typeof value === "function" ? value() : value) : ""}`);
+    this.toastElement.insertAdjacentHTML("afterbegin", `${value ? (isFunc(value) ? value() : value) : ""}`);
   }
   set render(value) {
     const bodyText = () => this.toastElement.querySelector(".t007-toast-body-text");
@@ -59,7 +59,7 @@ class T007_Toast {
       this._setUpBodyHTML();
       this.toastElement.querySelector(".t007-toast-body").prepend(bodyText() || createEl("p", { className: "t007-toast-body-text" }));
       const text = bodyText();
-      text.innerHTML = text.dataset.render = typeof value === "function" ? value() : value;
+      text.innerHTML = text.dataset.render = isFunc(value) ? value() : value;
     } else bodyText()?.remove();
   }
   set actions(value) {
@@ -113,7 +113,7 @@ class T007_Toast {
             className: "t007-toast-icon t007-toast-loader",
           })
       );
-      loader().innerHTML = typeof value === "string" ? value : t007.TOAST_ICONS.loading;
+      loader().innerHTML = isStr(value) ? value : t007.TOAST_ICONS.loading;
     } else {
       loader()?.remove();
       this.icon = this.opts.icon;
@@ -175,7 +175,7 @@ class T007_Toast {
       if (!this.#isPaused) {
         this.#timeVisible += time - lastTime;
         this.onTimeUpdate?.(this.#timeVisible);
-        if ("number" == typeof this.autoClose && this.#timeVisible >= this.autoClose) return this._remove("smooth", true);
+        if (isNum(this.autoClose) && this.#timeVisible >= this.autoClose) return this._remove("smooth", true);
       }
       lastTime = time;
       this.#autoCloseInterval = requestAnimationFrame(loop);
@@ -196,7 +196,7 @@ class T007_Toast {
     this.nprogress = 0;
     cancelAnimationFrame(this.#progressInterval);
     const loop = () => {
-      if ("number" == typeof this.autoClose && !this.#isPaused) this.nprogress = 1 - this.#timeVisible / this.autoClose;
+      if (isNum(this.autoClose) && !this.#isPaused) this.nprogress = 1 - this.#timeVisible / this.autoClose;
       this.#progressInterval = requestAnimationFrame(loop);
     };
     if (!value) this.#progressInterval = requestAnimationFrame(loop);
@@ -243,7 +243,7 @@ class T007_Toast {
     this.toastElement.onpointerup = value ? this._handleToastPointerUp : null;
   }
   _handleToastPointerStart(e) {
-    if (typeof this._ptrType === "string" && e.pointerType !== this._ptrType) return;
+    if (isStr(this._ptrType) && e.pointerType !== this._ptrType) return;
     if (e.touches?.length > 1) return;
     !e.target?.matches('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])') && this.toastElement.setPointerCapture(e.pointerId);
     this.#isPaused = true;
@@ -274,7 +274,7 @@ class T007_Toast {
     this._ptrTicker = true;
   }
   _handleToastPointerUp(e) {
-    if (typeof this._ptrType === "string" && e.pointerType !== this._ptrType) return;
+    if (isStr(this._ptrType) && e.pointerType !== this._ptrType) return;
     cancelAnimationFrame(this._ptrRAF);
     if (Math.abs(this._ptrDeltaX) > this.toastElement.offsetWidth * (this.opts.dragToClosePercent.x ?? this.opts.dragToClosePercent / 100) || Math.abs(this._ptrDeltaY) > this.toastElement.offsetHeight * (this.opts.dragToClosePercent.y ?? this.opts.dragToClosePercent / 100)) return this._remove("instant");
     this.#isPaused = this._ptrTicker = this._ptrDirSet = this._ptrDir = false;
@@ -344,24 +344,24 @@ export const toasting = {
       type: "",
     }),
   promise(base, promise = new Promise((res, rej) => setTimeout(Math.round(Math.random()) ? res : rej, 3000)), { pending, success, error } = {}) {
-    if (!promise || typeof promise.then !== "function") return console.error("toast.promise() requires a valid promise");
-    const NFC = (input, type) => (typeof input === "string" ? { render: input, type } : typeof input === "object" ? { ...input, type } : { type });
+    if (!promise || isFunc(promise.then)) return console.error("toast.promise() requires a valid promise");
+    const NFC = (input, type) => (isStr(input) ? { render: input, type } : isObj(input) ? { ...input, type } : { type });
     const pendingConfig = NFC(pending);
     const pendingToastId = base.loading(pendingConfig.render || "Promise pending...", { ...pendingConfig });
     promise.then(
       (response) => {
         const successConfig = NFC(success || "Promise resolved", "success");
         const { render, bodyHTML } = successConfig;
-        if (typeof render === "function") successConfig.render = (response) => render(response); // preserving as functions that receive the response
-        if (typeof bodyHTML === "function") successConfig.bodyHTML = (response) => bodyHTML(response);
+        if (isFunc(render)) successConfig.render = (response) => render(response); // preserving as functions that receive the response
+        if (isFunc(bodyHTML)) successConfig.bodyHTML = (response) => bodyHTML(response);
         base.success(pendingToastId, successConfig);
         return response;
       },
       (err) => {
         const errorConfig = NFC(error || "Promise rejected", "error");
         const { render, bodyHTML } = errorConfig;
-        if (typeof render === "function") errorConfig.render = (err) => render(err);
-        if (typeof bodyHTML === "function") errorConfig.bodyHTML = (err) => bodyHTML(err);
+        if (isFunc(render)) errorConfig.render = (err) => render(err);
+        if (isFunc(bodyHTML)) errorConfig.bodyHTML = (err) => bodyHTML(err);
         base.error(pendingToastId, errorConfig);
         return Promise.reject(err);
       }
@@ -406,7 +406,7 @@ export const toaster = (defOptions = {}, idPrefix = "t007_toast_") => {
 const toast = toaster();
 export default toast;
 
-if (typeof window !== "undefined") {
+if (isDef(window)) {
   t007.toast = toast;
   t007.toasting = toasting;
   t007.toaster = toaster;

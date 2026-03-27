@@ -58,15 +58,15 @@ export interface UpdatePayload<T, P extends WildPaths<T> = WildPaths<T>> extends
 
 // Discriminated Event Type (Creates the IDE magic)
 export type REvent<T, P extends WildPaths<T> = WildPaths<T>> =
-  | (Omit<ReactorEvent<T, P>, OverrideEvProp> &
+  | (Omit<ReactorEvent<T, P>, OverrideEvtProp> &
       DirectPayload<T, P> &
-      OverrideEvPart<DirectPayload<T, P>>)
-  | (Omit<ReactorEvent<T, P>, OverrideEvProp> &
+      OverrideEvtPart<DirectPayload<T, P>>)
+  | (Omit<ReactorEvent<T, P>, OverrideEvtProp> &
       UpdatePayload<T, P> &
-      OverrideEvPart<UpdatePayload<T, P>>);
+      OverrideEvtPart<UpdatePayload<T, P>>);
 
-type OverrideEvProp = "type" | "target" | "value" | "oldValue" | "path";
-interface OverrideEvPart<PL extends { target: { path: any; value: any; oldValue?: any } }> {
+type OverrideEvtProp = "type" | "target" | "value" | "oldValue" | "path";
+interface OverrideEvtPart<PL extends { target: { path: any; value: any; oldValue?: any } }> {
   path: PL["target"]["path"];
   value: PL["target"]["value"];
   oldValue: PL["target"]["oldValue"];
@@ -105,8 +105,8 @@ export type Listener<T, P extends WildPaths<T> = WildPaths<T>> = (event: REvent<
 
 export type GetterRecord<T extends object, P extends WildPaths<T> = WildPaths<T>> = {
   cb: Getter<T, P>;
-  clup: () => ReturnType<Reactor<T>["noget"]>;
-  sclup?: () => void;
+  clup: () => ReturnType<Reactor<T>["noget"]>; // Registration Cleanup
+  sclup?: () => void; // AbortSignal Cleanup
 } & SyncOptionsTuple;
 
 export type SetterRecord<T extends object, P extends WildPaths<T> = WildPaths<T>> = {
@@ -151,7 +151,6 @@ export interface ListenerOptionsTuple extends Omit<SyncOptionsTuple, "lazy"> {
 }
 export type ListenerOptions = boolean | ListenerOptionsTuple;
 
-// "almighty" mediation, (mediator|listener) for desired path, equality checks eg: `object.is()`
 export interface ReactorOptions<T extends object, P extends Paths<T> = Paths<T>> {
   get?: (
     object: PathBranchValue<T, P>,
@@ -159,7 +158,7 @@ export interface ReactorOptions<T extends object, P extends Paths<T> = Paths<T>>
     value: PathValue<T, P>,
     receiver: Reactive<T>,
     path: Paths<T> | Paths<T>[]
-  ) => PathValue<T, P> | undefined;
+  ) => PathValue<T, P> | undefined; // "almighty" mediation
   set?: (
     object: PathBranchValue<T, P>,
     key: PathKey<T, P>,
@@ -167,14 +166,14 @@ export interface ReactorOptions<T extends object, P extends Paths<T> = Paths<T>>
     oldValue: PathValue<T, P>,
     receiver: Reactive<T>,
     path: Paths<T> | Paths<T>[]
-  ) => PathValue<T, P> | typeof TERMINATOR | undefined;
+  ) => PathValue<T, P> | typeof TERMINATOR | undefined; // "almighty" mediation
   delete?: (
     object: PathBranchValue<T, P>,
     key: PathKey<T, P>,
     oldValue: PathValue<T, P>,
     receiver: Reactive<T>,
     path: Paths<T> | Paths<T>[]
-  ) => typeof TERMINATOR | undefined;
+  ) => typeof TERMINATOR | undefined; // "almighty" mediation
   debug?: boolean;
   crossRealms?: boolean; // needed for object type detection if using across realms e.g, iframes or other environments
   smartCloning?: boolean; // 1-time set for structural sharing, needs `.referenceTracking: true`
@@ -184,4 +183,4 @@ export interface ReactorOptions<T extends object, P extends Paths<T> = Paths<T>>
   equalityFunction?: (a: any, b: any) => boolean; // used in setters and for adapters custom control, e.g: `Object.is` {default}
   batchingFunction?: (cb: () => void) => void; // custom set for listener's notifications, e.g: `queueMicrotask` {default}, `unstable_batchedUpdates` from ReactDOM
   referenceTracking?: boolean; // 1-time set to activate
-} // debating making use of the Reflect API opt-in
+} // debating keeping use of the Reflect API opt-in

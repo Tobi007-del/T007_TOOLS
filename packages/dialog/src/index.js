@@ -1,5 +1,5 @@
 import "./css/index.css";
-import { bindAllMethods, createEl, loadResource } from "@t007/utils";
+import { isDef, bindAllMethods, createEl, loadResource } from "@t007/utils";
 
 class T007_Dialog {
   dialog;
@@ -131,11 +131,11 @@ export function prompt(question, defaultValue, options) {
   return new Promise((resolve) => new T007_Prompt_Dialog({ question, defaultValue, resolve, options }));
 }
 
-if (typeof window !== "undefined") {
+if (isDef(window)) {
   t007.alert = alert;
   t007.confirm = confirm;
   t007.prompt = prompt;
-  (loadResource(T007_DIALOG_CSS_SRC), loadResource(window.T007_INPUT_JS_SRC, "script"));
+  loadResource(T007_DIALOG_CSS_SRC), loadResource(window.T007_INPUT_JS_SRC, "script");
   window.Alert ??= t007.alert;
   window.Confirm ??= t007.confirm;
   window.Prompt ??= t007.prompt;

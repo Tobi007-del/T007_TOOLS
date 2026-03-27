@@ -1,6 +1,7 @@
 "use strict";
 import log from "../../../assets/scripts/logger.js";
 import { Reactor } from "https://cdn.jsdelivr.net/npm/sia-reactor@latest/dist/index.min.js";
+// import { Reactor } from "../dist/index.js";
 import { Reactor as OldReactor } from "./Fossil.js";
 window.Reactor ??= Reactor;
 window.OldReactor ??= OldReactor;
@@ -9,7 +10,7 @@ window.OldReactor ??= OldReactor;
 // PROFESSIONAL BENCHMARK SUITE
 // ==========================================
 
-var TEST_WARMUP_ITERATIONS = 200_000;
+var TEST_WARMUP_ITERATIONS = 20_000;
 var TEST_ITERATIONS = 1_000_000;
 var TEST_CYCLES = 5;
 

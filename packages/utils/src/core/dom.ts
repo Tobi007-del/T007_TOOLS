@@ -1,3 +1,4 @@
+import { isSym } from "./obj";
 import { isSameURL } from "./str";
 
 // Types
@@ -37,7 +38,7 @@ export function assignEl(el?: HTMLElement | null, props?: Record<string, unknown
 export const VIRTUAL_RESOURCE: unique symbol = Symbol.for("T007_VIRTUAL_RESOURCE");
 export function loadResource(req: string | symbol, type: ResourceType = "style", { module, media, crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, attempts = 3, retryKey = false }: LoadResourceOptions = {}, w = window): Promise<HTMLElement | void> {
   (w.t007 ??= {} as any), (w.t007._resourceCache ??= {});
-  if (req === VIRTUAL_RESOURCE || "symbol" === typeof req) return Promise.resolve();
+  if (req === VIRTUAL_RESOURCE || isSym(req)) return Promise.resolve();
   const src = req as string;
   if (w.t007._resourceCache[src]) return w.t007._resourceCache[src]; // set crossorigin on (links|scripts) if provided due to document.(styleSheets|scripts)
   const existing = type === "script" ? Array.prototype.find.call(w.document.scripts, (s) => isSameURL(s.src, src)) : type === "style" ? Array.prototype.find.call(w.document.styleSheets, (s) => isSameURL((s as CSSStyleSheet).href, src)) : null;

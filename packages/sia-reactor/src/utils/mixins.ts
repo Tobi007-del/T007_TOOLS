@@ -1,4 +1,4 @@
-import { Reactor, INERTIA, REJECTABLE, INDIFFABLE, VERSION, SSVERSION } from "../core/reactor";
+import { Reactor, INERTIA, REJECTABLE, INDIFFABLE, VERSION, SSVERSION, NIL } from "../core/reactor";
 import type { ReactorOptions, Inert, Intent, Live, State, Volatile, Stable } from "../types/reactor";
 
 // --- Reactor public methods ---
@@ -19,18 +19,20 @@ export interface ReactivePrefs {
 }
 export type Reactive<T extends object, P extends ReactivePrefs | undefined = undefined> = T & ReactiveMethodMap<T, P> & { __Reactor__: Reactor<T> };
 
-export function reactive<T extends object, const P extends ReactivePrefs | undefined = undefined>(target: T | Reactor<T>, options?: ReactorOptions<T>, prefs?: P): Reactive<T, P> {
+export function reactive<T extends object, const P extends ReactivePrefs | undefined = undefined>(target: T, options?: ReactorOptions<T>, prefs: P = NIL): T extends Reactive<infer O, infer P> ? T : Reactive<T, P> {
+  if ("__Reactor__" in target) return target as any;
   const descriptors: PropertyDescriptorMap = {},
     rtr = target instanceof Reactor ? target : new Reactor(target, options),
     locks = { enumerable: false, configurable: true, writable: false },
-    hasAffix = !!(prefs?.prefix || prefs?.suffix);
-  for (let key of methods) {
-    if (hasAffix) (prefs?.whitelist?.includes(key) ?? true) && (key = `${prefs?.prefix || ""}${key}${prefs?.suffix || ""}` as Method);
-    else if (prefs?.whitelist?.includes(key)) continue;
+    hasAffix = !!(prefs.prefix || prefs.suffix);
+  for (let i = 0, len = methods.length; i < len; i++) {
+    let key = methods[i];
+    if (hasAffix) (prefs.whitelist?.includes(key) ?? true) && (key = `${prefs.prefix || ""}${key}${prefs.suffix || ""}` as Method);
+    else if (prefs.whitelist?.includes(key)) continue;
     descriptors[key] = { value: rtr[key].bind(rtr), ...locks };
   }
   descriptors["__Reactor__"] = { value: rtr, ...locks };
-  return (Object.defineProperties(rtr.core, descriptors), rtr.core as Reactive<T, P>);
+  return Object.defineProperties(rtr.core, descriptors), rtr.core as any;
 }
 
 export function inert<T extends object>(target: T): Inert<T> {

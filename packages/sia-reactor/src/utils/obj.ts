@@ -4,27 +4,15 @@ const arrRx = /^([^\[\]]+)\[(\d+)\]$/;
 
 // Type Guards
 export function isDef(val: any): boolean {
-  return val !== undefined;
+  return "undefined" !== typeof val;
 }
 
-export function isArr<T = unknown>(obj: any): obj is T[] {
-  return Array.isArray(obj);
-}
-
-export function isObj<T extends object = object>(obj: any, checkArr = true): obj is T {
+export function isObj<T = object>(obj: any, checkArr = true): obj is T {
   return "object" === typeof obj && obj !== null && (checkArr ? !Array.isArray(obj) : true);
 } // okay for common use cases but loose
-export function isStrictObj<T extends object = object>(obj: any, crossRealms = false, typecheck = true): obj is T {
+export function isStrictObj<T = object>(obj: any, crossRealms = false, typecheck = true): obj is T {
   return (typecheck ? isObj(obj, false) : true) && (crossRealms ? Object.prototype.toString.call(obj) === "[object Object]" : obj.constructor === Object);
 } // for strict own POJOs, handles cross-realm objects too
-
-export function isIter<T = unknown>(obj: any): obj is Iterable<T> {
-  return obj != null && "function" === typeof obj[Symbol.iterator];
-}
-
-export function inBoolArrOpt(opt: any, str: string): boolean {
-  return opt?.includes?.(str) ?? opt;
-}
 
 export function setAny<T extends object, const S extends string = ".">(target: T, key: Paths<T, S>, value: PathValue<T, typeof key, S>, separator: S = "." as S, keyFunc?: (p: string) => string): void {
   if (!key.includes(separator)) return void ((target as any)[keyFunc ? keyFunc(key) : key] = value);
@@ -34,12 +22,12 @@ export function setAny<T extends object, const S extends string = ".">(target: T
       match = key.includes("[") && key.match(arrRx);
     if (match) {
       const [, key, iStr] = match;
-      if (!isArr(currObj[key])) currObj[key] = [];
+      if (!Array.isArray(currObj[key])) currObj[key] = [];
       if (i === len - 1) currObj[key][Number(iStr)] = value;
-      else ((currObj[key][Number(iStr)] ||= {}), (currObj = currObj[key][Number(iStr)]));
+      else (currObj[key][Number(iStr)] ||= {}), (currObj = currObj[key][Number(iStr)]);
     } else {
       if (i === len - 1) currObj[key] = value;
-      else ((currObj[key] ||= {}), (currObj = currObj[key]));
+      else (currObj[key] ||= {}), (currObj = currObj[key]);
     }
   }
 }
@@ -53,7 +41,7 @@ export function getAny<T extends object, const S extends string = ".">(source: T
       match = key.includes("[") && key.match(arrRx);
     if (match) {
       const [, key, iStr] = match;
-      if (!isArr(currObj[key]) || !(key in currObj)) return undefined;
+      if (!Array.isArray(currObj[key]) || !(key in currObj)) return undefined;
       currObj = currObj[key][Number(iStr)];
     } else {
       if (!isObj<Record<string, any>>(currObj) || !(key in currObj)) return undefined;
@@ -71,7 +59,7 @@ export function deleteAny<T extends object, const S extends string = ".">(target
       match = key.includes("[") && key.match(arrRx);
     if (match) {
       const [, key, iStr] = match;
-      if (!isArr(currObj[key]) || !(key in currObj)) return;
+      if (!Array.isArray(currObj[key]) || !(key in currObj)) return;
       if (i === len - 1) delete currObj[key][Number(iStr)];
       else currObj = currObj[key][Number(iStr)];
     } else {
@@ -90,7 +78,7 @@ export function inAny<T extends object, const S extends string = ".">(source: T,
       match = key.includes("[") && key.match(arrRx);
     if (match) {
       const [, key, iStr] = match;
-      if (!isArr(currObj[key]) || !(key in currObj)) return false;
+      if (!Array.isArray(currObj[key]) || !(key in currObj)) return false;
       if (i === len - 1) return true;
       currObj = currObj[key][Number(iStr)];
     } else {
@@ -110,8 +98,8 @@ export function parseAnyObj<T extends Record<string, any>, const S extends strin
   return result as Unflatten<T, S>;
 }
 
-export function parseEvOpts<T extends object>(options: T | boolean | undefined, opts: (keyof T)[] | readonly (keyof T)[], boolOpt: keyof T = opts[0], result = {} as T): T {
-  return (Object.assign(result, "boolean" === typeof options ? { [boolOpt]: options } : options), result);
+export function parseEvtOpts<T extends object>(options: T | boolean | undefined, opts: (keyof T)[] | readonly (keyof T)[], boolOpt: keyof T = opts[0], result = {} as T): T {
+  return Object.assign(result, "boolean" === typeof options ? { [boolOpt]: options } : options), result;
 }
 
 // Merging & Traversal
@@ -120,7 +108,7 @@ export function mergeObjs<T1 extends object>(o1: T1): T1;
 export function mergeObjs<T2 extends object>(o1: undefined | null, o2: T2): T2;
 export function mergeObjs(o1: any = {}, o2: any = {}): any {
   const merged = { ...(o1 || {}), ...(o2 || {}) };
-  return (Object.keys(merged).forEach((k) => isObj(o1?.[k]) && isObj(o2?.[k]) && (merged[k] = mergeObjs(o1[k], o2[k]))), merged);
+  return Object.keys(merged).forEach((k) => isObj(o1?.[k]) && isObj(o2?.[k]) && (merged[k] = mergeObjs(o1[k], o2[k]))), merged;
 }
 
 export function getTrailPaths<T>(path: WildPaths<T>, reverse: boolean = true): WildPaths<T>[] {
@@ -142,8 +130,8 @@ export function getTrailRecords<T extends object>(obj: T, path: WildPaths<T>): [
 
 // Cloning
 export function deepClone<T>(obj: T, crossRealms?: boolean, visited = new WeakMap()): T {
-  if (!(isStrictObj(obj, crossRealms) || isArr(obj)) || visited.has(obj)) return obj; // no circular references
-  const clone: any = isArr(obj) ? [] : {};
+  if (!(isStrictObj(obj, crossRealms) || Array.isArray(obj)) || visited.has(obj)) return obj; // no circular references
+  const clone: any = Array.isArray(obj) ? [] : {};
   visited.set(obj, clone);
   const keys = Object.keys(obj);
   for (let i = 0, len = keys.length; i < len; i++) clone[keys[i]] = deepClone((obj as any)[keys[i]], crossRealms, visited);

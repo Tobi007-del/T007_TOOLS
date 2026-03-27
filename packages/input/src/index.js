@@ -1,5 +1,5 @@
 import "./css/index.css";
-import { createEl, loadResource, initScrollAssist } from "@t007/utils";
+import { isArr, isDef, isStr, createEl, loadResource, initScrollAssist } from "@t007/utils";
 
 var formManager = {
   forms: document.getElementsByClassName("t007-input-form"),
@@ -145,7 +145,7 @@ var formManager = {
     }
     const inputEl = (field.inputEl = createEl(isTextArea ? "textarea" : isSelect ? "select" : "input", { className: `t007-input${className ? ` ${className}` : ""}`, placeholder })); // You're welcome :)
     // Insert options if select
-    if (isSelect && Array.isArray(options)) inputEl.innerHTML = options.map((opt) => (typeof opt === "string" ? `<option value="${opt}">${opt}</option>` : `<option value="${opt.value}">${opt.option}</option>`)).join("");
+    if (isSelect && isArr(options)) inputEl.innerHTML = options.map((opt) => (isStr(opt) ? `<option value="${opt}">${opt}</option>` : `<option value="${opt.value}">${opt.option}</option>`)).join("");
     if (!isSelect && !isTextArea) inputEl.type = type;
     if (custom) inputEl.setAttribute("custom", custom);
     if (minSize) inputEl.setAttribute("minsize", minSize);
@@ -336,7 +336,7 @@ var formManager = {
 const { field, handleFormValidation } = formManager;
 export { formManager, field, handleFormValidation };
 
-if (typeof window !== "undefined") {
+if (isDef(window)) {
   t007.FM = t007.formManager = formManager;
   t007.field = field;
   t007.handleFormValidation = handleFormValidation;

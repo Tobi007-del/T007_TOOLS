@@ -1,8 +1,10 @@
+import { isDef } from "./core/obj";
 import { VIRTUAL_RESOURCE } from "./core/dom";
 
 // Global Types
 export type * from "./types/global.d.ts";
 // Core
+export * from "./core/obj";
 export * from "./core/num";
 export * from "./core/str";
 export * from "./core/dom";
@@ -11,7 +13,7 @@ export * from "./mixins/methodist";
 // Quirks
 export * from "./quirks/scroll";
 
-if (typeof window !== "undefined") {
+if (isDef(window)) {
   window.t007 ??= {} as any;
 
   t007.VIRTUAL_RESOURCE = VIRTUAL_RESOURCE;

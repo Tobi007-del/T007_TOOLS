@@ -1,5 +1,17 @@
 # sia-reactor
 
+## 0.0.11
+
+### Patch Changes
+
+- Fixed bugs and optimization issues
+
+## 0.0.10
+
+### Patch Changes
+
+- Polished adapters and optimized library code
+
 ## 0.0.9
 
 ### Patch Changes
