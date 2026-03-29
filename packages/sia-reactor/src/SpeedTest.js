@@ -36,16 +36,16 @@ window.runBenchmark = async function runBenchmark() {
       },
     }
   );
-  window.proxy2 = new Proxy(
-    { val: 0 },
-    {
-      set(t, k, v, r) {
-        return Reflect.set(t, k, v, r);
-      },
-    }
-  );
+  // const proxy2 = new Proxy(
+  //   { val: 0 },
+  //   {
+  //     set(t, k, v, r) {
+  //       return Reflect.set(t, k, v, r);
+  //     },
+  //   }
+  // );
   window.siaState = createSIAProxy({ val: 0 });
-  window.siaState2 = createSIAProxy({ val: 0 }, { preserveContext: true });
+  // const siaState2 = createSIAProxy({ val: 0 }, { preserveContext: true });
   window.vueState = createVueProxy({ val: 0 });
   window.mobxState = createMobxProxy({ val: 0 });
   window.valtioState = createValtioProxy({ val: 0 });
@@ -54,8 +54,10 @@ window.runBenchmark = async function runBenchmark() {
   log(`🔥 Warming up JIT compiler to stabilize execution environments...`);
   for (let i = 0; i < TEST_WARMUP_ITERATIONS; i++) {
     rawObj.val = i;
-    (proxy.val = i), (proxy2.val = i);
-    (siaState.val = i), (siaState2.val = i);
+    proxy.val = i;
+    // proxy2.val = i;
+    siaState.val = i;
+    // siaState2.val = i;
     vueState.val = i;
     mobxState.val = i;
     valtioState.val = i;
@@ -74,18 +76,18 @@ window.runBenchmark = async function runBenchmark() {
     start = performance.now();
     for (let i = 0; i < TEST_ITERATIONS; i++) proxy.val = i;
     results.proxy.push(performance.now() - start);
-    await breathe();
-    start = performance.now();
-    for (let i = 0; i < TEST_ITERATIONS; i++) proxy2.val = i;
-    results.proxy2.push(performance.now() - start);
+    // await breathe();
+    // start = performance.now();
+    // for (let i = 0; i < TEST_ITERATIONS; i++) proxy2.val = i;
+    // results.proxy2.push(performance.now() - start);
     await breathe();
     start = performance.now();
     for (let i = 0; i < TEST_ITERATIONS; i++) siaState.val = i;
     results.reactor.push(performance.now() - start);
-    await breathe();
-    start = performance.now();
-    for (let i = 0; i < TEST_ITERATIONS; i++) siaState2.val = i;
-    results.reactor2.push(performance.now() - start);
+    // await breathe();
+    // start = performance.now();
+    // for (let i = 0; i < TEST_ITERATIONS; i++) siaState2.val = i;
+    // results.reactor2.push(performance.now() - start);
     await breathe();
     start = performance.now();
     for (let i = 0; i < TEST_ITERATIONS; i++) vueState.val = i;
@@ -113,10 +115,10 @@ window.runBenchmark = async function runBenchmark() {
   };
 
   const rawStats = getStats(results.raw);
-  const proxyStats = getStats(results.proxy),
-    proxy2Stats = getStats(results.proxy2);
-  const reactorStats = getStats(results.reactor),
-    reactor2Stats = getStats(results.reactor2);
+  const proxyStats = getStats(results.proxy);
+  const proxy2Stats = getStats(results.proxy2);
+  const reactorStats = getStats(results.reactor);
+  const reactor2Stats = getStats(results.reactor2);
   const vueStats = getStats(results.vue);
   const mobxStats = getStats(results.mobx);
   const valtioStats = getStats(results.valtio);
@@ -160,14 +162,14 @@ window.runBenchmark = async function runBenchmark() {
 
   logPad("1. Bare Metal", rawStats.avg, rawStats.opsSec, "color: white");
   logPad("2. Native Proxy", proxyStats.avg, proxyStats.opsSec, "color: white");
-  logPad("(With Reflect API)", proxy2Stats.avg, proxy2Stats.opsSec);
+  // logPad("(With Reflect API)", proxy2Stats.avg, proxy2Stats.opsSec);
   logPad("3. S.I.A Reactor", reactorStats.avg, reactorStats.opsSec, "color: white");
-  logPad("(With Reflect API)", reactor2Stats.avg, reactor2Stats.opsSec);
+  // logPad("(With Reflect API)", reactor2Stats.avg, reactor2Stats.opsSec);
   logPad("4. Vue Reactivity", vueStats.avg, vueStats.opsSec);
   logPad("5. MobX Observable", mobxStats.avg, mobxStats.opsSec);
   logPad("6. Valtio Proxy", valtioStats.avg, valtioStats.opsSec);
   // logPad("7. Legend-State", legendStats.avg, legendStats.opsSec);
-  log("The Reflect API that is opt-in due to it's slowdown and unnecessity in S.I.A.");
+  // log("The Reflect API is opt-in due to it's slowdown and unnecessity in S.I.A."); // A Magician never reveals his tricks :), except to u who came searching...
 
   log(`%c=== OVERHEAD ANALYSIS & FRAME BUDGET ===`, "color: darkturquoise; font-weight: bold;");
   const proxyOverhead = (proxyStats.avg / rawStats.avg).toFixed(1);
