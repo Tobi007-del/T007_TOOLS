@@ -3,7 +3,7 @@ import type { PathBranchValue, Paths, PathKey, PathValue, WildPaths } from "../t
 import { isDef, isStrictObj, mergeObjs, getTrailPaths, getTrailRecords, parseEvtOpts, inAny, getAny, setAny, deleteAny, nuke } from "../utils";
 
 /***
- * ========= The S.I.A (State Intent Architecture) `Reactor` CODE PATTERN WATCHLIST =========
+ * ========= THE S.I.A (State Intent Architecture) `Reactor` CODE PATTERN WATCHLIST =========
  * 1. non-stack loops & multiple optimizations, this is surgical work on the root of reactivity
  * 2. used cached loop lengths to optimize b4 JIT Compiler does for optimal speed throughput,
  * avoided myth of reverse while loops so new CPU's don't waste memory on a forward l1 Cache miss

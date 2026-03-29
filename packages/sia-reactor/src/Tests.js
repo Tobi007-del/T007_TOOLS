@@ -1,5 +1,5 @@
 "use strict";
-import { Reactor, TERMINATOR } from "https://cdn.jsdelivr.net/npm/sia-reactor@latest/dist/index.min.js";
+import { Reactor, TERMINATOR } from "https://esm.sh/sia-reactor";
 // import { Reactor, TERMINATOR } from "../dist/index.js";
 import log from "../../../assets/scripts/logger.js";
 
