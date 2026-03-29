@@ -1,5 +1,11 @@
 # @t007/utils
 
+## 0.0.11
+
+### Patch Changes
+
+- Bug Fix on Methodist
+
 ## 0.0.10
 
 ### Patch Changes

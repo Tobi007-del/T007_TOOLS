@@ -6,8 +6,7 @@ export function onAllMethods(owner: any, callback: (method: string, owner: any) 
   while (proto && proto !== Object.prototype) {
     for (const method of Object.getOwnPropertyNames(proto)) {
       if (method === "constructor") continue;
-      if (isFunc(Object.getOwnPropertyDescriptor(proto, method)?.value)) continue;
-      callback(method, owner);
+      if (isFunc(Object.getOwnPropertyDescriptor(proto, method)?.value)) callback(method, owner);
     }
     proto = Object.getPrototypeOf(proto);
   }
