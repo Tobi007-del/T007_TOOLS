@@ -24,7 +24,7 @@ class T007_Toast {
     this.destroyed = false;
   }
   update(options) {
-    if (!options || isObj(options)) return this.opts.id;
+    if (!options || !isObj(options)) return this.opts.id;
     try {
       this.opts = { ...this.opts, ...options };
       const run = () => Object.keys(options).forEach((key) => (this[key] = options[key]));
@@ -344,7 +344,7 @@ export const toasting = {
       type: "",
     }),
   promise(base, promise = new Promise((res, rej) => setTimeout(Math.round(Math.random()) ? res : rej, 3000)), { pending, success, error } = {}) {
-    if (!promise || isFunc(promise.then)) return console.error("toast.promise() requires a valid promise");
+    if (!promise || !isFunc(promise.then)) return console.error("toast.promise() requires a valid promise");
     const NFC = (input, type) => (isStr(input) ? { render: input, type } : isObj(input) ? { ...input, type } : { type });
     const pendingConfig = NFC(pending);
     const pendingToastId = base.loading(pendingConfig.render || "Promise pending...", { ...pendingConfig });

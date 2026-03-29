@@ -1,4 +1,5 @@
 import Toast from "https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/standalone.min.js";
+// import Toast from "../dist/standalone.js";
 
 //just testing all possible positions
 const positions = ["top-right", "top-left", "top-center", "bottom-right", "bottom-left", "bottom-center", "center-right", "center-left", "center-center"];

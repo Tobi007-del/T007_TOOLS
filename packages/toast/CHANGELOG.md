@@ -1,5 +1,11 @@
 # @t007/toast
 
+## 0.0.11
+
+### Patch Changes
+
+- Fixed util issues
+
 ## 0.0.10
 
 ### Patch Changes
