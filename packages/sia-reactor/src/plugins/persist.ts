@@ -3,7 +3,7 @@ import { StorageAdapter, LocalStorageAdapter, AsyncStorageAdapter, type StorageA
 import { mergeObjs, setAny, getAny, isPOJO } from "../utils/obj";
 import { setTimeout } from "../utils/fn";
 import { Reactor } from "../core/reactor";
-import type { REvent } from "../types/reactor";
+import type { REvent, Inert } from "../types/reactor";
 import type { Paths } from "../types/obj";
 
 export interface PersistConfig<T extends object> {
@@ -14,7 +14,7 @@ export interface PersistConfig<T extends object> {
   /** Specific paths only, no "*"; instead don't pass anything */
   paths: Paths<T>[];
   /** Storage adapter class or instance to use, can satisfy `instanceof` or just definition, cast to `any` if the latter */
-  adapter: StorageAdapter | AsyncStorageAdapter | StorageAdapterConstructor | AsyncStorageAdapterConstructor; // pass in the instance if u wanna do custom config
+  adapter: Inert<StorageAdapter> | Inert<AsyncStorageAdapter> | Inert<StorageAdapterConstructor> | Inert<AsyncStorageAdapterConstructor>; // pass in the instance if u wanna do custom config
   /** Throttle time for saving changes */
   throttle: number;
   /** Whether to use a clone of the state from `rtr.snapshot()`, incase store doesn't understand proxies */

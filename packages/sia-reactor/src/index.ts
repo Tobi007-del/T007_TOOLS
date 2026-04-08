@@ -76,6 +76,8 @@ export type {
 } from "./core/mixins";
 
 export type {
+  Primitive,
+  NoTraverse,
   Paths,
   WildPaths,
   ChildPaths,

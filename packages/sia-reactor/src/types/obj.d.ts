@@ -1,7 +1,7 @@
 import type { Inert } from "./reactor";
 
-type Primitive = string | number | boolean | bigint | symbol | null | undefined;
-type NoTraverse =
+export type Primitive = string | number | boolean | bigint | symbol | null | undefined;
+export type NoTraverse =
   | Primitive
   | Function
   | Date

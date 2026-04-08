@@ -1,5 +1,17 @@
 # @t007/dialog
 
+## 0.0.17
+
+### Patch Changes
+
+- @t007/utils@0.0.20
+
+## 0.0.16
+
+### Patch Changes
+
+- @t007/utils@0.0.19
+
 ## 0.0.15
 
 ### Patch Changes

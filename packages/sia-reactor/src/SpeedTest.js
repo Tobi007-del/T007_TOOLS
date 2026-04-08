@@ -1,6 +1,6 @@
 "use strict";
 import log from "../../../assets/scripts/logger.js";
-// import { reactive as createSIAProxy } from "https://esm.sh/sia-reactor";
+import { reactive as createSIAProxy } from "https://esm.sh/sia-reactor";
 import { reactive as createVueProxy } from "https://esm.sh/@vue/reactivity";
 import { observable as createMobxProxy } from "https://esm.sh/mobx";
 import { proxy as createValtioProxy } from "https://esm.sh/valtio";

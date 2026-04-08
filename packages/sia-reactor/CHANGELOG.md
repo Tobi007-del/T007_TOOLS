@@ -1,5 +1,17 @@
 # sia-reactor
 
+## 0.0.19
+
+### Patch Changes
+
+- Fixed type issues
+
+## 0.0.18
+
+### Patch Changes
+
+- Prevented Circular Loops in types
+
 ## 0.0.17
 
 ### Patch Changes

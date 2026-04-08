@@ -15,8 +15,8 @@ export abstract class BaseReactorPlugin<T extends object = any, Config = any, St
   }
   protected ac = new AbortController();
   public readonly signal = this.ac.signal;
-  protected rtr!: Reactor<T>;
-  protected config!: Config extends object ? Reactive<Config> : Config;
+  public rtr!: Reactor<T>;
+  public config!: Config extends object ? Reactive<Config> : Config;
   public state!: State extends object ? Reactive<State> : State;
 
   constructor(config?: Config, rtr?: Reactor<T>, state?: State) {
