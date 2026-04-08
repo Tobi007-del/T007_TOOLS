@@ -1,4 +1,3 @@
-import { isDef } from "./core/obj";
 import { VIRTUAL_RESOURCE } from "./core/dom";
 
 // Global Types
@@ -7,13 +6,14 @@ export type * from "./types/global.d.ts";
 export * from "./core/obj";
 export * from "./core/num";
 export * from "./core/str";
+export * from "./core/fn";
 export * from "./core/dom";
 // Mixins
-export * from "./mixins/methodist";
+export * from "./core/methd";
 // Quirks
 export * from "./quirks/scroll";
 
-if (isDef(window)) {
+if ("undefined" !== typeof window) {
   window.t007 ??= {} as any;
 
   t007.VIRTUAL_RESOURCE = VIRTUAL_RESOURCE;

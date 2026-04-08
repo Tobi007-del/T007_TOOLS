@@ -1,8 +1,27 @@
+export {
+  CTX,
+  RAW,
+  INERTIA,
+  REJECTABLE,
+  INDIFFABLE,
+  TERMINATOR,
+  VERSION,
+  SSVERSION,
+  RTR_BATCH,
+  RTR_LOG,
+  EVT_WARN,
+  EVT_OPTS,
+  NIL,
+  NOOP 
+} from "./core/consts";
+
 export { 
-  Reactor, 
-  ReactorEvent, 
-  TERMINATOR 
+  Reactor 
 } from "./core/reactor";
+
+export {
+  ReactorEvent
+} from "./core/event";
 
 export {
   methods,
@@ -16,9 +35,10 @@ export {
   volatile,
   stable,
   isVolatile,
+  getRaw,
   getVersion,
   getSnapshotVersion
-} from "./utils/mixins";
+} from "./core/mixins";
 
 export type {
   Inert,
@@ -46,13 +66,14 @@ export type {
   SyncOptions,
   ListenerOptionsTuple,
   ListenerOptions,
-  ReactorOptions
+  EffectOptions,
+  ReactorBuild
 } from "./types/reactor";
 
 export type { 
   Reactive, 
-  ReactivePrefs 
-} from "./utils/mixins";
+  ReactivePreferences 
+} from "./core/mixins";
 
 export type {
   Paths,

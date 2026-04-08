@@ -1,5 +1,5 @@
 import "./css/index.css";
-import { isArr, isDef, isStr, createEl, loadResource, initScrollAssist } from "@t007/utils";
+import { isArr, isStr, createEl, loadResource, initScrollAssist } from "@t007/utils";
 
 var formManager = {
   forms: document.getElementsByClassName("t007-input-form"),
@@ -336,7 +336,7 @@ var formManager = {
 const { field, handleFormValidation } = formManager;
 export { formManager, field, handleFormValidation };
 
-if (isDef(window)) {
+if ("undefined" !== typeof window) {
   t007.FM = t007.formManager = formManager;
   t007.field = field;
   t007.handleFormValidation = handleFormValidation;

@@ -1,4 +1,4 @@
-import { isStr } from "./obj";
+import { isStr } from "..";
 
 // Generation
 export function uid(prefix = ""): string {

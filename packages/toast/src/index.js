@@ -1,5 +1,5 @@
 import "./css/index.css";
-import { isDef, isStr, isNum, isObj, isFunc, clamp, uid, bindAllMethods, createEl, loadResource } from "@t007/utils";
+import { isStr, isNum, isObj, isFunc, clamp, uid, bindAllMethods, createEl, loadResource } from "@t007/utils";
 
 class T007_Toast {
   #autoCloseInterval;
@@ -406,7 +406,7 @@ export const toaster = (defOptions = {}, idPrefix = "t007_toast_") => {
 const toast = toaster();
 export default toast;
 
-if (isDef(window)) {
+if ("undefined" !== typeof window) {
   t007.toast = toast;
   t007.toasting = toasting;
   t007.toaster = toaster;

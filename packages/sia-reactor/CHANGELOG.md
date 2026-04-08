@@ -1,5 +1,11 @@
 # sia-reactor
 
+## 0.0.16
+
+### Patch Changes
+
+- Major implementatioin updates across board, react hooks and plugin architecture.
+
 ## 0.0.12
 
 ### Patch Changes

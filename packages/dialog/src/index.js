@@ -1,5 +1,5 @@
 import "./css/index.css";
-import { isDef, bindAllMethods, createEl, loadResource } from "@t007/utils";
+import { bindAllMethods, createEl, loadResource } from "@t007/utils";
 
 class T007_Dialog {
   dialog;
@@ -131,7 +131,7 @@ export function prompt(question, defaultValue, options) {
   return new Promise((resolve) => new T007_Prompt_Dialog({ question, defaultValue, resolve, options }));
 }
 
-if (isDef(window)) {
+if ("undefined" !== typeof window) {
   t007.alert = alert;
   t007.confirm = confirm;
   t007.prompt = prompt;

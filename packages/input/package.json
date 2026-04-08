@@ -1,6 +1,6 @@
 {
   "name": "@t007/input",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "A lightweight, pure JS input system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -29,8 +29,6 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./standalone": "./dist/standalone.js",
-    "./global": "./dist/index.global.js",
     "./style.css": "./dist/index.css"
   },
   "publishConfig": {
@@ -57,6 +55,6 @@
     "monkey-patch"
   ],
   "dependencies": {
-    "@t007/utils": "^0.0.11"
+    "@t007/utils": "^0.0.15"
   }
 }

@@ -1,7 +1,7 @@
 export {
-  isDef,
   isObj,
-  isStrictObj,
+  isPOJO,
+  canHandle,
   setAny,
   getAny,
   deleteAny,
@@ -9,8 +9,38 @@ export {
   parseAnyObj,
   parseEvtOpts,
   mergeObjs,
-  getTrailPaths,
   getTrailRecords,
   deepClone,
   nuke
 } from "./utils/obj";
+
+export {
+  clamp
+} from "./utils/num";
+
+export {
+  setTimeout,
+  setInterval,
+  requestAnimationFrame,
+} from "./utils/fn";
+
+export {
+  onAllMethods,
+  bindAllMethods,
+  guardAllMethods,
+  guardMethod
+} from "./utils/methd";
+
+export {
+  type keysSettings,
+  type KeyStruct,
+  parseKeyCombo,
+  stringifyKeyEvent,
+  cleanKeyCombo,
+  matchKeys,
+  getTermsForKey,
+  keyEventAllowed,
+  formatKeyForDisplay,
+  formatKeyShortcutsForDisplay,
+  parseForARIAKS
+} from "./utils/keys";

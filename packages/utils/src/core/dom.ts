@@ -1,5 +1,4 @@
-import { isSym } from "./obj";
-import { isSameURL } from "./str";
+import { isSym, isSameURL } from "..";
 
 // Types
 export type Dataset = Record<string, string | number>;

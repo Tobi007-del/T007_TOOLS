@@ -1,5 +1,5 @@
-import { confirm, prompt } from "https://cdn.jsdelivr.net/npm/@t007/dialog@latest/dist/standalone.min.js";
-import Toast from "https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/standalone.min.js";
+import { confirm, prompt } from "https://esm.sh/@t007/dialog@latest";
+import Toast from "https://esm.sh/@t007/toast@latest";
 import { formatHTML, highlightHTML, highlightJSON } from "../../../assets/scripts/formatter.js";
 
 window.onload = () =>

@@ -1,4 +1,4 @@
-import Toast from "https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/standalone.min.js";
+import Toast from "https://esm.sh/@t007/toast@latest";
 // import Toast from "../dist/standalone.js";
 
 //just testing all possible positions

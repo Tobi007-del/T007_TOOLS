@@ -1,5 +1,29 @@
 # @t007/utils
 
+## 0.0.15
+
+### Patch Changes
+
+- Updated Type Defs for new methods
+
+## 0.0.14
+
+### Patch Changes
+
+- Building with changes unlike last time
+
+## 0.0.13
+
+### Patch Changes
+
+- Updated methods expert to stop redundant work
+
+## 0.0.12
+
+### Patch Changes
+
+- Removed Dependencies
+
 ## 0.0.11
 
 ### Patch Changes

@@ -1,0 +1,1 @@
+export { type keysSettings, type KeyStruct, parseKeyCombo, stringifyKeyEvent, cleanKeyCombo, matchKeys, getTermsForKey, keyEventAllowed, formatKeyForDisplay, formatKeyShortcutsForDisplay, parseForARIAKS } from "sia-reactor/utils";

@@ -1,6 +1,5 @@
 "use strict";
-import { Reactor, TERMINATOR } from "https://esm.sh/sia-reactor";
-// import { Reactor, TERMINATOR } from "../dist/index.js";
+// import { Reactor, TERMINATOR } from "https://esm.sh/sia-reactor";
 import log from "../../../assets/scripts/logger.js";
 
 const nextTick = () => new Promise((resolve) => setTimeout(resolve, 10)); // Helper to let the microtask queue flush between tests

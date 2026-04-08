@@ -1,4 +1,4 @@
-import { alert, confirm, prompt } from "https://cdn.jsdelivr.net/npm/@t007/dialog@latest/dist/standalone.min.js";
+import { alert, confirm, prompt } from "https://esm.sh/@t007/dialog@latest";
 
 window.showAlert = async function () {
   await alert("Hello, I'm Tobi007");
