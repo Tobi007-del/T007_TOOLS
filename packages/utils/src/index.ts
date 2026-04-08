@@ -8,8 +8,9 @@ export * from "./core/num";
 export * from "./core/str";
 export * from "./core/fn";
 export * from "./core/dom";
+export * from "./core/keys";
 // Mixins
-export * from "./core/methd";
+export * from "./mixins/methd";
 // Quirks
 export * from "./quirks/scroll";
 
