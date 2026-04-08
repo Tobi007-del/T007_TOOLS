@@ -1,5 +1,18 @@
 # @t007/utils
 
+## 0.0.17
+
+### Patch Changes
+
+- Updated dependencies
+  - sia-reactor@0.0.17
+
+## 0.0.16
+
+### Patch Changes
+
+- Build updated with new dependency
+
 ## 0.0.15
 
 ### Patch Changes

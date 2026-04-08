@@ -1,3 +1,4 @@
+import { isObj } from "sia-reactor/utils";
 // Type Guards
 export function isDef(val: any): boolean {
   return "undefined" !== typeof val;
@@ -23,7 +24,7 @@ export function isArr<T = unknown>(obj: any): obj is T[] {
   return Array.isArray(obj);
 }
 
-export { isObj } from "sia-reactor/utils";
+export { isObj };
 export function isPOJO<T extends object = object>(obj: any, crossRealms = false, typecheck = true): obj is T {
   return (typecheck ? isObj(obj, false) : true) && (crossRealms ? Object.prototype.toString.call(obj) === "[object Object]" : obj.constructor === Object);
 } // for strict own POJOs, handles cross-realm objects too

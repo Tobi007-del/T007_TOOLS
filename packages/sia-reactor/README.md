@@ -39,7 +39,7 @@ Read [Chronicles](https://github.com/Tobi007-del/tmg-media-player/blob/main/CHRO
 - **I just need to use this fast**:
 Jump directly to [Getting Started](#getting-started) and [API Reference](#api-reference).
 
-### Concept Snapshot 
+### Quick Overview
 
 `sia-reactor` treats nested data like a programmable evented tree.
 
@@ -52,8 +52,8 @@ Jump directly to [Getting Started](#getting-started) and [API Reference](#api-re
 Semantic split recommendation:
 - `intent`: async/delayed requests.
 - `state`: granted facts.
-- `settings/config`: immediate user prefs.
-- `status`: read-only system facts.
+- `settings/config (custom)`: immediate user prefs.
+- `status (custom)`: read-only system facts.
 
 ```javascript
 import { reactive, intent } from 'sia-reactor';
@@ -137,15 +137,40 @@ state.set("player.volume", (val) => Math.min(val, 100));
 state.on("player.volume", (e) => console.log(e.value));
 
 state.player.volume = 150; // Triggers mediation, clamps to 100, fires listener.
+state.__Reactor__ // Reference to the underlying reactor
 ```
 
 Alternatively, you can instantiate the `Reactor` class directly to keep the API separate from your data:
 ```javascript
 const reactor = new Reactor({ player: { volume: 50 } }, { debug: true, referenceTracking: true });
 reactor.core.player.volume = 100;
-const state = reactive(reactor); // Methods are now attached to the core and returned.
-state.__Reactor__ // Reference to the underlying reactor
 ```
+
+### Core Methods
+
+All methods are available on `Reactor` instances or objects wrapped in `reactive()`.
+
+#### **Mediators (Synchronous Gatekeepers)**
+- **`set(path, callback, options)`**: Intercept memory writes. Return a value to modify it, or return `TERMINATOR` to block the write entirely.
+- **`get(path, callback, options)`**: Intercept and format data during retrieval.
+- **`delete(path, callback, options)`**: Intercept property deletion.
+
+#### **Watchers (Synchronous Observers)**
+- **`watch(path, callback, options)`**: Fires instantly after a mutation. Use strictly for critical internal engine syncing.
+
+#### **Listeners (Asynchronous/Batched UI Observers)**
+- **`on(path, callback, options)`**: Attach DOM-style event listeners. Supports `{ capture: true, depth: 1, once: true, immediate: true }`.
+- **`once(path, callback, options)`**: Fires once and self-destructs.
+- **`off(path, callback, options)`**: Removes a listener.
+
+#### **Lifecycle & Utilities**
+- **`tick(path)`**: Forces a synchronous flush of the batch queue for a specific path.
+- **`stall(task)` / `nostall(task)`**: Manually stall the queue to wait for calculations before rendering.
+- **`cascade(eventOrPayload, objectSafe)`**: Manually trigger deep-object event waves, bypassing strict unchanged-proxy traps. Perfect for dumping massive API payloads into the tree, `objectSafe` merges `value` with `oldValue`.
+- **`snapshot(raw)`**: Generates a strict, structurally-shared, un-proxied clone of the current state tree.
+- **`plugIn(new ReactorPlugin(config))`**: Allows extended behaviour with external logic.
+- **`reset()`**: Clears all records bringing everything back to a clean slate.
+- **`destroy()`**: Last resort destruction, nukes everything by nullifying it's properties for full disposal.
 
 ### Reactor Build Options
 
@@ -180,32 +205,6 @@ const data = reactive({
   trigger: volatile({ clickCount: 0 })  // Fires events even if set to 0 again
 });
 ```
-
-### Core Methods
-
-All methods are available on `Reactor` instances or objects wrapped in `reactive()`.
-
-#### **Mediators (Synchronous Gatekeepers)**
-- **`set(path, callback, options)`**: Intercept memory writes. Return a value to modify it, or return `TERMINATOR` to block the write entirely.
-- **`get(path, callback, options)`**: Intercept and format data during retrieval.
-- **`delete(path, callback, options)`**: Intercept property deletion.
-
-#### **Watchers (Synchronous Observers)**
-- **`watch(path, callback, options)`**: Fires instantly after a mutation. Use strictly for critical internal engine syncing.
-
-#### **Listeners (Asynchronous/Batched UI Observers)**
-- **`on(path, callback, options)`**: Attach DOM-style event listeners. Supports `{ capture: true, depth: 1, once: true, immediate: true }`.
-- **`once(path, callback, options)`**: Fires once and self-destructs.
-- **`off(path, callback, options)`**: Removes a listener.
-
-#### **Lifecycle & Utilities**
-- **`tick(path)`**: Forces a synchronous flush of the batch queue for a specific path.
-- **`stall(task)` / `nostall(task)`**: Manually stall the queue to wait for calculations before rendering.
-- **`cascade(eventOrPayload, objectSafe)`**: Manually trigger deep-object event waves, bypassing strict unchanged-proxy traps. Perfect for dumping massive API payloads into the tree, `objectSafe` merges `value` with `oldValue`.
-- **`snapshot(raw)`**: Generates a strict, structurally-shared, un-proxied clone of the current state tree.
-- **`plugIn(new ReactorPlugin(config))`**: Allows extended behaviour with external logic.
-- **`reset()`**: Clears all records bringing everything back to a clean slate.
-- **`destroy()`**: Last resort destruction, nukes everything by nullifying it's properties for full disposal.
 
 ### Plugins: The Extension Port
 
@@ -455,7 +454,7 @@ S.I.A. Reactor synthesizes core concepts from the heavyweights of web and media 
 * **Video.js (VJS):** The philosophy of "Intent vs. State" MEDIATION, ensuring UI actions only commit when the underlying engine allows it.
 * **The Browser DOM:** Treating a raw JSON state tree like HTML nodes, complete with deep, path-based event bubbling.
 * **The JavaScript Event Loop:** Utilizing `queueMicrotask` to batch thousands of synchronous state mutations into a single, noiseless render tick.
-* **Vue & MobX:** Leveraging native ES6 Proxies for instant, deep reactivity without forcing clunky `get()` or `set()` wrapper functions.
+* **Vue, MobX & Valtio:** Leveraging native ES6 Proxies for instant, deep reactivity without forcing clunky `get()` or `set()` wrapper functions.
  
 ---
 
