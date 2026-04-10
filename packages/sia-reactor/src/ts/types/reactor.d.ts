@@ -43,7 +43,7 @@ export interface Target<T, P extends WildPaths<T> = WildPaths<T>> {
    * Whether the key for the value existed on the parent object.
    * For accuracy on if `key` was in the `object` rather than checking `oldValue` against undefined
    */
-  keyExisted: boolean;
+  hadKey: boolean;
   /** Parent-branch value for the path. */
   object: PathBranchValue<T, P>;
 }
@@ -80,7 +80,7 @@ export interface UpdatePayload<T, P extends WildPaths<T> = WildPaths<T>> extends
 }
 
 /** Event union with payload-aware overrides for `type`, `path`, and value fields (Creates the IDE magic). */
-export type REvent<T, P extends WildPaths<T> = WildPaths<T>> =
+export type REvent<T extends object, P extends WildPaths<T> = WildPaths<T>> =
   | (Omit<ReactorEvent<T, P>, OverrideEvtProp> &
       DirectPayload<T, P> &
       OverrideEvtPart<DirectPayload<T, P>>)

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { reactive, TERMINATOR } from "../src";
-import { effect } from "../src/adapters/vanilla";
-import { TimeTravelPlugin, PersistPlugin, MemoryStorageAdapter } from "../src/plugins";
+import { reactive, TERMINATOR } from "../src/ts";
+import { effect } from "../src/ts/adapters/vanilla";
+import { TimeTravelPlugin, PersistPlugin, MemoryStorageAdapter } from "../src/ts/plugins";
 
 describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
   // ===========================================================================
@@ -140,7 +140,7 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
     it("must execute O(1) bidirectional teleportation and timeline branching", () => {
       const state = reactive({ volume: 50, playing: false });
       const timePlug = new TimeTravelPlugin();
-      state.__Reactor__.plugIn(timePlug);
+      state.plugIn(timePlug);
 
       state.volume = 60;
       state.tick(); // Frame 0
@@ -163,10 +163,10 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
       expect(timePlug.state.history[1].value).toBe(11);
     });
 
-    it("must solve the 'Explicit Undefined' paradox using keyExisted flags", () => {
+    it("must solve the 'Explicit Undefined' paradox using hadKey flags", () => {
       const state = reactive({ session: { token: "abc" } } as any);
       const timePlug = new TimeTravelPlugin();
-      state.__Reactor__.plugIn(timePlug);
+      state.plugIn(timePlug);
 
       // Frame 0: Explicitly set existing key to undefined
       state.session.token = undefined;
@@ -190,7 +190,7 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
 
       const state = reactive({ position: 0 });
       const timePlug = new TimeTravelPlugin({ maxPlaybackDelay: 100 });
-      state.__Reactor__.plugIn(timePlug);
+      state.plugIn(timePlug);
 
       state.position = 10;
       state.tick();
@@ -227,7 +227,7 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
         cache: { temp: "foo" },
       });
 
-      state.__Reactor__.plugIn(
+      state.plugIn(
         new PersistPlugin({
           key: "REACTOR_TEST",
           paths: ["settings"], // Strict path isolation
@@ -261,7 +261,7 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
 
       const state = reactive({ user: { role: "guest" } });
 
-      state.__Reactor__.plugIn(
+      state.plugIn(
         new PersistPlugin({
           key: "APP_STATE",
           adapter: mockAdapter,

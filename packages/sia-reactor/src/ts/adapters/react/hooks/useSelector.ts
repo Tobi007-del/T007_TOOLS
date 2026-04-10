@@ -2,8 +2,8 @@ import { useSyncExternalStore, useRef, useCallback } from "react";
 import { useISOLayoutEffect } from "../utils";
 import { NIL, NOOP } from "../../../core/consts";
 import { Reactor } from "../../../core/reactor";
-import type { EffectOptions } from "../../../types/reactor";
-import type { Reactive } from "../../../core/mixins";
+import { type Reactive, getReactor } from "../../../core/mixins";
+import type { EffectOptions, ReactorBuild } from "../../../types/reactor";
 import { Autotracker, withTracker } from "../../autotracker";
 
 /**
@@ -16,6 +16,7 @@ import { Autotracker, withTracker } from "../../autotracker";
  * @param sel Slice selector.
  * @param eq Equality function used to compare consecutive selector results.
  * @param options Watcher options if `options.sync: false` else Listener options.
+ * @param build Optional Reactor build options used when creating a scoped Reactor for plain objects.
  * @returns The selected slice.
  * @example
  * const a = useSelector({ user: { name: "Ada" } }, (s) => s.user.name);
@@ -26,10 +27,10 @@ import { Autotracker, withTracker } from "../../autotracker";
  * const rtr = new Reactor({ user: { name: "Ada" } });
  * const c = useSelector(rtr, (s) => s.user.name);
  */
-export function useSelector<T extends object, R>(target: T | Reactor<T> | Reactive<T>, sel: (state: T) => R, eq = Object.is, options: EffectOptions = NIL): R {
+export function useSelector<T extends object, R>(target: T | Reactor<T> | Reactive<T>, sel: (state: T) => R, eq: (prev: R | undefined, next: R) => boolean = Object.is, options: EffectOptions = NIL, build?: ReactorBuild<T>): R {
   const rtrRef = useRef<Reactor<T>>(),
-    tgtRef = useRef<T | Reactor<T> | Reactive<T>>(),  // HMR Survival
-    rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = target instanceof Reactor ? target : (target as Reactive<T>).__Reactor__ || new Reactor(target))) : rtrRef.current,
+    tgtRef = useRef<T | Reactor<T> | Reactive<T>>(), // HMR Survival
+    rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = getReactor(target, true, build))) : rtrRef.current,
     atrkrRef = useRef<Autotracker<T>>(),
     atrkr = (atrkrRef.current ||= new Autotracker()), // assigned after to avoid waste of new instances
     notifyRef = useRef<() => void>(NOOP),

@@ -17,7 +17,7 @@ export interface HistoryEntry {
   /** The "Undo" antidote (Previous value), if applicable */
   oldValue: any;
   /** Did the key for the value exist on its parent object? */
-  keyExisted: boolean;
+  hadKey: boolean;
   /** Did the Power Line disapprove?; why? */
   rejected: string;
   /** For chronological re-enactment */
@@ -79,15 +79,14 @@ export class TimeTravelPlugin<T extends object = any> extends BaseReactorPlugin<
     if (!this.state.paused) return;
     if (this.state.currentFrame < this.state.history.length) this.state.history = this.state.history.slice(0, this.state.currentFrame); // we must destroy the "Alternate Future" (the redo stack) before recording.
     if (this.state.history.length >= this.config.maxHistoryLength!) this.state.history = this.state.history.slice(1); // Drop the oldest memory if we exceed the limit
-    this.state.history.push({ timestamp: e.timestamp ?? performance.now(), path: e.target.path, type: e.staticType, value: this.rtr.snapshot(false, e.target.value), oldValue: this.rtr.snapshot(false, e.target.oldValue), keyExisted: e.target.keyExisted, rejected: e.rejected });
+    this.state.history.push({ timestamp: e.timestamp ?? performance.now(), path: e.target.path, type: e.staticType, value: this.rtr.snapshot(false, e.target.value), oldValue: this.rtr.snapshot(false, e.target.oldValue), hadKey: e.target.hadKey, rejected: e.rejected });
     this.state.currentFrame = this.state.history.length; // Lock the playhead to the absolute present
   }
   /** Clears timeline history and resets playhead/genesis to the current reactor state. */
   public clear() {
     this.pause();
     this.playbackTimeoutId = -1;
-    this.state.history = [];
-    this.state.currentFrame = 0;
+    this.state.history.length = this.state.currentFrame = 0;
     this.state.initialState = this.rtr.snapshot();
   }
 
@@ -104,7 +103,7 @@ export class TimeTravelPlugin<T extends object = any> extends BaseReactorPlugin<
       const e = this.state.history[forward ? this.state.currentFrame : this.state.currentFrame - 1]; // Grab the correct frame (Current unapplied frame if going forward, previous applied frame if going backward)
       if (!e) break;
       if (forward) e.type === "delete" ? deleteAny(this.rtr.core, e.path as any) : setAny(this.rtr.core, e.path as any, deepClone(e.value, this.rtr.config));
-      else !e.keyExisted ? deleteAny(this.rtr.core, e.path as any) : setAny(this.rtr.core, e.path as any, deepClone(e.oldValue, this.rtr.config));
+      else !e.hadKey ? deleteAny(this.rtr.core, e.path as any) : setAny(this.rtr.core, e.path as any, deepClone(e.oldValue, this.rtr.config));
       forward ? this.state.currentFrame++ : this.state.currentFrame--; // 3. Move the playhead
       if (e.rejected) this.rtr.log(`[Reactor ${this.name} Plug] ${forward ? "Replaying" : "Reversing"} REJECTED intent at "${e.path}"`);
     }

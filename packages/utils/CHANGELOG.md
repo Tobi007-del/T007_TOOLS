@@ -1,5 +1,13 @@
 # @t007/utils
 
+## 0.0.21
+
+### Patch Changes
+
+- Features added for seamless dev experience
+- Updated dependencies
+  - sia-reactor@0.0.20
+
 ## 0.0.20
 
 ### Patch Changes

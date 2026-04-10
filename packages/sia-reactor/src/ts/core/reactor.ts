@@ -88,7 +88,7 @@ export class Reactor<T extends object> {
             const currPath = (this.config.lineageTracing ? paths[i] : fullPath) as Paths<T>,
               cords = this.getters.get(currPath);
             if (!cords && !wildcords) continue;
-            const target: Target<T> = { path: currPath, value, key: keyStr as PathKey<T>, keyExisted: true, object: receiver },
+            const target: Target<T> = { path: currPath, value, key: keyStr as PathKey<T>, hadKey: true, object: receiver },
               payload = { type: "get", target, currentTarget: target, root: this.core, rejectable } as Payload<T, Paths<T>>;
             if (cords) value = this.mediate(currPath, payload, "get", cords);
             if (!wildcords) continue;
@@ -108,7 +108,7 @@ export class Reactor<T extends object> {
           paths = this.config.lineageTracing ? this.trace(object, keyStr) : fullPath,
           loopLen = this.config.lineageTracing ? paths.length : 1,
           oldValue = !this.config.preserveContext ? (object as any)[key] : Reflect.get(object, key, receiver),
-          keyExisted = !this.config.preserveContext ? key in object : Reflect.has(object, key);
+          hadKey = !this.config.preserveContext ? key in object : Reflect.has(object, key);
         this.log(`✏️ [Reactor \`set\` Trap] Initiated for "${keyStr}" on "${paths}"`), CTX.autotracker?.track(fullPath, this, true);
         if (this.config.referenceTracking || !indiffable) {
           safeOldValue = oldValue?.[RAW] || oldValue;
@@ -123,7 +123,7 @@ export class Reactor<T extends object> {
             const currPath = (this.config.lineageTracing ? paths[i] : fullPath) as Paths<T>,
               cords = this.setters.get(currPath);
             if (!cords && !wildcords) continue;
-            const target: Target<T> = { path: currPath, value, oldValue, key: keyStr as PathKey<T>, keyExisted, object: receiver },
+            const target: Target<T> = { path: currPath, value, oldValue, key: keyStr as PathKey<T>, hadKey, object: receiver },
               payload = { type: "set", target, currentTarget: target, root: this.core, terminated, rejectable } as Payload<T, Paths<T>>;
             if (cords) {
               const result = this.mediate(currPath, payload, "set", cords);
@@ -142,7 +142,7 @@ export class Reactor<T extends object> {
         if (this.watchers || this.listeners)
           for (let i = 0; i < loopLen; i++) {
             const currPath = (this.config.lineageTracing ? paths[i] : fullPath) as Paths<T>,
-              target: Target<T> = { path: currPath, value, oldValue, key: keyStr as PathKey<T>, keyExisted, object: receiver };
+              target: Target<T> = { path: currPath, value, oldValue, key: keyStr as PathKey<T>, hadKey, object: receiver };
             this.notify(currPath, { type: "set", target, currentTarget: target, root: this.core, terminated, rejectable } as Payload<T, Paths<T>>);
           } // Listeners
         return true;
@@ -156,7 +156,7 @@ export class Reactor<T extends object> {
           paths = this.config.lineageTracing ? this.trace(object, keyStr) : fullPath,
           loopLen = this.config.lineageTracing ? paths.length : 1,
           oldValue = !this.config.preserveContext ? (object as any)[key] : Reflect.get(object, key, receiver),
-          keyExisted = !this.config.preserveContext ? key in object : Reflect.has(object, key);
+          hadKey = !this.config.preserveContext ? key in object : Reflect.has(object, key);
         this.log(`🗑️ [Reactor \`deleteProperty\` Trap] Initiated for "${keyStr}" on "${paths}"`), CTX.autotracker?.track(fullPath, this, true);
         if (this.config.deleteProperty) terminated = (value = this.config.deleteProperty(object as PathBranchValue<T>, key as PathKey<T>, oldValue, receiver, paths)) === TERMINATOR;
         if (this.deleters) {
@@ -165,7 +165,7 @@ export class Reactor<T extends object> {
             const currPath = (this.config.lineageTracing ? paths[i] : fullPath) as Paths<T>,
               cords = this.deleters.get(currPath);
             if (!cords && !wildcords) continue;
-            const target: Target<T> = { path: currPath, value, oldValue, key: keyStr as PathKey<T>, keyExisted, object: receiver },
+            const target: Target<T> = { path: currPath, value, oldValue, key: keyStr as PathKey<T>, hadKey, object: receiver },
               payload = { type: "delete", target, currentTarget: target, root: this.core, rejectable } as Payload<T, Paths<T>>;
             if (cords) {
               const result = this.mediate(currPath, payload, "delete", cords);
@@ -183,7 +183,7 @@ export class Reactor<T extends object> {
         if (this.watchers || this.listeners)
           for (let i = 0; i < loopLen; i++) {
             const currPath = (this.config.lineageTracing ? paths[i] : fullPath) as Paths<T>,
-              target: Target<T> = { path: currPath, value, oldValue, key: keyStr as PathKey<T>, keyExisted, object: receiver };
+              target: Target<T> = { path: currPath, value, oldValue, key: keyStr as PathKey<T>, hadKey, object: receiver };
             this.notify(currPath, { type: "delete", target, currentTarget: target, root: this.core, rejectable } as Payload<T, Paths<T>>);
           } // Listeners
         return true;
@@ -317,7 +317,7 @@ export class Reactor<T extends object> {
   protected fire([path, object, value]: ReturnType<typeof getTrailRecords<T>>[number], e: REvent<T>, isCapture: boolean, cords = this.listeners!.get(path)): void {
     if (!cords) return; // not doing `.listeners?.` in param cuz this is called in a loop and internally, listeners are defined before this is touched
     e.type = path !== e.target.path ? "update" : e.staticType; // `update` for ancestors
-    e.currentTarget = { path, value, oldValue: e.type !== "update" ? e.target.oldValue : undefined, key: (e.type !== "update" ? path : path.slice(path.lastIndexOf(".") + 1) || "") as PathKey<T>, keyExisted: e.type !== "update" ? e.target.keyExisted : true, object: object as PathBranchValue<T> };
+    e.currentTarget = { path, value, oldValue: e.type !== "update" ? e.target.oldValue : undefined, key: (e.type !== "update" ? path : path.slice(path.lastIndexOf(".") + 1) || "") as PathKey<T>, hadKey: e.type !== "update" ? e.target.hadKey : true, object: object as PathBranchValue<T> };
     for (let i = 0, len = cords.length, tDepth; i < len; i++) {
       if (e.immediatePropagationStopped) break;
       if (cords[i].capture !== isCapture) continue;
@@ -376,7 +376,7 @@ export class Reactor<T extends object> {
     const lastDot = path.lastIndexOf("."),
       value = getAny(this.core, path),
       object = lastDot === -1 ? this.core : getAny(this.core, path.slice(0, lastDot) as Paths<T>);
-    return { path: path as P, value, key: (path.slice(lastDot + 1) || "") as PathKey<T, P>, keyExisted: true, object: object as PathBranchValue<T, P> };
+    return { path: path as P, value, key: (path.slice(lastDot + 1) || "") as PathKey<T, P>, hadKey: true, object: object as PathBranchValue<T, P> };
   }
   protected bindSignal<Cb>(cord: GetterRecord<T> | SetterRecord<T> | DeleterRecord<T> | WatcherRecord<T> | ListenerRecord<T>, sig?: AbortSignal): Cb {
     if (sig) sig.aborted ? cord.clup() : sig.addEventListener("abort", cord.clup, { once: true }); // once incase spec changes, memory leaks too

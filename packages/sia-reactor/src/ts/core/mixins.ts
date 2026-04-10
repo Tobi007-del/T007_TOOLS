@@ -3,7 +3,7 @@ import { Reactor } from "./reactor";
 import type { ReactorBuild, Inert, Intent, Live, State, Volatile, Stable } from "../types/reactor";
 
 /** Reactor method names exposed on objects returned by {@link reactive}. */
-export const methods = ["tick", "stall", "nostall", "get", "gonce", "noget", "set", "sonce", "noset", "delete", "donce", "nodelete", "watch", "wonce", "nowatch", "on", "once", "off", "cascade", "snapshot", "reset", "destroy"] as const;
+export const methods = ["tick", "stall", "nostall", "get", "gonce", "noget", "set", "sonce", "noset", "delete", "donce", "nodelete", "watch", "wonce", "nowatch", "on", "once", "off", "snapshot", "cascade", "plugIn", "reset", "destroy"] as const;
 
 type Method = (typeof methods)[number];
 type Prefix<P extends ReactivePreferences | undefined> = P extends { prefix?: infer X extends string } ? X : "";
@@ -25,6 +25,7 @@ export type Reactive<T extends object, P extends ReactivePreferences | undefined
 
 /**
  * Attaches Reactor APIs to a state object and returns its reactive proxy.
+ * If an existing `reactive()` return value is passed, it is re-returned ignoring change in preferences.
  * @param target Source state object or an existing Reactor instance.
  * @param build Reactor initial configuration.
  * @param preferences Method naming preferences for exposed APIs.
@@ -39,7 +40,7 @@ export type Reactive<T extends object, P extends ReactivePreferences | undefined
 export function reactive<T extends object, const P extends ReactivePreferences | undefined = undefined>(target: T, build?: ReactorBuild<T>, preferences: P = NIL): T extends Reactive<infer O, infer P> ? T : Reactive<T, P> {
   if ("__Reactor__" in target) return target as any;
   const descriptors: PropertyDescriptorMap = {},
-    rtr = target instanceof Reactor ? target : new Reactor(target, build),
+    rtr = getReactor(target, true, build),
     locks = { enumerable: false, configurable: true, writable: false },
     hasAffix = !!(preferences.prefix || preferences.suffix);
   for (let i = 0, len = methods.length; i < len; i++) {
@@ -125,6 +126,24 @@ export function stable<T extends object>(target: T): Stable<T> {
  */
 export function isVolatile<T extends object>(target: T): target is Volatile<T> {
   return !!getRaw(target as any)[INDIFFABLE];
+}
+
+/**
+ * Gets the underlying `Reactor` instance associated with a reactive object,
+ * returns the `Reactor` itself if given, or optionally creates one for plain objects.
+ * @param target Object to retrieve `Reactor` from.
+ * @param create When `true`, creates a new `Reactor` for plain objects when none exists.
+ * @param build Optional `Reactor` build options used only when `create` initializes a new instance.
+ * @returns `Reactor` instance or `undefined` if not reactive and `create` is false.
+ */
+export function getReactor<T extends object>(target: Reactor<T>, create?: boolean, build?: ReactorBuild<T>): Reactor<T>;
+export function getReactor<T extends object>(target: Reactive<T>, create?: boolean, build?: ReactorBuild<T>): Reactor<T>;
+export function getReactor<T extends object>(target: T, create: true, build?: ReactorBuild<T>): Reactor<T>;
+export function getReactor<T extends object>(target: T, create?: false, build?: ReactorBuild<T>): Reactor<T> | undefined;
+export function getReactor<T extends object>(target: T | Reactor<T> | Reactive<T>, create: true, build?: ReactorBuild<T>): Reactor<T>;
+export function getReactor<T extends object>(target: T | Reactor<T> | Reactive<T>, create?: false, build?: ReactorBuild<T>): Reactor<T> | undefined;
+export function getReactor<T extends object>(target: T | Reactor<T> | Reactive<T>, create = false, build?: ReactorBuild<T>): Reactor<T> | undefined {
+  return (target instanceof Reactor ? target : (target as Reactive<T>).__Reactor__) || (create ? new Reactor(target as T, build) : undefined);
 }
 
 /**

@@ -1,9 +1,8 @@
-import { useRef, useReducer } from "react";
-import { useISOLayoutEffect } from "../utils";
+import { useRef, useSyncExternalStore, useCallback } from "react";
 import { NIL } from "../../../core/consts";
 import { Reactor } from "../../../core/reactor";
-import type { Reactive } from "../../../core/mixins";
-import type { EffectOptions } from "../../../types/reactor";
+import { type Reactive, getReactor } from "../../../core/mixins";
+import type { EffectOptions, ReactorBuild } from "../../../types/reactor";
 import type { WildPaths, PathValue } from "../../../types/obj";
 import { getAny } from "../../../utils/obj";
 
@@ -15,6 +14,7 @@ import { getAny } from "../../../utils/obj";
  * @param target Reactive object, Reactor instance, or plain object.
  * @param path Path to observe. Supports dotted paths and wildcard `"*"`.
  * @param options Watcher options if `options.sync: false` else Listener options.
+ * @param build Optional Reactor build options used when creating a scoped Reactor for plain objects.
  * @returns Current value at the requested path.
  * @example
  * const a = usePath({ user: { profile: { name: "Ada" } } }, "user.profile.name");
@@ -27,12 +27,15 @@ import { getAny } from "../../../utils/obj";
  * @example
  * const wholeState = usePath(state, "*");
  */
-export function usePath<T extends object, P extends WildPaths<T>>(target: T | Reactor<T> | Reactive<T>, path: P, options: EffectOptions = NIL): PathValue<T, P> {
-  const [, reRender] = useReducer((s) => s + 1, 0),
+export function usePath<T extends object, P extends WildPaths<T>>(target: T | Reactor<T> | Reactive<T>, path: P, options: EffectOptions = NIL, build?: ReactorBuild<T>): PathValue<T, P> {
+  const versionRef = useRef(0),
     tgtRef = useRef<T | Reactor<T> | Reactive<T>>(), // HMR Survival
     rtrRef = useRef<Reactor<T>>(),
-    rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = target instanceof Reactor ? target : (target as Reactive<T>).__Reactor__ || new Reactor(target))) : rtrRef.current,
+    rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = getReactor(target, true, build))) : rtrRef.current,
     optsRef = useRef(options);
   optsRef.current = options; // preventing staleness
-  return useISOLayoutEffect(() => void rtr[optsRef.current.sync ? "watch" : "on"](path, reRender, optsRef.current), [rtr, path]), getAny(rtr.core, path);
+  const subscribe = useCallback((notify: () => void) => rtr[optsRef.current.sync ? "watch" : "on"](path, () => (versionRef.current++, notify()), optsRef.current), [rtr, path]);
+  const getSnapshot = useCallback(() => versionRef.current, []);
+  useSyncExternalStore(subscribe, getSnapshot, getSnapshot); // Feed React a primitive number to track tearing, zero cloning.
+  return getAny(rtr.core, path);
 }

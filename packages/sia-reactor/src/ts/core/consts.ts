@@ -6,6 +6,8 @@ import { Autotracker } from "../adapters/autotracker";
 
 /** Global context object for sharing state across the reactor runtime. */
 export const CTX = {
+  /** Flag indicating whether the application is running in development mode. */
+  isDevEnv: "undefined" !== typeof process ? process.env.NODE_ENV !== "production" : true,
   /** active `Autotracker` instance, override for automatic dependency collection on `Reactor` traps. */
   autotracker: null as Autotracker<any> | null,
 };

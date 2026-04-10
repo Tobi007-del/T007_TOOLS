@@ -1,5 +1,11 @@
 # sia-reactor
 
+## 0.0.20
+
+### Patch Changes
+
+- Features added for seamless dev experience
+
 ## 0.0.19
 
 ### Patch Changes

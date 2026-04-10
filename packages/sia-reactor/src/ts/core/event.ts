@@ -66,7 +66,7 @@ export class ReactorEvent<T extends object, P extends WildPaths<T> = WildPaths<T
    * @param canWarn Whether warning output is enabled.
    * @param canStamp Whether timestamping is enabled.
    */
-  constructor(payload: Payload<T, P>, bubbles = false, canStamp = false, canWarn = true, ) {
+  constructor(payload: Payload<T, P>, bubbles = false, canStamp = false, canWarn = true) {
     this.staticType = this.type = payload.type as ReactorEvent<T, P>["staticType"];
     this.target = payload.target;
     this.currentTarget = payload.currentTarget;

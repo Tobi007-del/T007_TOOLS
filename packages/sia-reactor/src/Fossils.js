@@ -144,6 +144,7 @@ export function reactify(target, root) {
 //  * @param sel Slice selector.
 //  * @param eq Equality function used to compare consecutive selector results.
 //  * @param options Watcher options if `options.sync: false` else Listener options.
+//  * @param build Optional Reactor build options used when creating a scoped Reactor for plain objects.
 //  * @returns The selected slice.
 //  * @example
 //  * const a = useSelector({ user: { name: "Ada" } }, (s) => s.user.name);
@@ -154,10 +155,10 @@ export function reactify(target, root) {
 //  * const rtr = new Reactor({ user: { name: "Ada" } });
 //  * const c = useSelector(rtr, (s) => s.user.name);
 //  */
-// export function useSelector<T extends object, R>(target: T | Reactor<T> | Reactive<T>, sel: (state: T) => R, eq = Object.is, options?: EffectOptions): R {
+// export function useSelector<T extends object, R>(target: T | Reactor<T> | Reactive<T>, sel: (state: T) => R, eq = Object.is, options?: EffectOptions, build: ReactorBuild<T> = { referenceTracking: true, smartCloning: true }): R {
 //   const tgtRef = useRef<T | Reactor<T> | Reactive<T>>(),
 //     rtrRef = useRef<Reactor<T>>(),
-//     rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = target instanceof Reactor ? target : (target as Reactive<T>).__Reactor__ || new Reactor(target, { referenceTracking: true, smartCloning: true }))) : rtrRef.current,
+//     rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = getReactor(target, true, build))) : rtrRef.current,
 //     atrkrRef = useRef<Autotracker<T>>(),
 //     atrkrRtrRef = useRef<Reactor<T>>(),
 //     atrkr = atrkrRtrRef.current !== rtr || !atrkrRef.current ? ((atrkrRtrRef.current = rtr), (atrkrRef.current = new Autotracker(rtr))) : atrkrRef.current,
@@ -193,6 +194,7 @@ export function reactify(target, root) {
 //  * @typeParam T Root state object type.
 //  * @param target Reactive object, Reactor instance, or plain object.
 //  * @param options Watcher options if `options.sync: false` else Listener options.
+//  * @param build Optional Reactor build options used when creating a scoped Reactor for plain objects.
 //  * @returns Tracked snapshot snap for render usage.
 //  * @example
 //  * const a = useReactor({ user: { name: "Ada" } });
@@ -203,10 +205,10 @@ export function reactify(target, root) {
 //  * const rtr = new Reactor({ user: { name: "Ada" } });
 //  * const c = useReactor(rtr);
 //  */
-// export function useReactor<T extends object>(target: T | Reactor<T> | Reactive<T>, options?: EffectOptions): T {
+// export function useReactor<T extends object>(target: T | Reactor<T> | Reactive<T>, options?: EffectOptions, build: ReactorBuild<T> = { referenceTracking: true, smartCloning: true }): T {
 //   const tgtRef = useRef<T | Reactor<T> | Reactive<T>>(),
 //     rtrRef = useRef<Reactor<T>>(),
-//     rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = target instanceof Reactor ? target : (target as Reactive<T>).__Reactor__ || new Reactor(target, { referenceTracking: true, smartCloning: true }))) : rtrRef.current,
+//     rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = getReactor(target, true, build))) : rtrRef.current,
 //     atrkrRef = useRef<Autotracker<T>>(),
 //     atrkrRtrRef = useRef<Reactor<T>>(),
 //     atrkr = atrkrRtrRef.current !== rtr || !atrkrRef.current ? ((atrkrRtrRef.current = rtr), (atrkrRef.current = new Autotracker(rtr))) : atrkrRef.current,

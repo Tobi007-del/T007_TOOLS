@@ -1,5 +1,12 @@
 # @t007/dialog
 
+## 0.0.18
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.21
+
 ## 0.0.17
 
 ### Patch Changes

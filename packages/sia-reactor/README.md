@@ -100,7 +100,8 @@ import { setAny, getAny, mergeObjs } from 'sia-reactor/utils';
 import { reactive, Reactor } from 'sia-reactor';
 import 'sia-reactor/utils'; // deep object helpers (setAny/getAny/mergeObjs/...)
 import 'sia-reactor/plugins'; // built-in plugins + storage adapters
-import 'sia-reactor/adapters/vanilla'; // Autotracker + effect API
+import 'sia-reactor/adapters/vanilla'; // Autotracker + effect API + TimeTravelOverlay class
+import 'sia-reactor/adapters/vanilla/time-travel-overlay.css'; // TimeTravelOverlay CSS
 import 'sia-reactor/adapters/react'; // useReactor/useSelector/usePath hooks
 ```
 
@@ -125,22 +126,22 @@ import 'sia-reactor/adapters/react'; // useReactor/useSelector/usePath hooks
 
 ### Initialization (`reactive` & `Reactor`)
 
-The primary way to use the reactor is to wrap an object using `reactive()`, which directly mixes the reactor methods into your target object for a pristine, flat API.
+The primary way to use the reactor is to wrap an object using `reactive(target, build, preferences)`, which directly mixes the reactor methods into your target object for a pristine, flat API.
 
 *NOTE: `.` and `*` are engine reserved so don't use them as object keys*
 
 ```javascript
 const state = reactive({ player: { volume: 50 } }, { smartCloning: true, referenceTracking: true });
 
-// Methods are attached directly to the object with `reactive()`!
+// Public API Methods are attached directly to the object with `reactive()`!
 state.set("player.volume", (val) => Math.min(val, 100));
 state.on("player.volume", (e) => console.log(e.value));
 
 state.player.volume = 150; // Triggers mediation, clamps to 100, fires listener.
-state.__Reactor__ // Reference to the underlying reactor
+getReactor(state); state.__Reactor__; // Reference to the underlying reactor
 ```
 
-Alternatively, you can instantiate the `Reactor` class directly to keep the API separate from your data:
+Alternatively, you can instantiate the `Reactor` class directly to keep the API from interfering with your data or [try this](#reactive-preferences-method-naming):
 ```javascript
 const reactor = new Reactor({ player: { volume: 50 } }, { debug: true, referenceTracking: true });
 reactor.core.player.volume = 100;
@@ -166,27 +167,11 @@ All methods are available on `Reactor` instances or objects wrapped in `reactive
 #### **Lifecycle & Utilities**
 - **`tick(path)`**: Forces a synchronous flush of the batch queue for a specific path.
 - **`stall(task)` / `nostall(task)`**: Manually stall the queue to wait for calculations before rendering.
-- **`cascade(eventOrPayload, objectSafe)`**: Manually trigger deep-object event waves, bypassing strict unchanged-proxy traps. Perfect for dumping massive API payloads into the tree, `objectSafe` merges `value` with `oldValue`.
 - **`snapshot(raw)`**: Generates a strict, structurally-shared, un-proxied clone of the current state tree.
+- **`cascade(eventOrPayload, objectSafe)`**: Manually trigger direct object values event waves, bypassing strict unchanged-proxy traps, `objectSafe` merges `value` with `oldValue`.
 - **`plugIn(new ReactorPlugin(config))`**: Allows extended behaviour with external logic.
 - **`reset()`**: Clears all records bringing everything back to a clean slate.
-- **`destroy()`**: Last resort destruction, nukes everything by nullifying it's properties for full disposal.
-
-### Reactor Build Options
-
-These are some core build options accepted by `new Reactor(core, build)` and `reactive(core, build)`.
-
-- **`debug`**: 1-time set. Enables debug logging and diagnostics of core operations. (default: `false`)
-- **`crossRealms`**: Enables cross-realm object detection support by using slower but safer type checks. (e.g. iframes) (default: `false`).
-- **`smartCloning`**: Enables structural-sharing snapshot behavior (requires `referenceTracking: true`) (default: `false`).
-- **`eventBubbling`**: Enables event bubbling across ancestor paths (default: `true`) (default: `true`).
-- **`lineageTracing`**: Enables path lineage tracing for reference lookups on property access (requires `referenceTracking: true`) (default: `false`).
-- **`preserveContext`**: Preserves Reflect trap context; safer with ~8x slowdown in hot paths, allows more types to be proxied (e.g. classes) (default: `false`).
-- **`equalityFunction`**: Custom equality used by setters and adapter comparisons (default: `Object.is`).
-- **`batchingFunction`**: Custom batching scheduler for listener notification flushes (default: `queueMicrotask`)
-- **`referenceTracking`**: Enables identity/reference tracking features in the runtime. (default: `false`).
- 
-*NOTE: those not marked as 1-time set are configurable via `Reactor.config`.*
+- **`destroy()`**: Last resort destruction, nukes everything by nullifying it's properties for full disposal, lives on every class.
 
 ### Memory & Granular Control Flags
 
@@ -204,32 +189,6 @@ const data = reactive({
   userWish: intent({ flying: false }),  // Can be rejected by a Higher Power
   trigger: volatile({ clickCount: 0 })  // Fires events even if set to 0 again
 });
-```
-
-### Plugins: The Extension Port
-
-The `Reactor` is designed to be a lightweight core. Extended capabilities are attached via Plugins. It ships with a suite of built-in plugins for common architectural needs. like a Persist and TimeTravel plugin.
-
-#### The Persistence Plugin
-Automatically syncs your State to LocalStorage, SessionStorage, Memory or IndexedDB. It respects the async nature of IDB while keeping your app synchronous.
-
-```javascript
-import { reactive, Reactor } from 'sia-reactor';
-import { PersistPlugin, LocalStorageAdapter, IndexedDBAdapter } from 'sia-reactor/plugins';
-
-const state = reactive({ theme: "dark", volume: 50 });
-state.__Reactor__.plugIn(new PersistPlugin({
-  key: "APP_PREFS",
-  throttle: 5000, 
-  adapter: LocalStorageAdapter
-}); // Plug it in. State is now automatically hydrated and throttled-saved.
-
-const reactor = new Reactor({ theme: "dark", settings: { volume: 50, brightness: 30 } });
-reactor.plugIn(new PersistPlugin({
-  key: "APP_PREFS",
-  paths: ["theme", "settings.brightness"],
-  adapter: new IndexedDBAdapter({ dbName: "Session", version: 1, onversionchange: () => location.reload() })
-}, reactor));  // Put Reactor as second arg if you want type inference, e.g. for the paths in the array.
 ```
 
 ### React Hooks & Effects
@@ -267,6 +226,92 @@ function AgeObserver() {
 const stopTracking = effect(() => {
   console.log("User name changed to:", state.user.name);
 });
+```
+
+### Plugins: The Extension Port
+
+The `Reactor` is designed to be a lightweight core. Extended capabilities are attached via Plugins. It ships with a suite of built-in plugins for common architectural needs.
+
+#### The Persistence Plugin
+Automatically syncs your State to LocalStorage, SessionStorage, Memory or IndexedDB. It respects the async nature of any adapter while keeping your app synchronous.
+
+```javascript
+import { reactive, Reactor, getReactor } from 'sia-reactor';
+import { PersistPlugin, LocalStorageAdapter, IndexedDBAdapter } from 'sia-reactor/plugins';
+
+const state = reactive({ theme: "dark", settings: { volume: 50, brightness: 30 } });
+state.plugIn(new PersistPlugin({ // Plug it in. State is now automatically hydrated and throttled-saved.
+  key: "APP_PREFS",
+  paths: ["theme", "settings.brightness"],
+  throttle: 5000, 
+  adapter: new IndexedDBAdapter({ dbName: "Session", version: 1, onversionchange: () => location.reload() }) // or `LocalStorageAdapter` (instance or signature)
+}, getReactor(state)));  // Put Reactor as second arg if you want type inference, e.g. for the paths in the array.
+```
+
+#### The Time Travel Plugin
+Record state frames, step through history, and optionally attach a ready-to-use vanilla debug overlay.
+
+```javascript
+import { reactive } from 'sia-reactor';
+import { TimeTravelPlugin } from 'sia-reactor/plugins';
+import { TimeTravelOverlay } from 'sia-reactor/adapters/vanilla';
+import 'sia-reactor/css/time-travel-overlay.css';
+
+const state = reactive({ count: 0, filter: "all" });
+const time = new TimeTravelPlugin({ maxHistory: 300, loop: false, rate: 150 });
+state.plugIn(time);
+const overlay = new TimeTravelOverlay(time, { color: "#e26e02", startOpen: false, devOnly: true, container: document.body }); // optional debug interface for visulazation
+```
+```jsx
+import { TimeTravelOverlay } from 'sia-reactor/adapters/react';
+
+<TimeTravelOverlay time={time} color="#e26e02" startOpen devOnly /> // react-safe instance lifecycle management, e.g. for HMR predictability.
+```
+
+Useful plugin methods: `play()`, `pause()`, `rewind()`, `clear()`, `undo()`, `redo()`, `step(n, forward)`, `jumpTo(frame)`, `export()`, `import(serialized)`.
+
+### Reactor Build Options
+
+These are some core build options accepted by `new Reactor(core, build)` and `reactive(core, build, preferences)`.
+
+- **`debug?`**: 1-time set. Enables debug logging and diagnostics of core operations. (default: `false`)
+- **`crossRealms?`**: Enables cross-realm object detection support by using slower but safer type checks. (e.g. iframes) (default: `false`).
+- **`smartCloning?`**: Enables structural-sharing snapshot behavior (requires `referenceTracking: true`) (default: `false`).
+- **`eventBubbling?`**: Enables event bubbling across ancestor paths (default: `true`) (default: `true`).
+- **`lineageTracing?`**: Enables path lineage tracing for reference lookups on property access (requires `referenceTracking: true`) (default: `false`).
+- **`preserveContext?`**: Preserves Reflect trap context; safer with ~8x slowdown in hot paths, allows more types to be proxied (e.g. classes) (default: `false`).
+- **`equalityFunction?`**: Custom equality used by setters and adapter comparisons (default: `Object.is`).
+- **`batchingFunction?`**: Custom batching scheduler for listener notification flushes (default: `queueMicrotask`)
+- **`referenceTracking?`**: Enables identity/reference tracking features in the runtime. (default: `false`).
+ 
+*NOTE: those not marked as 1-time set are configurable via `Reactor.config`. Also, plugs and hooks turn on whatever they need automatically.*
+
+### Reactive Preferences (Method Naming)
+
+`reactive(core, build, preferences)` also accepts method naming preferences so you can expose Reactor APIs with custom names.
+
+- **`prefix?`**: Adds a prefix to exposed method names.
+- **`suffix?`**: Adds a suffix to exposed method names.
+- **`whitelist?`**: Keeps specific methods on their original names while others get affixed.
+
+```javascript
+import { reactive } from 'sia-reactor';
+
+const state = reactive(
+  { count: 0 },
+  { debug: false },
+  {
+    prefix: '$',
+    suffix: 'Now',
+    whitelist: ['set', 'get', 'on', 'off'] // keys you're sure won't interfere with your own key names
+  }
+);
+// Whitelisted methods keep original names
+state.set('count', (v) => v + 1);
+state.get('count', (v) => v);
+// Non-whitelisted methods are affixed
+state.$watchNow('count', (v) => console.log(v));
+state.$snapshotNow();
 ```
 
 ### Migration: Method API to State/Event Protocol
@@ -333,9 +378,10 @@ The `target` and `currentTarget` objects give you absolute surgical awareness of
 ```javascript
 {
   path: "user.age",          // The full dot-path being accessed
-  key: "age",                // The specific property key
   value: 26,                 // The NEW value attempting to be written
   oldValue: 25,              // The CURRENT value sitting in memory
+  key: "age",                // The specific property key
+  hadKey: true,              // If the key existed on the parent object
   object: { age: 25 }        // The actual memory reference of the parent object
 }
 ```
