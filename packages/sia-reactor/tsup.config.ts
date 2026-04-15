@@ -3,7 +3,7 @@ import fs from "fs";
 
 export default defineConfig([
   {
-    entry: ["src/ts/index.ts", "src/ts/utils.ts", "src/ts/plugins.ts", "src/ts/adapters/vanilla.ts", "src/ts/adapters/react.ts"],
+    entry: ["src/ts/index.ts", "src/ts/utils.ts", "src/ts/modules.ts", "src/ts/adapters/vanilla.ts", "src/ts/adapters/react.ts"],
     format: ["cjs", "esm"],
     dts: true,
     clean: true,

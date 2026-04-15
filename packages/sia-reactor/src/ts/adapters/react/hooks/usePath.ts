@@ -17,12 +17,12 @@ import { getAny } from "../../../utils/obj";
  * @param build Optional Reactor build options used when creating a scoped Reactor for plain objects.
  * @returns Current value at the requested path.
  * @example
- * const a = usePath({ user: { profile: { name: "Ada" } } }, "user.profile.name");
+ * const a = usePath({ user: { profile: { name: "Kosi" } } }, "user.profile.name");
  * @example
- * const state = reactive({ user: { profile: { name: "Ada" } } });
+ * const state = reactive({ user: { profile: { name: "Kosi" } } });
  * const b = usePath(state, "user.profile.name");
  * @example
- * const rtr = new Reactor({ user: { profile: { name: "Ada" } } });
+ * const rtr = new Reactor({ user: { profile: { name: "Kosi" } } });
  * const c = usePath(rtr, "user.profile.name");
  * @example
  * const wholeState = usePath(state, "*");
@@ -34,7 +34,7 @@ export function usePath<T extends object, P extends WildPaths<T>>(target: T | Re
     rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = getReactor(target, true, build))) : rtrRef.current,
     optsRef = useRef(options);
   optsRef.current = options; // preventing staleness
-  const subscribe = useCallback((notify: () => void) => rtr[optsRef.current.sync ? "watch" : "on"](path, () => (versionRef.current++, notify()), optsRef.current), [rtr, path]);
+  const subscribe = useCallback((notify: () => void) => rtr[(optsRef.current.sync ? "watch" : "on") as "on"](path, () => (versionRef.current++, notify()), optsRef.current), [rtr, path]);
   const getSnapshot = useCallback(() => versionRef.current, []);
   useSyncExternalStore(subscribe, getSnapshot, getSnapshot); // Feed React a primitive number to track tearing, zero cloning.
   return getAny(rtr.core, path);

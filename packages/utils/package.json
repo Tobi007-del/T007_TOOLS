@@ -45,6 +45,6 @@
     "performance"
   ],
   "dependencies": {
-    "sia-reactor": "^0.0.20"
+    "sia-reactor": "^0.0.22"
   }
 }

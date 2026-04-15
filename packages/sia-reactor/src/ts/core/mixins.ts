@@ -3,7 +3,7 @@ import { Reactor } from "./reactor";
 import type { ReactorBuild, Inert, Intent, Live, State, Volatile, Stable } from "../types/reactor";
 
 /** Reactor method names exposed on objects returned by {@link reactive}. */
-export const methods = ["tick", "stall", "nostall", "get", "gonce", "noget", "set", "sonce", "noset", "delete", "donce", "nodelete", "watch", "wonce", "nowatch", "on", "once", "off", "snapshot", "cascade", "plugIn", "reset", "destroy"] as const;
+export const methods = ["tick", "stall", "nostall", "get", "gonce", "noget", "set", "sonce", "noset", "delete", "donce", "nodelete", "watch", "wonce", "nowatch", "on", "once", "off", "snapshot", "use", "reset", "destroy"] as const;
 
 type Method = (typeof methods)[number];
 type Prefix<P extends ReactivePreferences | undefined> = P extends { prefix?: infer X extends string } ? X : "";
@@ -24,14 +24,14 @@ export interface ReactivePreferences {
 export type Reactive<T extends object, P extends ReactivePreferences | undefined = undefined> = T & ReactiveMethodMap<T, P> & { __Reactor__: Reactor<T> };
 
 /**
- * Attaches Reactor APIs to a state object and returns its reactive proxy.
- * If an existing `reactive()` return value is passed, it is re-returned ignoring change in preferences.
+ * Attaches `Reactor` APIs to a state object and returns its reactive proxy from the reactor's core.
+ * If an existing `reactive()` object is passed, it is re-returned ignoring change in preferences.
  * @param target Source state object or an existing Reactor instance.
  * @param build Reactor initial configuration.
  * @param preferences Method naming preferences for exposed APIs.
  * @returns Reactive object with mapped Reactor methods and `__Reactor__`.
  * @example
- * const state = reactive({ user: { name: "Ada" } });
+ * const state = reactive({ user: { name: "Kosi" } });
  * state.set("user.name", (v) => v);
  * @example
  * const rtr = new Reactor({ count: 0 });
@@ -47,7 +47,7 @@ export function reactive<T extends object, const P extends ReactivePreferences |
     let key = methods[i];
     if (hasAffix) (preferences.whitelist?.includes(key) ?? true) && (key = `${preferences.prefix || ""}${key}${preferences.suffix || ""}` as Method);
     else if (preferences.whitelist?.includes(key)) continue;
-    descriptors[key] = { value: rtr[key].bind(rtr), ...locks };
+    descriptors[key] = { value: rtr[methods[i]].bind(rtr), ...locks };
   }
   descriptors["__Reactor__"] = { value: rtr, ...locks };
   return Object.defineProperties(rtr.core, descriptors), rtr.core as any;
@@ -129,7 +129,7 @@ export function isVolatile<T extends object>(target: T): target is Volatile<T> {
 }
 
 /**
- * Gets the underlying `Reactor` instance associated with a reactive object,
+ * Gets the underlying `Reactor` instance associated with a `reactive()` object,
  * returns the `Reactor` itself if given, or optionally creates one for plain objects.
  * @param target Object to retrieve `Reactor` from.
  * @param create When `true`, creates a new `Reactor` for plain objects when none exists.
@@ -149,7 +149,7 @@ export function getReactor<T extends object>(target: T | Reactor<T> | Reactive<T
 /**
  * Gets the raw (unproxied) version of an object if it's proxied, otherwise returns the original object.
  * @param target Object to unwrap.
- * @returns Raw object if proxied, else the original object.
+ * @returns Raw object if proxied, else the original object. Use `Reactor.snapshot(true)` for deep unwrapping.
  */
 export function getRaw<T extends object>(target: T): T {
   return (target as any)?.[RAW] || target;

@@ -55,6 +55,6 @@
     "monkey-patch"
   ],
   "dependencies": {
-    "@t007/utils": "^0.0.21"
+    "@t007/utils": "^0.0.23"
   }
 }

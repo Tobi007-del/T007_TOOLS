@@ -8,7 +8,9 @@ import { Autotracker } from "../adapters/autotracker";
 export const CTX = {
   /** Flag indicating whether the application is running in development mode. */
   isDevEnv: "undefined" !== typeof process ? process.env.NODE_ENV !== "production" : true,
-  /** active `Autotracker` instance, override for automatic dependency collection on `Reactor` traps. */
+  /** Flag indicating whether a cascade is currently ongoing so reactors can allow all writes. */
+  isCascading: false,
+  /** Active `Autotracker` instance, override for automatic dependency collection on `Reactor` traps. */
   autotracker: null as Autotracker<any> | null,
 };
 /** Marker to access underlying raw object from a proxy. */
@@ -29,8 +31,6 @@ export const SSVERSION: unique symbol = Symbol.for("S.I.A_SNAPSHOT_VERSION"); //
 export const RTR_BATCH = "undefined" !== typeof window ? ("undefined" !== typeof queueMicrotask ? queueMicrotask : setTimeout).bind(window) : "undefined" !== typeof process && process.nextTick ? process.nextTick : setTimeout;
 /** Default reactor logger prefix function. */
 export const RTR_LOG = console.log.bind(console, "[S.I.A Reactor]");
-/** Default event warning logger prefix function. */
-export const EVT_WARN = console.warn.bind(console, "[S.I.A Event]");
 /** Canonical option keys parsed for listener and mediator registrations. */
 export const EVT_OPTS = { LISTENER: ["capture", "depth", "once", "signal", "immediate"], MEDIATOR: ["lazy", "signal", "immediate"] } as const;
 /** Frozen empty object used as a zero-allocation default options value. */

@@ -22,24 +22,31 @@ export type NoTraverse =
   | AbortSignal
   | Inert<unknown>;
 
-/** Dot-path union for traversable keys in `T`. */
-export type Paths<T, S extends string = ".", D extends number = RDepth> = [D] extends [0]
+/** Dot-path union for traversable keys in `T` up to depth `D{11}`. */
+export type Paths<T, S extends string = ".", D extends number = MaxDepth> = [D] extends [0]
   ? never // Circuit Breaker Triggered
   : T extends NoTraverse
   ? never
   : T extends readonly (infer U)[]
-  ? `${Extract<keyof T, number>}` | `${Extract<keyof T, number>}${S}${Paths<U, S, RPrev[D]>}`
+  ? `${Extract<keyof T, number>}` | `${Extract<keyof T, number>}${S}${Paths<U, S, PrevDepth[D]>}`
   : {
       [K in keyof T & (string | number)]: T[K] extends Primitive
         ? `${K}`
-        : `${K}` | `${K}${S}${Paths<T[K], S, RPrev[D]>}`;
+        : `${K}` | `${K}${S}${Paths<T[K], S, PrevDepth[D]>}`;
     }[keyof T & (string | number)];
 /** Wildcard path (`*`) or concrete dot-path. */
 export type WildPaths<T, S extends string = "."> = "*" | Paths<T, S>;
-/** Child-path expansion for a path (includes descendants). */
-export type ChildPaths<T, P extends WildPaths<T>, S extends string = "."> = P extends "*"
+/** Child-path expansion for a path up to relative depth `D{x}`. */
+export type ChildPaths<
+  T,
+  P extends WildPaths<T>,
+  S extends string = ".",
+  D extends number = MaxDepth
+> = P extends "*"
   ? Paths<T, S>
-  : P | Extract<Paths<T, S>, `${P}${S}${string}`>;
+  : [D] extends [AllDepth] // hardcoded since already at ts deep limits
+  ? Extract<Paths<T, S, AddDepth<PathDepth<P, S>, D>>, `${P}${S}${string}`>
+  : Extract<Paths<T, S, AddDepth<PathDepth<P, S>, D>>, `${P}${S}${string}`>;
 
 /** Leaf key name extracted from a path. */
 export type PathKey<T, P extends string = Paths<T>, S extends string = "."> = P extends "*"
@@ -88,7 +95,16 @@ type UnflattenKey<
   ? { [P in Head]: UnflattenKey<Tail, V, S> }
   : { [P in K]: V };
 
-// Helpers
+// --- Helpers ---
+
+/** Calculates the depth of a dot-separated path with a max of D{11}. */
+export type PathDepth<P extends string, S extends string = ".", D extends number = MaxDepth> = [
+  D
+] extends [0]
+  ? 0
+  : P extends `${infer _}${S}${infer Rest}`
+  ? NextDepth[PathDepth<Rest, S, PrevDepth[D]>]
+  : 1;
 
 /** Last segment of a path. */
 export type PathLeaf<
@@ -106,34 +122,49 @@ export type PathBranch<
     : Head
   : never;
 
+/** Converts a union of types into an intersection of types. */
 export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
   k: infer I
 ) => void
   ? I
   : never;
 
+/** Adds two depths together, respecting the max depth{11}. */
+export type AddDepth<A extends number, B extends number> = [B] extends [0]
+  ? A
+  : [A] extends [MaxDepth]
+  ? MaxDepth
+  : AddDepth<NextDepth[A], PrevDepth[B]>;
+
+/** Subtracts depth B from A, respecting the min depth{0}. */
+export type SubtractDepth<A extends number, B extends number> = [B] extends [0]
+  ? A
+  : [A] extends [0]
+  ? 0
+  : SubtractDepth<PrevDepth[A], PrevDepth[B]>;
+
 // --- "It's not that deep" WARRIORS ---
 
-/** Deep key union of `T` up to depth `D{10}`. */
-export type DeepKeys<T, D extends number = RDepth> = [D] extends [0]
+/** Deep key union of `T` up to depth `D{11}`. */
+export type DeepKeys<T, D extends number = MaxDepth> = [D] extends [0]
   ? never
   : T extends NoTraverse
   ? never
   : T extends readonly any[]
-  ? DeepKeys<T[number], RPrev[D]>
+  ? DeepKeys<T[number], PrevDepth[D]>
   : {
-      [K in keyof T & (string | number)]: K | DeepKeys<T[K], RPrev[D]>;
+      [K in keyof T & (string | number)]: K | DeepKeys<T[K], PrevDepth[D]>;
     }[keyof T & (string | number)];
 
-/** Recursive merge result type for `T1` and `T2` up to depth `D{10}`. */
-export type DeepMerge<T1, T2, D extends number = RDepth> = [D] extends [0]
+/** Recursive merge result type for `T1` and `T2` up to depth `D{11}`. */
+export type DeepMerge<T1, T2, D extends number = MaxDepth> = [D] extends [0]
   ? never
   : T2 extends object
   ? T1 extends object
     ? {
         [K in keyof T1 | keyof T2]: K extends keyof T2
           ? K extends keyof T1
-            ? DeepMerge<T1[K], T2[K], RPrev[D]>
+            ? DeepMerge<T1[K], T2[K], PrevDepth[D]>
             : T2[K]
           : K extends keyof T1
           ? T1[K]
@@ -142,33 +173,43 @@ export type DeepMerge<T1, T2, D extends number = RDepth> = [D] extends [0]
     : T2
   : T2;
 
-/** Recursive partial type up to depth `D{10}`. */
-export type DeepPartial<T, D extends number = RDepth> = [D] extends [0]
+/** Recursive partial type up to depth `D{11}`. */
+export type DeepPartial<T, D extends number = MaxDepth> = [D] extends [0]
   ? never
   : T extends Function
   ? T
   : T extends Array<infer U>
-  ? Array<DeepPartial<U, RPrev[D]>>
+  ? Array<DeepPartial<U, PrevDepth[D]>>
   : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U, RPrev[D]>>
+  ? ReadonlyArray<DeepPartial<U, PrevDepth[D]>>
   : T extends object
-  ? { [P in keyof T]?: DeepPartial<T[P], RPrev[D]> }
+  ? { [P in keyof T]?: DeepPartial<T[P], PrevDepth[D]> }
   : T;
 
-/** Recursive required type up to depth `D{10}`. */
-export type DeepRequired<T, D extends number = RDepth> = [D] extends [0]
+/** Recursive required type up to depth `D{11}`. */
+export type DeepRequired<T, D extends number = MaxDepth> = [D] extends [0]
   ? never
   : T extends Function
   ? T
   : T extends Array<infer U>
-  ? Array<DeepRequired<U, RPrev[D]>>
+  ? Array<DeepRequired<U, PrevDepth[D]>>
   : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepRequired<U, RPrev[D]>>
+  ? ReadonlyArray<DeepRequired<U, PrevDepth[D]>>
   : T extends object
-  ? { [P in keyof T]-?: DeepRequired<T[P], RPrev[D]> }
+  ? { [P in keyof T]-?: DeepRequired<T[P], PrevDepth[D]> }
   : T;
 
 // --- RECURSION LIMITERS ---
-type RDepth = 10; // current limit for state trees, observed ts max - 19; limit needed cuz of ts bundlers
-// This tuple maps a number to the number below it (Index 4 contains 3) allowing `RPrev[D]` to subtract 1 from our depth.
-type RPrev = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+
+/** Config for defining recursive limits for all parts of the application */
+export interface DepthConfig {
+  max: 11;
+  all: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19; // observed bundler recursive limit for state trees
+  prev: [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+  next: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+}
+/** Current recursive depth limit */
+export type MaxDepth = DepthConfig["max"];
+export type AllDepth = DepthConfig["all"];
+export type PrevDepth = DepthConfig["prev"];
+export type NextDepth = DepthConfig["next"];

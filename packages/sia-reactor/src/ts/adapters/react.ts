@@ -1,6 +1,6 @@
-export { useReactor, useAnyReactor } from "./react/hooks/useReactor";
+export { useReactor, useAnyReactor, useReactorSnapshot } from "./react/hooks/useReactor";
 
-export { useSelector, useAnySelector } from "./react/hooks/useSelector";
+export { useSelector, useAnySelector, useSelectorSnapshot } from "./react/hooks/useSelector";
 
 export { usePath } from "./react/hooks/usePath";
 

@@ -11,8 +11,8 @@ export let activeTracker: Autotracker<any> | null = null;
 // ===========================================================================
 
 /**
- * Auto-dependency tracker used to subscribe only to accessed paths.
- * `tracked(...)` wraps a snapshot in a read-tracking proxy, and `callback(...)`
+ * - Auto-dependency tracker used to subscribe only to accessed paths.
+ * - `tracked(...)` wraps a snapshot in a read-tracking proxy, and `callback(...)`
  * binds subscriptions for collected paths using `watch` (sync) or `on` (batched).
  * @typeParam T Root state object type.
  */
@@ -126,9 +126,9 @@ export class Autotracker<T extends object> {
    * const stop = atrkr.callback(() => console.log("changed")); // re-run after when ".user.name" changes
    * @example Packaged Customization
    * const atrkr = new Autotracker(); // no reactor passed
-   * withTracker(atrkr, () => state.user.name); // import `withTracker` first
+   * withTracker(atrkr, () => state.user.name); // import `withTracker` too
    * const stop = atrkr.callback(() => console.log("sync"), { sync: true }); // re-run immediately when ".user.name" changes, works on any path used from any reactor state
-   * @example Extensive customization
+   * @example Extensive Customization
    * atrkr.unblock();
    * const prev = CTX.autotracker;
    * CTX.autotracker = atrkr; // import CTX first
@@ -139,8 +139,8 @@ export class Autotracker<T extends object> {
     this.cleanup();
     const method = options.sync ? "watch" : "on";
     for (const [rtr, paths] of this.deps) {
-      if (!paths.size || paths.has("*")) rtr && this.clups.push(rtr[method]("*", cb, options));
-      else for (const path of paths) this.clups.push(rtr[method](path, cb, options));
+      if (!paths.size || paths.has("*")) rtr && this.clups.push(rtr[method as "on"]("*", cb, options));
+      else for (const path of paths) this.clups.push(rtr[method as "on"](path, cb, options));
     }
     return () => this.cleanup();
   }

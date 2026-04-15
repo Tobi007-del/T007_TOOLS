@@ -1,7 +1,7 @@
 import { REJECTABLE, INERTIA, INDIFFABLE, TERMINATOR } from "../core/consts";
 import { Reactor } from "../core/reactor";
 import { ReactorEvent } from "../core/event";
-import type { Paths, WildPaths, ChildPaths, PathValue, PathBranchValue, PathKey } from "./obj";
+import { Paths, WildPaths, ChildPaths, PathValue, PathBranchValue, PathKey, MaxDepth } from "./obj";
 import { Reactive } from "../core/mixins";
 
 // ===========================================================================
@@ -49,9 +49,9 @@ export interface Target<T, P extends WildPaths<T> = WildPaths<T>> {
 }
 
 /** Runtime payload union for mediated operations and update waves (Creates the IDE magic). */
-export type Payload<T, P extends WildPaths<T> = WildPaths<T>> =
+export type Payload<T, P extends WildPaths<T> = WildPaths<T>, D extends number = MaxDepth> =
   | DirectPayload<T, P>
-  | UpdatePayload<T, P>;
+  | UpdatePayload<T, P, D>;
 
 export interface BasePayload<T, P extends WildPaths<T> = WildPaths<T>> {
   /**
@@ -72,24 +72,32 @@ export interface DirectPayload<T, P extends WildPaths<T> = WildPaths<T>> extends
   /** Target context for this payload. */
   target: Target<T, P>;
 }
-export interface UpdatePayload<T, P extends WildPaths<T> = WildPaths<T>> extends BasePayload<T, P> {
+export interface UpdatePayload<
+  T,
+  P extends WildPaths<T> = WildPaths<T>,
+  D extends number = MaxDepth
+> extends BasePayload<T, P> {
   /** Type of the operation that triggered this payload, i.e. "update" */
   type: "update";
   /** Target context for this payload. */
-  target: Target<T, ChildPaths<T, P>>; // Target is strictly one of the child paths!
+  target: Target<T, ChildPaths<T, P, ".", D>>; // Target is strictly one of the child paths!
 }
 
 /** Event union with payload-aware overrides for `type`, `path`, and value fields (Creates the IDE magic). */
-export type REvent<T extends object, P extends WildPaths<T> = WildPaths<T>> =
+export type REvent<
+  T extends object,
+  P extends WildPaths<T> = WildPaths<T>,
+  D extends number = MaxDepth
+> =
   | (Omit<ReactorEvent<T, P>, OverrideEvtProp> &
       DirectPayload<T, P> &
-      OverrideEvtPart<DirectPayload<T, P>>)
+      OverrideEvt<DirectPayload<T, P>>)
   | (Omit<ReactorEvent<T, P>, OverrideEvtProp> &
-      UpdatePayload<T, P> &
-      OverrideEvtPart<UpdatePayload<T, P>>);
+      UpdatePayload<T, P, D> &
+      OverrideEvt<UpdatePayload<T, P, D>>);
 
 type OverrideEvtProp = "type" | "target" | "value" | "oldValue" | "path";
-interface OverrideEvtPart<PL extends { target: { path: any; value: any; oldValue?: any } }> {
+interface OverrideEvt<PL extends { target: { path: any; value: any; oldValue?: any } }> {
   path: PL["target"]["path"];
   value: PL["target"]["value"];
   oldValue: PL["target"]["oldValue"];
@@ -125,7 +133,9 @@ export type Watcher<T, P extends WildPaths<T> = WildPaths<T>> = (
 ) => void;
 
 /** Listener callback (batched/asynchronous by default). */
-export type Listener<T, P extends WildPaths<T> = WildPaths<T>> = (event: REvent<T, P>) => void;
+export type Listener<T, P extends WildPaths<T> = WildPaths<T>, D extends number = MaxDepth> = (
+  event: REvent<T, P, D>
+) => void;
 
 // ===========================================================================
 // ENGINE RECORDS (Internal Storage)
@@ -133,35 +143,39 @@ export type Listener<T, P extends WildPaths<T> = WildPaths<T>> = (event: REvent<
 
 export type GetterRecord<T extends object, P extends WildPaths<T> = WildPaths<T>> = {
   cb: Getter<T, P>;
-  clup: () => ReturnType<Reactor<T>["noget"]>; // Registration Cleanup
+  clup: () => boolean | undefined; // Registration Cleanup
   sclup?: () => void; // AbortSignal Cleanup
 } & SyncOptionsTuple;
 
 /** Internal registry record for `set` mediators. */
 export type SetterRecord<T extends object, P extends WildPaths<T> = WildPaths<T>> = {
   cb: Setter<T, P>;
-  clup: () => ReturnType<Reactor<T>["noset"]>;
+  clup: () => boolean | undefined;
   sclup?: () => void;
 } & SyncOptionsTuple;
 
 export type DeleterRecord<T extends object, P extends WildPaths<T> = WildPaths<T>> = {
   cb: Deleter<T, P>;
-  clup: () => ReturnType<Reactor<T>["nodelete"]>;
+  clup: () => boolean | undefined;
   sclup?: () => void;
 } & SyncOptionsTuple;
 
 export type WatcherRecord<T extends object, P extends WildPaths<T> = WildPaths<T>> = {
   cb: Watcher<T, P>;
-  clup: () => ReturnType<Reactor<T>["nowatch"]>;
+  clup: () => boolean | undefined;
   sclup?: () => void;
 } & SyncOptionsTuple;
 
-export type ListenerRecord<T extends object, P extends WildPaths<T> = WildPaths<T>> = {
-  cb: Listener<T, P>;
-  clup: () => ReturnType<Reactor<T>["off"]>;
+export type ListenerRecord<
+  T extends object,
+  P extends WildPaths<T> = WildPaths<T>,
+  D extends number = MaxDepth
+> = {
+  cb: Listener<T, P, D>;
+  clup: () => boolean | undefined;
   sclup?: () => void;
   lDepth?: number; // Listener Depth
-} & ListenerOptionsTuple;
+} & ListenerOptionsTuple<D>;
 
 // ===========================================================================
 // CONFIGURATION OPTIONS
@@ -180,19 +194,20 @@ export interface SyncOptionsTuple {
 /** Tuple-form and shorthand boolean for mediator/watch registrations. */
 export type SyncOptions = boolean | SyncOptionsTuple;
 
-export interface ListenerOptionsTuple extends Omit<SyncOptionsTuple, "lazy"> {
+export interface ListenerOptionsTuple<D extends number = MaxDepth>
+  extends Omit<SyncOptionsTuple, "lazy"> {
   /** Whether to listen on the capture phase against bubble. */
   capture?: boolean;
   /** Maximum path nested depth for event propagation, try `1` if listening to an array with nested objects. */
-  depth?: number;
+  depth?: D;
 }
 /** Tuple-form and shorthand boolean for listener registrations. */
-export type ListenerOptions = boolean | ListenerOptionsTuple;
+export type ListenerOptions<D extends number = MaxDepth> = boolean | ListenerOptionsTuple<D>;
 
 /** Options accepted by adapter effects (`sync: true` -> watch mode else listener mode). */
 export type EffectOptions =
-  | (SyncOptionsTuple & { sync: true })
-  | (ListenerOptionsTuple & { sync?: false });
+  | (Omit<SyncOptionsTuple, "immediate"> & { sync: true })
+  | (Omit<ListenerOptionsTuple, "immediate"> & { sync?: false });
 
 /** Reactor bootstrap/build configuration. */
 export interface ReactorBuild<T extends object, P extends Paths<T> = Paths<T>> {

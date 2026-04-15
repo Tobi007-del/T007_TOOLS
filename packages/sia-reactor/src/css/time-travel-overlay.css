@@ -154,7 +154,7 @@
 
 .tt-io {
   min-height: 84px;
-  max-height: calc(100vh - 350px);
+  max-height: calc((100vh - 318px) / 2);
   resize: vertical;
   border: 1px solid var(--sia-tt-line);
   background: var(--sia-tt-input-bg);

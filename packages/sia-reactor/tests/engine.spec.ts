@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { reactive, TERMINATOR } from "../src/ts";
 import { effect } from "../src/ts/adapters/vanilla";
-import { TimeTravelPlugin, PersistPlugin, MemoryStorageAdapter } from "../src/ts/plugins";
+import { TimeTravelModule, PersistModule, MemoryAdapter } from "../src/ts/modules";
 
 describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
   // ===========================================================================
@@ -136,11 +136,11 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
   // ===========================================================================
   // MODULE 2: TIME TRAVEL & SPACETIME PHYSICS
   // ===========================================================================
-  describe("TimeTravelPlugin: The Spacetime Engine", () => {
+  describe("TimeTravelModule: The Spacetime Engine", () => {
     it("must execute O(1) bidirectional teleportation and timeline branching", () => {
       const state = reactive({ volume: 50, playing: false });
-      const timePlug = new TimeTravelPlugin();
-      state.plugIn(timePlug);
+      const timeModule = new TimeTravelModule();
+      state.use(timeModule);
 
       state.volume = 60;
       state.tick(); // Frame 0
@@ -150,7 +150,7 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
       state.tick(); // Frame 2
 
       // Undo 2 steps (Back to Frame 0)
-      timePlug.step(2, false);
+      timeModule.step(2, false);
       expect(state.volume).toBe(60);
       expect(state.playing).toBe(false);
 
@@ -159,14 +159,14 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
       state.tick();
 
       // The timeline should have overwritten Frame 1 and 2
-      expect(timePlug.state.history.length).toBe(2);
-      expect(timePlug.state.history[1].value).toBe(11);
+      expect(timeModule.state.history.length).toBe(2);
+      expect(timeModule.state.history[1].value).toBe(11);
     });
 
     it("must solve the 'Explicit Undefined' paradox using hadKey flags", () => {
       const state = reactive({ session: { token: "abc" } } as any);
-      const timePlug = new TimeTravelPlugin();
-      state.plugIn(timePlug);
+      const timeModule = new TimeTravelModule();
+      state.use(timeModule);
 
       // Frame 0: Explicitly set existing key to undefined
       state.session.token = undefined;
@@ -177,7 +177,7 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
       state.tick();
 
       // Rewind to Genesis
-      timePlug.jumpTo(-1);
+      timeModule.jumpTo(-1);
 
       // It must know to delete `newFlag`, but RESTORE `token` to "abc"
       expect(state.session.newFlag).toBeUndefined();
@@ -189,8 +189,8 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
       vi.useRealTimers(); // Requires real-time physics for custom timeouts
 
       const state = reactive({ position: 0 });
-      const timePlug = new TimeTravelPlugin({ maxPlaybackDelay: 100 });
-      state.plugIn(timePlug);
+      const timeModule = new TimeTravelModule({ maxPlaybackDelay: 100 });
+      state.use(timeModule);
 
       state.position = 10;
       state.tick();
@@ -203,11 +203,11 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
       state.position = 30;
       state.tick();
 
-      timePlug.jumpTo(-1); // Reset to Genesis
+      timeModule.jumpTo(-1); // Reset to Genesis
       expect(state.position).toBe(0);
 
       // Run the VCR
-      await timePlug.play();
+      await timeModule.play();
 
       expect(state.position).toBe(30);
     });
@@ -216,19 +216,19 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
   // ===========================================================================
   // MODULE 3: PERSISTENCE & HYDRATION
   // ===========================================================================
-  describe("PersistPlugin: Storage & Sync", () => {
+  describe("PersistModule: Storage & Sync", () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
 
     it("must securely isolate payload paths and throttle storage writes", async () => {
-      const mockAdapter = new MemoryStorageAdapter();
+      const mockAdapter = new MemoryAdapter();
       const state = reactive({
         settings: { theme: "light" },
         cache: { temp: "foo" },
       });
 
-      state.plugIn(
-        new PersistPlugin({
+      state.use(
+        new PersistModule({
           key: "REACTOR_TEST",
           paths: ["settings"], // Strict path isolation
           throttle: 1000,
@@ -256,13 +256,13 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
     });
 
     it("must hydrate state cleanly from a populated adapter", async () => {
-      const mockAdapter = new MemoryStorageAdapter();
+      const mockAdapter = new MemoryAdapter();
       mockAdapter.set("APP_STATE", { user: { role: "admin" } });
 
       const state = reactive({ user: { role: "guest" } });
 
-      state.plugIn(
-        new PersistPlugin({
+      state.use(
+        new PersistModule({
           key: "APP_STATE",
           adapter: mockAdapter,
         })
@@ -274,3 +274,20 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
     });
   });
 });
+
+const state = reactive({ user: { profile: { name: { first: "a", fam: { nick: { test: { testt: { testtt: { testttt: { testtttt: { lover: "Kosi" } } } } } } } } }, age: 1 } });
+state.on(
+  "user.profile",
+  (e) => {
+    if (e.type === "update") {
+      e.target.key;
+      e.target.path;
+      e.target.value;
+    } else {
+      e.target.key;
+      e.currentTarget.path;
+      e.currentTarget.value;
+    }
+  },
+  { depth: 2 }
+); // Manual depth inference typecheck

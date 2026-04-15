@@ -1,4 +1,6 @@
-import { NIL } from "../core/consts";
+import { CTX, NIL } from "../core/consts";
+import { ReactorEvent } from "../core/event";
+import { Payload } from "../types/reactor";
 import type { DeepMerge, Unflatten, WildPaths, PathValue, PathBranchValue } from "../types/obj";
 
 const arrRx = /^([^\[\]]+)\[(\d+)\]$/;
@@ -27,7 +29,7 @@ export function canHandle(obj: any, config: { crossRealms?: boolean; preserveCon
 /**
  * Gets a value by path.
  * @example
- * const state = { user: { profile: { name: "Ada" } } };
+ * const state = { user: { profile: { name: "Kosi" } } };
  * const name = getAny(state, "user.profile.name");
  */
 export function getAny<T extends object, const S extends string = ".", P extends WildPaths<T, S> = WildPaths<T, S>>(source: T, key: P, separator: S = "." as S, keyFunc?: (p: string) => string): PathValue<T, P, S> {
@@ -53,11 +55,11 @@ export function getAny<T extends object, const S extends string = ".", P extends
 /**
  * Sets a value by path.
  * @example
- * const state = { user: { profile: { name: "Ada" } } };
+ * const state = { user: { profile: { name: "Kosi" } } };
  * setAny(state, "user.profile.name", "Grace");
  * @example
  * const state = { users: [] as Array<{ name?: string }> };
- * setAny(state, "users[0].name" as any, "Ada");
+ * setAny(state, "users[0].name" as any, "Kosi");
  */
 export function setAny<T extends object, const S extends string = ".", P extends WildPaths<T, S> = WildPaths<T, S>>(target: T, key: P, value: PathValue<T, P, S>, separator: S = "." as S, keyFunc?: (p: string) => string): void {
   if (key === "*") return Object.assign(target, value);
@@ -81,10 +83,10 @@ export function setAny<T extends object, const S extends string = ".", P extends
 /**
  * Deletes a value by path.
  * @example
- * const state = { user: { profile: { name: "Ada" } } };
+ * const state = { user: { profile: { name: "Kosi" } } };
  * deleteAny(state, "user.profile.name");
  */
-export function deleteAny<T extends object, const S extends string = ".">(target: T, key: WildPaths<T, S>, separator: S = "." as S, keyFunc?: (p: string) => string): void {
+export function deleteAny<T extends object, const S extends string = ".", P extends WildPaths<T, S> = WildPaths<T, S>>(target: T, key: P, separator: S = "." as S, keyFunc?: (p: string) => string): void {
   if (key === "*") {
     const keys = Object.keys(target);
     for (let i = 0, len = keys.length; i < len; i++) delete (target as any)[keys[i]];
@@ -111,10 +113,10 @@ export function deleteAny<T extends object, const S extends string = ".">(target
 /**
  * Checks whether a path exists.
  * @example
- * const state = { user: { profile: { name: "Ada" } } };
- * const ok = inAny(state, "user.profile.name");
+ * const state = { user: { profile: { name: "Kosi" } } };
+ * const ok = inAny(state, "user.profile.name"); // default loose typing due to it's usecase
  */
-export function inAny<T extends object, const S extends string = ".">(source: T, key: string | WildPaths<T, S>, separator: S = "." as S, keyFunc?: (p: string) => string): boolean {
+export function inAny<T extends object, const S extends string = ".", P extends string = string>(source: T, key: P, separator: S = "." as S, keyFunc?: (p: string) => string): boolean {
   if (key === "*") return true;
   if (!key.includes(separator)) return key in source;
   const keys = key.split(separator);
@@ -138,14 +140,18 @@ export function inAny<T extends object, const S extends string = ".">(source: T,
 /**
  * Converts flattened keys into nested object structure.
  * @example
- * const flat = { "user.name": "Ada", "user.role": "admin" };
+ * const flat = { "user.name": "Kosi", "user.role": "admin" };
  * const obj = parseAnyObj(flat);
  */
 export function parseAnyObj<T extends Record<string, any>, const S extends string = ".">(obj: T, separator: S = "." as S, keyFunc = (p: string) => p, seen = new WeakSet()): Unflatten<T, S> {
   if (!isObj(obj) || seen.has(obj)) return obj as Unflatten<T, S>; // no circular references
   seen.add(obj);
-  const result: any = {};
-  Object.keys(obj).forEach((k) => (k === "*" || k.includes(separator) ? setAny(result, k as any, parseAnyObj(obj[k] as any, separator, keyFunc, seen), separator, keyFunc) : (result[k] = isObj(obj[k]) ? parseAnyObj(obj[k] as any, separator, keyFunc, seen) : obj[k])));
+  const result: any = {},
+    keys = Object.keys(obj);
+  for (let i = 0, len = keys.length; i < len; i++) {
+    const k: any = keys[i];
+    k === "*" || k.includes(separator) ? setAny(result, k, parseAnyObj(obj[k] as any, separator, keyFunc, seen), separator, keyFunc) : (result[k] = isObj(obj[k]) ? parseAnyObj(obj[k] as any, separator, keyFunc, seen) : obj[k]);
+  }
   return result as Unflatten<T, S>;
 }
 
@@ -157,16 +163,56 @@ export function parseEvtOpts<T extends object>(options: T | boolean | undefined,
 // Merging & Traversal
 
 /**
+ * Unified expansion utility.
+ * Bridges Coarse (Immutable replacement) writes into Fine-grained (Reactive) writes by
+ * surgically expanding a single object write into multiple granular child operations.
+ * @example
+ * // Event Mode (Cascading after-write)
+ * rtr.on("user", (e) => fanout(e, { depth: 1 })); // defaults to 1 level deep
+ * @example
+ * // Direct Mode (Patching before-write)
+ * fanout(state, "user", { session: { id: 1, name: "Kosi", role: "admin" } }, { depth: Infinity }); // use this or `true` to fanout all nested keys
+ */
+export function fanout<T extends object>(event: ReactorEvent<T> | Payload<T>, options?: { merge?: boolean; depth?: number | boolean; crossRealms?: boolean }): void;
+export function fanout<T extends object>(state: T, path: WildPaths<T>, value: any, options?: { merge?: boolean; depth?: number | boolean; crossRealms?: boolean }): void;
+export function fanout(a: any, b?: any, c?: any, d?: any): void {
+  const isEvtPld = !!a?.target,
+    [state, path, news, olds, opts, type] = isEvtPld ? [a.root, a.currentTarget.path, a.currentTarget.value, a.currentTarget.oldValue, b || NIL, a.type] : [a, b, c, (d || NIL).merge ? getAny(a, b) : NIL, d || NIL],
+    target = path === "*" ? state : getAny(state, path as any);
+  if ((isEvtPld && type !== "set" && type !== "delete") || !target || !canHandle(news, opts)) return;
+  const prev = CTX.isCascading;
+  CTX.isCascading = isEvtPld; // if event or payload, already written values can bypass equality checks
+  try {
+    const walk = (target: any, obj: any, depth = 1, keys = Object.keys(obj)) => {
+      for (let i = 0, len = keys.length; i < len; i++) {
+        const val = obj[keys[i]];
+        try {
+          depth > 1 && canHandle(val, opts) ? walk((target[keys[i]] ||= {}), val, depth - 1) : (target[keys[i]] = val);
+        } catch {} // call a spade a spade and just skip, no descriptor gymanstics
+      }
+    };
+    walk(target, opts.merge && canHandle(olds, opts) ? mergeObjs(olds, news) : news, opts.depth === true ? Infinity : +opts.depth);
+  } finally {
+    CTX.isCascading = prev;
+  }
+}
+
+/**
  * Deep-merges object-like values.
  * @example
- * const next = mergeObjs({ user: { name: "Ada" } }, { user: { role: "admin" } });
+ * const next = mergeObjs({ user: { name: "Kosi" } }, { user: { role: "admin" } });
  */
 export function mergeObjs<T1 extends object, T2 extends object>(o1: T1, o2: T2): DeepMerge<T1, T2>;
 export function mergeObjs<T1 extends object>(o1: T1): T1;
 export function mergeObjs<T2 extends object>(o1: undefined | null, o2: T2): T2;
 export function mergeObjs(o1: any = {}, o2: any = {}): any {
-  const merged = { ...(o1 || {}), ...(o2 || {}) };
-  return Object.keys(merged).forEach((k) => isObj(o1?.[k]) && isObj(o2?.[k]) && (merged[k] = mergeObjs(o1[k], o2[k]))), merged;
+  const merged = { ...(o1 ||= {}), ...(o2 ||= {}) },
+    keys = Object.keys(merged);
+  for (let i = 0, len = keys.length; i < len; i++) {
+    const k = keys[i];
+    if (isObj(o1[k]) && isObj(o2[k])) merged[k] = mergeObjs(o1[k], o2[k]);
+  }
+  return merged;
 }
 
 /** Returns [path, parent, value] records from root to the target path. */
@@ -182,7 +228,7 @@ export function getTrailRecords<T extends object>(obj: T, path: WildPaths<T>, re
 /**
  * Deep-clones supported object structures.
  * @example
- * const cloned = deepClone({ user: { name: "Ada" } });
+ * const cloned = deepClone({ user: { name: "Kosi" } });
  */
 export function deepClone<T>(obj: T, config: { crossRealms?: boolean; preserveContext?: boolean } = NIL, seen = new WeakMap()): T {
   if (!obj || "object" !== typeof obj) return obj;
@@ -192,7 +238,10 @@ export function deepClone<T>(obj: T, config: { crossRealms?: boolean; preserveCo
   const clone: any = config.preserveContext ? Object.create(Object.getPrototypeOf(obj)) : Array.isArray(obj) ? [] : {};
   seen.set(obj, clone);
   const keys = config.preserveContext ? Reflect.ownKeys(obj) : Object.keys(obj);
-  for (let i = 0, len = keys.length; i < len; i++) clone[keys[i]] = deepClone((obj as any)[keys[i]], config, seen);
+  for (let i = 0, len = keys.length; i < len; i++)
+    try {
+      clone[keys[i]] = deepClone((obj as any)[keys[i]], config, seen);
+    } catch {} // call a spade a spade and just skip, no descriptor gymanstics
   return clone;
 } // POJO|Arr|Dynamic Deep cloner
 

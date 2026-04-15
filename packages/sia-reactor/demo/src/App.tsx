@@ -1,26 +1,20 @@
 import { useEffect, useRef } from "react";
 import { reactive } from "../../src/ts/core/mixins";
 import { effect } from "../../src/ts/adapters/vanilla";
-import { useAnyReactor, useAnySelector, usePath, useReactor, useSelector, TimeTravelOverlay } from "../../src/ts/adapters/react";
-import { PersistPlugin, TimeTravelPlugin } from "../../src/ts/plugins";
+import { useAnyReactor, useAnySelector, useReactorSnapshot, useReactor, useSelector, useSelectorSnapshot, usePath, TimeTravelOverlay } from "../../src/ts/adapters/react";
+import { IndexedDBAdapter, PersistModule, TimeTravelModule } from "../../src/ts/modules";
 import "../../src/css/time-travel-overlay.css";
 
-const state = reactive({ count: 0 });
-const time = new TimeTravelPlugin();
-time.state.plugIn(new PersistPlugin({ key: "SIA_DEMO_TIMETRAVEL", throttle: 150 }));
-state.plugIn(new PersistPlugin({ key: "SIA_DEMO_STATE", throttle: 150 })).plugIn(time);
+const time = new TimeTravelModule(),
+  persist = new PersistModule({ key: "SIA_DEMO", adapter: IndexedDBAdapter, useSnapshot: true }).attach(time.state, "timeTravel"),
+  state = reactive({ count: 0 }),
+  increment = () => (state.count += 1),
+  decrement = () => (state.count -= 1),
+  reset = () => (state.count = 0);
+// Module setup
+state.use(persist, "app"), persist.state.once("hydrated", () => state.use(time));
 
-const increment = () => (state.count += 1);
-const decrement = () => (state.count -= 1);
-const reset = () => (state.count = 0);
-
-type CounterCardProps = {
-  label: string;
-  count: number;
-  renders: number;
-};
-
-function CounterCard({ label, count, renders }: CounterCardProps) {
+function CounterCard({ label, count, renders }: { label: string; count: number; renders: number }) {
   return (
     <section className="card">
       <div className="title">{label}</div>
@@ -34,43 +28,45 @@ function CounterCard({ label, count, renders }: CounterCardProps) {
   );
 }
 
-function UseReactorCounter() {
+function ReactorCounter() {
   const s = useReactor(state),
     renders = useRef(0);
   return <CounterCard label="useReactor" count={s.count} renders={++renders.current} />;
 }
-
-function UseAnyReactorCounter() {
+function AnyReactorCounter() {
   useAnyReactor();
   const renders = useRef(0);
   return <CounterCard label="useAnyReactor" count={state.count} renders={++renders.current} />;
 }
-
-function UseSelectorCounter() {
+function ReactorSnapshotCounter() {
+  const s = useReactorSnapshot(state),
+    renders = useRef(0);
+  return <CounterCard label="useReactorSnapshot" count={s.count} renders={++renders.current} />;
+}
+function SelectorCounter() {
   const count = useSelector(state, (s) => s.count),
     renders = useRef(0);
   return <CounterCard label="useSelector" count={count} renders={++renders.current} />;
 }
-
-function UseAnySelectorCounter() {
+function AnySelectorCounter() {
   const count = useAnySelector(() => state.count),
     renders = useRef(0);
   return <CounterCard label="useAnySelector" count={count} renders={++renders.current} />;
 }
-
-function UsePathCounter() {
+function SelectorSnapshotCounter() {
+  const count = useSelectorSnapshot(state, (s) => s.count),
+    renders = useRef(0);
+  return <CounterCard label="useSelectorSnapshot" count={count} renders={++renders.current} />;
+}
+function PathCounter() {
   const count = usePath(state, "count"),
     renders = useRef(0);
   return <CounterCard label="usePath" count={count} renders={++renders.current} />;
 }
-
 function VanillaEffectPanel() {
   const valRef = useRef<HTMLDivElement | null>(null),
     runsRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    let runs = 0;
-    return effect(() => (valRef.current && (valRef.current.textContent = String(state.count)), runsRef.current && (runsRef.current.textContent = String(++runs))));
-  }, []);
+  useEffect((runs = 0) => effect(() => (valRef.current && (valRef.current.textContent = String(state.count)), runsRef.current && (runsRef.current.textContent = String(++runs)))), []);
   return (
     <section className="panel">
       <h2>Vanilla JS Effect</h2>
@@ -102,11 +98,13 @@ export function App() {
         <section className="panel">
           <h2>React Hook Counters</h2>
           <div className="grid">
-            <UseReactorCounter />
-            <UseAnyReactorCounter />
-            <UseSelectorCounter />
-            <UseAnySelectorCounter />
-            <UsePathCounter />
+            <ReactorCounter />
+            <AnyReactorCounter />
+            <ReactorSnapshotCounter />
+            <SelectorCounter />
+            <AnySelectorCounter />
+            <SelectorSnapshotCounter />
+            <PathCounter />
           </div>
         </section>
         <VanillaEffectPanel />

@@ -1,6 +1,6 @@
 {
   "name": "sia-reactor",
-  "version": "0.0.20",
+  "version": "0.0.22",
   "description": "The Programmable Data DOM. A high-performance State Intent Architecture (S.I.A.) Engine with zero-allocation loops, event propagation, and structural sharing.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -33,11 +33,11 @@
       "require": "./dist/utils.cjs",
       "default": "./dist/utils.js"
     },
-    "./plugins": {
-      "types": "./dist/plugins.d.ts",
-      "import": "./dist/plugins.js",
-      "require": "./dist/plugins.cjs",
-      "default": "./dist/plugins.js"
+    "./modules": {
+      "types": "./dist/modules.d.ts",
+      "import": "./dist/modules.js",
+      "require": "./dist/modules.cjs",
+      "default": "./dist/modules.js"
     },
     "./adapters/vanilla": {
       "types": "./dist/adapters/vanilla.d.ts",

@@ -1,5 +1,6 @@
 "use strict";
 import { Reactor, TERMINATOR } from "https://esm.sh/sia-reactor";
+import { fanout } from "https://esm.sh/sia-reactor/utils";
 import log from "../../../assets/scripts/logger.js";
 
 const nextTick = () => new Promise((resolve) => setTimeout(resolve, 10)); // Helper to let the microtask queue flush between tests
@@ -128,7 +129,7 @@ window.runTests = async () => {
   window.t5 = new Reactor({ player: { metadata: null } });
 
   let cascadeFired = false;
-  t5.on("player.metadata", (e) => t5.cascade(e, false)); // cascade overwrites down one level, `false` to turn off old and new value object merging since old can be null
+  t5.on("player.metadata", fanout); // cascade overwrites down one level, `false` to turn off old and new value object merging since old can be null
   t5.on("player.metadata.duration", () => (cascadeFired = true));
 
   const apiResponse = {

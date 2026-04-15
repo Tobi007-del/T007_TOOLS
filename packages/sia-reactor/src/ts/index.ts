@@ -1,4 +1,4 @@
-export { CTX, RAW, INERTIA, REJECTABLE, INDIFFABLE, TERMINATOR, VERSION, SSVERSION, RTR_BATCH, RTR_LOG, EVT_WARN, EVT_OPTS, NIL, NOOP } from "./core/consts";
+export { CTX, RAW, INERTIA, REJECTABLE, INDIFFABLE, TERMINATOR, VERSION, SSVERSION, RTR_BATCH, RTR_LOG, EVT_OPTS, NIL, NOOP } from "./core/consts";
 
 export { Reactor } from "./core/reactor";
 
@@ -10,4 +10,4 @@ export type { Inert, Live, Intent, State, Volatile, Stable, Target, Payload, Dir
 
 export type { Reactive, ReactivePreferences } from "./core/mixins";
 
-export type { Primitive, NoTraverse, Paths, WildPaths, ChildPaths, PathKey, StrictPathKey, PathValue, PathBranchValue, Unflatten, PathLeaf, PathBranch, UnionToIntersection, DeepKeys, DeepMerge, DeepPartial, DeepRequired } from "./types/obj";
+export type { Primitive, NoTraverse, Paths, WildPaths, ChildPaths, PathKey, StrictPathKey, PathValue, PathBranchValue, Unflatten, PathDepth, PathLeaf, PathBranch, UnionToIntersection, AddDepth, SubtractDepth, DeepKeys, DeepMerge, DeepPartial, DeepRequired, DepthConfig, MaxDepth, AllDepth, PrevDepth, NextDepth } from "./types/obj";

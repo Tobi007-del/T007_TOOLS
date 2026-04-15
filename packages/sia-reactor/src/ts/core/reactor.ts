@@ -1,9 +1,9 @@
 import { CTX, RAW, INERTIA, REJECTABLE, INDIFFABLE, TERMINATOR, VERSION, SSVERSION, NOOP, RTR_BATCH, RTR_LOG, EVT_OPTS } from "./consts";
 import { ReactorEvent } from "./event";
 import type { REvent, Target, Payload, Getter, Setter, Deleter, Watcher, Listener, ListenerOptions, ListenerRecord, WatcherRecord, GetterRecord, SetterRecord, DeleterRecord, SyncOptions, ReactorBuild } from "../types/reactor";
-import type { PathBranchValue, Paths, PathKey, PathValue, WildPaths } from "../types/obj";
-import { canHandle, mergeObjs, getTrailRecords, parseEvtOpts, inAny, getAny, setAny, deleteAny, nuke } from "../utils/obj";
-import { BaseReactorPlugin as ReactorPlugin } from "../plugins/base";
+import type { PathBranchValue, Paths, PathKey, PathValue, WildPaths, MaxDepth } from "../types/obj";
+import { canHandle, getTrailRecords, parseEvtOpts, inAny, getAny, setAny, deleteAny, nuke } from "../utils/obj";
+import { BaseReactorModule as ReactorModule, ReactorModuleId } from "../modules/base";
 
 /*
  * ========= THE S.I.A (State Intent Architecture) `Reactor` CODE PATTERN WATCHLIST =========
@@ -25,19 +25,23 @@ import { BaseReactorPlugin as ReactorPlugin } from "../plugins/base";
 // The S.I.A (State Intent Architecture) `Reactor`
 // ===========================================================================
 
-/** Core S.I.A runtime for path mediation, observation, and event propagation.
- * Provides path-level mediators (`get|set|delete`), synchronous watchers (`watch`), and batched listeners (`on`).
- * Supports wildcard/path-based subscriptions, optional reference tracking, and plugin-based extensions.
+/**
+ * - Core S.I.A runtime for path mediation, observation, and event propagation.
+ * - Provides path-level mediators (`get|set|delete`), synchronous watchers (`watch`), and batched listeners (`on`).
+ * Supports wildcard/path-based subscriptions, optional reference tracking, and module-based extensions.
  * @typeParam T Root state object type.
  */
 export class Reactor<T extends object> {
+  /** Logger function for this reactor instance, override if desired, `this.canLog = false` resets. */
   public log: (...args: any[]) => void = NOOP;
+  /** The core state object for this reactor instance. */
   public core: T; // `?:`s | pay the ~800 byte price upfront for what u might never use
-  public plugins?: Map<string, ReactorPlugin<T>>;
+  /** The modules being used by this reactor. */
+  public modules?: Set<ReactorModule<T>>;
+  /** Configuration options for this reactor instance. */
   public config: Omit<ReactorBuild<T>, "debug">;
+  /** Whether this reactor instance is currently batching updates, a window view into the engine timing */
   public isBatching = false; // Async Batching
-  public isCascading = false; // Setter Cascading
-  protected isLogging = false; // keeping track so API getter doesn't slow down internal iterations in any way
   protected queue?: Set<() => void>; // Tasks to run after flush
   protected batch?: Map<Paths<T>, Payload<T>>; // Batched payloads to flush async
   protected lineage?: WeakMap<object, (object | string)[]>; // { parent, key }: uses maths to avoid extra allocations for pairs
@@ -51,28 +55,28 @@ export class Reactor<T extends object> {
 
   /**
    * Creates a new Reactor instance.
-   * @param object Initial state object.
+   * @param target Initial state target.
    * @param build Reactor bootstrap/build configuration.
    * @example
    * const rtr = new Reactor({ count: 0 });
    */
-  constructor(object: T = {} as T, build?: ReactorBuild<T>) {
+  constructor(target: T = {} as T, build?: ReactorBuild<T>) {
     (this as any)[INERTIA] = true;
     this.config = { crossRealms: false, smartCloning: false, eventBubbling: true, lineageTracing: false, preserveContext: false, equalityFunction: Object.is, batchingFunction: RTR_BATCH, ...build };
-    this.core = this.proxied(object);
+    this.core = this.proxied(target);
     if (build) this.canLog = !!build.debug;
   }
 
-  public proxied<O extends object>(obj: O, rejectable = false, indiffable = false, parent?: object, key?: string, path?: string): O {
-    if (!obj || "object" !== typeof obj) return obj;
-    obj = (obj as any)[RAW] || obj; // prevents nested proxies
-    if (this.config.referenceTracking && parent && key && !this.link(obj, parent, key, false)) return obj; // already checked types above
-    const cached = this.proxyCache.get(obj);
+  public proxied<O extends object>(target: O, rejectable = false, indiffable = false, parent?: object, key?: string, path?: string): O {
+    if (!target || "object" !== typeof target) return target;
+    target = (target as any)[RAW] || target; // prevents nested proxies
+    if (this.config.referenceTracking && parent && key && !this.link(target, parent, key, false)) return target; // already checked types above
+    const cached = this.proxyCache.get(target);
     if (cached) return cached;
-    if ((obj as any)[INERTIA] || !canHandle(obj, this.config, false)) return obj; // handles unless inert, // did light type check for `[Symbol]` so `false` to strictObj typecheck param
-    rejectable ||= (obj as any)[REJECTABLE];
-    indiffable ||= (obj as any)[INDIFFABLE];
-    const proxy = new Proxy(obj, {
+    if ((target as any)[INERTIA] || !canHandle(target, this.config, false)) return target; // handles unless inert, // did light type check for `[Symbol]` so `false` to strictObj typecheck param
+    rejectable ||= (target as any)[REJECTABLE];
+    indiffable ||= (target as any)[INDIFFABLE];
+    const proxy = new Proxy(target, {
       // Robust Proxy handler
       get: (object, key, receiver) => {
         if (key === RAW) return this.log(`👀 [Reactor \`get\` Trap] Peeked at ${object}`), object;
@@ -115,7 +119,7 @@ export class Reactor<T extends object> {
           safeValue = value?.[RAW] || value;
           unchanged = this.config.equalityFunction!(safeValue, safeOldValue);
         }
-        if (!indiffable && unchanged && !this.isCascading) return this.log(`🔄 [Reactor \`set\` Trap] Unchanged for "${keyStr}" on "${paths}"`), true;
+        if (!indiffable && unchanged && !CTX.isCascading) return this.log(`🔄 [Reactor \`set\` Trap] Unchanged for "${keyStr}" on "${paths}"`), true;
         if (this.config.set) terminated = (value = this.config.set(object as PathBranchValue<T>, key as PathKey<T>, value, oldValue, receiver, paths)) === TERMINATOR;
         if (this.setters) {
           const wildcords = this.setters.get("*");
@@ -212,7 +216,7 @@ export class Reactor<T extends object> {
         return ownKeys;
       },
     });
-    return this.proxyCache.set(obj, proxy), proxy;
+    return this.proxyCache.set(target, proxy), proxy;
   }
 
   public trace(target: object, path: string, paths: string[] = [], seen = new WeakSet<object>()): Paths<T>[] {
@@ -264,16 +268,16 @@ export class Reactor<T extends object> {
 
   public notify<P extends Paths<T>>(path: P, payload: Payload<T, P>): void {
     if (this.watchers) {
-      const wildcords = this.watchers.get("*"),
-        cords = this.watchers.get(path);
+      const wildcords = this.watchers.get("*") as Array<WatcherRecord<T, "*">> | undefined,
+        cords = this.watchers.get(path) as Array<WatcherRecord<T, P>> | undefined;
       if (cords)
         for (let i = 0, len = cords.length; i < len; i++) {
-          cords[i].cb(payload.target.value, payload); // watchers do not terminate as they're after the OP
+          cords[i].cb(payload.target.value as PathValue<T, P>, payload); // watchers do not terminate as they're after the OP
           if (cords[i].once) cords.splice((len--, i--), 1), !cords.length && this.watchers!.delete(path);
         }
       if (wildcords)
         for (let i = 0, len = wildcords.length; i < len; i++) {
-          wildcords[i].cb(payload.target.value, payload);
+          wildcords[i].cb(payload.target.value, payload as Payload<T, "*">);
           if (wildcords[i].once) wildcords.splice((len--, i--), 1), !wildcords.length && this.watchers!.delete("*");
         }
     }
@@ -292,7 +296,7 @@ export class Reactor<T extends object> {
   }
 
   public wave<P extends Paths<T>>(path: P, payload: Payload<T, P>): void {
-    const e = new ReactorEvent<T>(payload, this.config.eventBubbling, this.config.eventTimeStamps, this.isLogging) as REvent<T>, // a wave is started forly when really necessary all things considered
+    const e = new ReactorEvent<T>(payload, this) as REvent<T>, // a wave is started forly when really necessary all things considered
       chain = getTrailRecords(this.core, path); // either build a large array to climb back up or have to derive each step
     // 1: CAPTURE phase (core -> parent) - intent owners reject here, capture should preferably be used to reject
     e.eventPhase = ReactorEvent.CAPTURING_PHASE;
@@ -372,29 +376,32 @@ export class Reactor<T extends object> {
     for (let i = 0, len = path.length; i < len; i++) if (path.charCodeAt(i) === 46) depth++; // zero alloc; so when we say it's optmized, it's not cap :)
     return depth;
   }
-  protected getContext<P extends WildPaths<T>>(path: P): Target<T, P> {
-    const lastDot = path.lastIndexOf("."),
+  public getContext<P extends WildPaths<T>>(path: P): Target<T, P> {
+    const last = path.lastIndexOf("."),
       value = getAny(this.core, path),
-      object = lastDot === -1 ? this.core : getAny(this.core, path.slice(0, lastDot) as Paths<T>);
-    return { path: path as P, value, key: (path.slice(lastDot + 1) || "") as PathKey<T, P>, hadKey: true, object: object as PathBranchValue<T, P> };
+      object = last === -1 ? this.core : getAny(this.core, path.slice(0, last) as Paths<T>);
+    return { path: path as P, value, key: (path.slice(last + 1) || "") as PathKey<T, P>, hadKey: true, object: object as PathBranchValue<T, P> };
   }
   protected bindSignal<Cb>(cord: GetterRecord<T> | SetterRecord<T> | DeleterRecord<T> | WatcherRecord<T> | ListenerRecord<T>, sig?: AbortSignal): Cb {
     if (sig) sig.aborted ? cord.clup() : sig.addEventListener("abort", cord.clup, { once: true }); // once incase spec changes, memory leaks too
     return (cord.sclup = !sig || sig.aborted ? NOOP : () => sig.removeEventListener("abort", cord.clup)), cord.clup as Cb;
   }
-  protected cloned(obj: any, raw: boolean, seen = new WeakMap()): any {
-    if (!obj || "object" !== typeof obj) return obj;
-    obj = obj[RAW] || obj; // escape hatch from traps
-    const cloned = seen.get(obj);
+  protected cloned<O>(target: O, raw: boolean, seen = new WeakMap()): O {
+    if (!target || "object" !== typeof target) return target;
+    const obj = (target as any)[RAW] || target, // escape hatch from traps
+      cloned = seen.get(obj);
     if (cloned) return cloned;
     if (!canHandle(obj, this.config, false)) return obj; // no circular references
     const version = obj[VERSION] || 0,
       cached = !raw && this.config.smartCloning && (this.snapCache ??= new WeakMap()).get(obj);
     if (cached && obj[SSVERSION] === version) return cached;
-    const clone = !raw ? (this.config.preserveContext ? Object.create(Object.getPrototypeOf(obj)) : Array.isArray(obj) ? [] : {}) : obj[RAW] || obj;
+    const clone = !raw ? (this.config.preserveContext ? Object.create(Object.getPrototypeOf(obj)) : Array.isArray(obj) ? [] : {}) : obj;
     seen.set(obj, clone);
     const keys = this.config.preserveContext ? Reflect.ownKeys(obj) : Object.keys(obj);
-    for (let i = 0, len = keys.length; i < len; i++) clone[keys[i]] = this.cloned(obj[keys[i]], raw, seen);
+    for (let i = 0, len = keys.length; i < len; i++)
+      try {
+        clone[keys[i]] = this.cloned(obj[keys[i]], raw, seen);
+      } catch {} // call a spade a spade and just skip, no descriptor gymanstics
     if (!raw && this.config.smartCloning) this.snapCache!.set(obj, clone), (obj[SSVERSION] = version);
     return clone;
   }
@@ -461,7 +468,7 @@ export class Reactor<T extends object> {
    * rtr.set("user.name", (value) => String(value).trim());
    */
   public set<P extends WildPaths<T>>(path: P, callback: Setter<T, P>, options?: SyncOptions): SetterRecord<T>["clup"] {
-    return this.syncAdd("set", path, callback, options, (imm) => (imm !== "auto" || inAny(this.core, path)) && setAny(this.core, path as Paths<T>, getAny(this.core, path)!));
+    return this.syncAdd("set", path, callback, options, (imm) => (imm !== "auto" || inAny(this.core, path)) && setAny(this.core, path, getAny(this.core, path)!));
   }
   /** Registers a set mediator for a path that only triggers once. */
   public sonce<P extends WildPaths<T>>(path: P, callback: Setter<T, P>, options?: SyncOptions): SetterRecord<T>["clup"] {
@@ -487,7 +494,7 @@ export class Reactor<T extends object> {
    * rtr.delete("cache.temp", () => TERMINATOR);
    */
   public delete<P extends WildPaths<T>>(path: P, callback: Deleter<T, P>, options?: SyncOptions): DeleterRecord<T>["clup"] {
-    return this.syncAdd("delete", path, callback, options, (imm) => (imm !== "auto" || inAny(this.core, path)) && deleteAny(this.core, path as Paths<T>, undefined));
+    return this.syncAdd("delete", path, callback, options, (imm) => (imm !== "auto" || inAny(this.core, path)) && deleteAny(this.core, path));
   }
   /** Registers a delete mediator for a path that only triggers once. */
   public donce<P extends WildPaths<T>>(path: P, callback: Deleter<T, P>, options?: SyncOptions): DeleterRecord<T>["clup"] {
@@ -505,7 +512,7 @@ export class Reactor<T extends object> {
 
   /**
    * Registers a watcher for a path.
-   * Watch callbacks run synchronously with the operation.
+   * Watch callbacks run synchronously with the operation, use leaf paths for reliability as it sees exact sets; no bubbling here.
    * @param path Path or wildcard path.
    * @param callback Watch callback.
    * @param options Sync options.
@@ -540,7 +547,7 @@ export class Reactor<T extends object> {
    * @example
    * const cleanup = rtr.on("user.name", (e) => console.log(e.type, e.path));
    */
-  public on<P extends WildPaths<T>>(path: P, callback: Listener<T, P>, options?: ListenerOptions): ListenerRecord<T>["clup"] {
+  public on<P extends WildPaths<T>, const D extends number = MaxDepth>(path: P, callback: Listener<T, P, D>, options?: ListenerOptions<D>): ListenerRecord<T, P, D>["clup"] {
     this.listeners ??= new Map();
     const { capture = false, once = false, signal, immediate = false, depth } = parseEvtOpts(options, EVT_OPTS.LISTENER);
     let cords = this.listeners.get(path),
@@ -552,17 +559,17 @@ export class Reactor<T extends object> {
           break;
         }
     if (cord) return cord.clup;
-    cord = { cb: callback as Listener<T>, capture, depth, once, clup: () => this.off<P>(path, callback, options), lDepth: depth !== undefined ? this.getDepth(path) : depth };
+    cord = { cb: callback as Listener<T>, capture, depth: depth as MaxDepth, once, clup: () => this.off<P, D>(path, callback, options), lDepth: depth !== undefined ? this.getDepth(path) : depth };
     if (immediate && (immediate !== "auto" || inAny(this.core, path))) {
       const target = this.getContext(path) as Target<T, P>;
-      callback(new ReactorEvent<T, P>({ type: "init", target, currentTarget: target, root: this.core, rejectable: false }, this.config.eventBubbling, this.isLogging) as REvent<T, P>);
+      callback(new ReactorEvent<T, P>({ type: "init", target, currentTarget: target, root: this.core, rejectable: false }, this) as REvent<T, P, D>);
     }
-    (cords ?? (this.listeners.set(path, (cords = [])), cords)).push(cord);
-    return this.bindSignal(cord, signal);
+    (cords ?? (this.listeners.set(path, (cords = [])), cords)).push(cord!);
+    return this.bindSignal(cord!, signal);
   }
   /** Registers an event listener for a path that only triggers once. */
-  public once<P extends WildPaths<T>>(path: P, callback: Listener<T, P>, options?: ListenerOptions): ListenerRecord<T>["clup"] {
-    return this.on<P>(path, callback, Object.assign(parseEvtOpts(options, EVT_OPTS.LISTENER), { once: true }));
+  public once<P extends WildPaths<T>, const D extends number = MaxDepth>(path: P, callback: Listener<T, P, D>, options?: ListenerOptions<D>): ListenerRecord<T, P, D>["clup"] {
+    return this.on<P, D>(path, callback, Object.assign(parseEvtOpts(options, EVT_OPTS.LISTENER), { once: true }));
   }
   /**
    * Removes an event listener for a path.
@@ -575,7 +582,7 @@ export class Reactor<T extends object> {
    * rtr.on("user.name", cb);
    * rtr.off("user.name", cb);
    */
-  public off<P extends WildPaths<T>>(path: P, callback: Listener<T, P>, options?: ListenerOptions): boolean | undefined {
+  public off<P extends WildPaths<T>, const D extends number = MaxDepth>(path: P, callback: Listener<T, P, D>, options?: ListenerOptions<D>): boolean | undefined {
     const cords = this.listeners?.get(path);
     if (!cords) return undefined;
     const { capture } = parseEvtOpts(options, EVT_OPTS.LISTENER);
@@ -586,65 +593,49 @@ export class Reactor<T extends object> {
   /**
    * Creates a snapshot; possibly clone of state (or a state branch).
    * You could alternatively use or serialize your proxied state "as is" except the environment demands no proxies or new references.
-   * @param raw Use raw (deep unproxied & uncloned) version of branch.
-   * @param branch Branch to clone.
+   * @param raw Use raw (deep unproxied & uncloned) version of branch, defaults to `true` if `config.smartCloning: false`.
+   * @param branch Specific branch to clone.
    * @returns Snapshot deep or smart (structurally shared) clone.
    * @example
    * const snap = rtr.snapshot();
    * @example
    * const snap = rtr.snapshot(false, rtr.core.history.past);
    */
-  public snapshot(raw = !this.config.smartCloning, branch = this.core): T {
-    return this.cloned(branch, raw); // raw is true if not smart cloning(structural sharing) for better vanilla performace except explicitly changed
-  }
-  /**
-   * Cascades object updates into direct child paths.
-   * @param payload Event or payload source.
-   * @param objectSafe Merge old/new object values before cascading, don't set for arrays; merger doesn't play nice
-   * @example
-   * rtr.on("user", (event) => rtr.cascade(event));
-   * @example
-   * rtr.watch("user", (_value, payload) => rtr.cascade(payload));
-   */
-  public cascade({ type, currentTarget: { path, value: news, oldValue: olds } }: ReactorEvent<T> | Payload<T>, objectSafe = true): void {
-    if ((type !== "set" && type !== "delete") || !canHandle(news, this.config) || (objectSafe ? !canHandle(olds, this.config) : false)) return;
-    const obj = objectSafe ? mergeObjs(olds!, news) : news,
-      keys = Object.keys(obj);
-    this.isCascading = true;
-    for (let i = 0, len = keys.length; i < len; i++) setAny(this.core, (path === "*" ? keys[i] : path + "." + keys[i]) as Paths<T>, (obj as any)[keys[i]]); // smart progressive enhancement for objects; !*
-    this.isCascading = false;
+  public snapshot(raw?: boolean): T;
+  public snapshot<B>(raw?: boolean, branch?: B): B;
+  public snapshot(raw = !this.config.smartCloning, branch?: any) {
+    return this.cloned(arguments.length < 2 ? this.core : branch, raw); // raw is true if not smart cloning(structural sharing) for better vanilla performace except explicitly changed
   }
 
   /**
-   * Installs a plugin instance.
-   * @param plugin Plugin instance.
-   * @returns Current reactor for fluent chaining.
+   * Installs a module instance.
+   * @param target Module instance.
+   * @param id Optional identification tag for this instance in the module.
+   * @returns Current `Reactor` instance for fluent chaining.
    */
-  public plugIn(plugin: ReactorPlugin<T>): this {
-    const name = (plugin.constructor as any).plugName;
-    this.plugins?.get(name)?.destroy();
-    return (this.plugins ??= new Map()).set(name, (plugin.setup(this), plugin)), this;
+  public use(target: ReactorModule<T>, id?: ReactorModuleId): this {
+    return (this.modules ??= new Set()).add(target.setup(this, id)), this;
   }
-  /** Resets the reactor to its initial state. */
+  /** Resets this reactor instance to its initial state. */
   public reset(): void {
     this.getters?.clear(), this.setters?.clear(), this.deleters?.clear(), this.watchers?.clear(), this.listeners?.clear();
     this.batch?.clear(), this.queue?.clear(), (this.isBatching = false);
   }
   public destroy(): void {
-    if (this.plugins) for (const plug of this.plugins.values()) plug.destroy();
+    if (this.modules) for (const mdle of this.modules) mdle.destroy();
     this.reset(), nuke(this);
   }
 
   public get canLog(): boolean {
-    return (this.isLogging = this.log !== NOOP);
+    return this.log !== NOOP;
   }
   public set canLog(value: boolean) {
-    this.log = (this.isLogging = value) ? RTR_LOG : NOOP;
+    this.log = value ? RTR_LOG : NOOP;
   }
-  public get canTraceLineage() {
-    return this.config.referenceTracking && !!this.config.lineageTracing;
+  public get canLineageTrace() {
+    return this.config.lineageTracing && this.config.referenceTracking;
   }
   public get canSmartClone() {
-    return this.config.referenceTracking && !!this.config.smartCloning;
+    return this.config.smartCloning && this.config.referenceTracking;
   }
 }

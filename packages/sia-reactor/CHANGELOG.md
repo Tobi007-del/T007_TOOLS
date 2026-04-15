@@ -1,5 +1,17 @@
 # sia-reactor
 
+## 0.0.22
+
+### Patch Changes
+
+- Multi-reactor modules formerly called plugins added with cleaner typing all round
+
+## 0.0.21
+
+### Patch Changes
+
+- Standardized overlay and still exploring time travel
+
 ## 0.0.20
 
 ### Patch Changes
