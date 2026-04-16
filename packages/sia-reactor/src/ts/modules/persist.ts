@@ -1,6 +1,6 @@
 import { BaseReactorModule, wpArr } from "./base";
 import { StorageAdapter, LocalStorageAdapter, AsyncStorageAdapter, type StorageAdapterConstructor, type AsyncStorageAdapterConstructor } from "../utils/store";
-import { mergeObjs, setAny, getAny, isPOJO, fanout } from "../utils/obj";
+import { type FanoutTuple, fanoutOptsArr, setAny, getAny, fanout, mergeObjs, parseEvtOpts } from "../utils/obj";
 import { setTimeout } from "../utils/fn";
 import { Reactor } from "../core/reactor";
 import type { REvent, Inert } from "../types/reactor";
@@ -17,11 +17,10 @@ export interface PersistConfig<T extends object> {
   adapter: Inert<StorageAdapter> | Inert<AsyncStorageAdapter> | Inert<StorageAdapterConstructor> | Inert<AsyncStorageAdapterConstructor>; // pass in the instance if u wanna do custom config
   /** Throttle time for saving changes */
   throttle: number;
-  /** Whether hydration should fan out restored writes so listeners/effects catch up, defaults to `true` if async */
-  fanout: boolean | number;
+  /** Fan out restored hydration writes so listeners/effects catch up, defaults to `true` if async for predictability */
+  fanout: boolean | FanoutTuple;
   /** - `false`: persist live proxied roots (fastest, adapter must handle proxies).
-   * - `true`,`"auto"`: persist via `Reactor.snapshot()` but `true` force-enables `Reactor.config.referenceTracking`+`Reactor.config.smartCloning` for better performance.
-   */
+   * - `true`,`"auto"`: persist via `Reactor.snapshot()` but `true` force-enables `Reactor.config.referenceTracking`+`Reactor.config.smartCloning` for better performance. */
   useSnapshot: boolean | "auto";
 }
 
@@ -53,7 +52,7 @@ export class PersistModule<T extends object = any> extends BaseReactorModule<T, 
   }
 
   constructor(config?: Partial<PersistConfig<T>>, rtr?: Reactor<T>) {
-    super({ ...PERSIST_MODULE_BUILD, ...config } as PersistConfig<T>, rtr, { hydrated: false });
+    super(mergeObjs(PERSIST_MODULE_BUILD, config) as PersistConfig<T>, rtr, { hydrated: false });
   }
 
   public wire() {
@@ -79,17 +78,16 @@ export class PersistModule<T extends object = any> extends BaseReactorModule<T, 
     try {
       let saved = this.adapter.get(this.config.key);
       const isAsync = saved instanceof Promise, // accuracy incase overriden methods are async
-        depth = this.config.fanout ?? isAsync;
+        { depth, merge = true } = parseEvtOpts(this.config.fanout ?? isAsync, fanoutOptsArr, "depth");
       saved = !isAsync ? saved : await saved;
       if (seq !== this.hydrateSeq || !saved) return;
       for (const [rid, rtr] of this.rtrs) {
         const entry = this.rtrs.size > 1 ? getAny(saved, rid as any) : saved; // allows retrieving with path-like ids
         if (!entry) continue;
-        const set = (p: any, news: any, olds: any) => (depth ? fanout : (setAny as any))(rtr.core, p, isPOJO(news, rtr.config) && isPOJO(olds, rtr.config) ? mergeObjs(news, olds) : olds, depth ? { depth } : undefined);
+        const set = (p: any, news: any, olds: any) => (depth ? (fanout as any) : setAny)(rtr.core, p, merge ? mergeObjs(news, olds) : olds, depth ? { depth, crossRealms: rtr.config.crossRealms } : undefined); // if sync, merge directly, else fanout with options for granularity
         for (const p of this.config.paths ?? wpArr) set(p, getAny(rtr.core, p), getAny(entry, p));
       }
-      for (const rtr of this.rtrs.values()) rtr.tick(!depth ? this.config.paths ?? "*" : "*"); // if sync, tick "written paths" b4 listeners init, else tick "written paths if known" or "all" for their refresh
-    } catch {
+      for (const rtr of this.rtrs.values()) rtr.tick(depth ? "*" : this.config.paths ?? "*"); // if sync, tick "written paths" b4 listeners init, else tick "written paths if known" or "all" for their refresh
     } finally {
       if (seq === this.hydrateSeq) this.state.hydrated = true;
     }

@@ -74,7 +74,7 @@ export function live<T extends object>(target: T): Live<T> {
  * @param target Object to test.
  * @returns `true` when inert.
  */
-export function isInert<T extends object>(target: T): target is Inert<T> {
+export function isInert<T extends object>(target: T = NIL): target is Inert<T> {
   return !!getRaw(target as any)[INERTIA];
 }
 
@@ -99,7 +99,7 @@ export function state<T extends object>(target: T): State<T> {
  * @param target Object to test.
  * @returns `true` when marked as intent.
  */
-export function isIntent<T extends object>(target: T): target is Intent<T> {
+export function isIntent<T extends object>(target: T = NIL): target is Intent<T> {
   return !!getRaw(target as any)[REJECTABLE];
 }
 
@@ -124,7 +124,7 @@ export function stable<T extends object>(target: T): Stable<T> {
  * @param target Object to test.
  * @returns `true` when marked as volatile.
  */
-export function isVolatile<T extends object>(target: T): target is Volatile<T> {
+export function isVolatile<T extends object>(target: T = NIL): target is Volatile<T> {
   return !!getRaw(target as any)[INDIFFABLE];
 }
 
@@ -151,8 +151,8 @@ export function getReactor<T extends object>(target: T | Reactor<T> | Reactive<T
  * @param target Object to unwrap.
  * @returns Raw object if proxied, else the original object. Use `Reactor.snapshot(true)` for deep unwrapping.
  */
-export function getRaw<T extends object>(target: T): T {
-  return (target as any)?.[RAW] || target;
+export function getRaw<T extends object>(target: T = NIL): T {
+  return (target as any)[RAW] || target;
 }
 
 /**
@@ -160,7 +160,7 @@ export function getRaw<T extends object>(target: T): T {
  * @param target Object to inspect.
  * @returns Version number.
  */
-export function getVersion<T extends object>(target: T): number {
+export function getVersion<T extends object>(target: T = NIL): number {
   return getRaw(target as any)[VERSION] || 0;
 }
 /**
@@ -168,6 +168,6 @@ export function getVersion<T extends object>(target: T): number {
  * @param target Object to inspect.
  * @returns Snapshot version number.
  */
-export function getSnapshotVersion<T extends object>(target: T): number {
+export function getSnapshotVersion<T extends object>(target: T = NIL): number {
   return getRaw(target as any)[SSVERSION] || 0;
 }

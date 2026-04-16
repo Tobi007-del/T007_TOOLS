@@ -73,7 +73,7 @@ export class Reactor<T extends object> {
     if (this.config.referenceTracking && parent && key && !this.link(target, parent, key, false)) return target; // already checked types above
     const cached = this.proxyCache.get(target);
     if (cached) return cached;
-    if ((target as any)[INERTIA] || !canHandle(target, this.config, false)) return target; // handles unless inert, // did light type check for `[Symbol]` so `false` to strictObj typecheck param
+    if (!canHandle(target, this.config, false)) return target; // handles unless inert, // did light type check for `[Symbol]` so `false` to strictObj typecheck param
     rejectable ||= (target as any)[REJECTABLE];
     indiffable ||= (target as any)[INDIFFABLE];
     const proxy = new Proxy(target, {
@@ -401,7 +401,9 @@ export class Reactor<T extends object> {
     for (let i = 0, len = keys.length; i < len; i++)
       try {
         clone[keys[i]] = this.cloned(obj[keys[i]], raw, seen);
-      } catch {} // call a spade a spade and just skip, no descriptor gymanstics
+      } catch (e) {
+        if (e instanceof RangeError) throw e; // internals can skip, not users
+      } // call a spade a spade and just skip, no descriptor gymanstics
     if (!raw && this.config.smartCloning) this.snapCache!.set(obj, clone), (obj[SSVERSION] = version);
     return clone;
   }

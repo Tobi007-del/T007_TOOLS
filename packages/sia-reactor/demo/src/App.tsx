@@ -6,13 +6,14 @@ import { IndexedDBAdapter, PersistModule, TimeTravelModule } from "../../src/ts/
 import "../../src/css/time-travel-overlay.css";
 
 const time = new TimeTravelModule(),
-  persist = new PersistModule({ key: "SIA_DEMO", adapter: IndexedDBAdapter, useSnapshot: true }).attach(time.state, "timeTravel"),
+  persist = new PersistModule({ key: "SIA_DEMO", adapter: new IndexedDBAdapter({ durability: "relaxed" }), useSnapshot: true, throttle: 150 }).attach(time.state, "timeTravel"),
   state = reactive({ count: 0 }),
   increment = () => (state.count += 1),
   decrement = () => (state.count -= 1),
   reset = () => (state.count = 0);
 // Module setup
 state.use(persist, "app"), persist.state.once("hydrated", () => state.use(time));
+((window as any).state = state), ((window as any).time = time), ((window as any).persist = persist); // for demo debugging purposes
 
 function CounterCard({ label, count, renders }: { label: string; count: number; renders: number }) {
   return (

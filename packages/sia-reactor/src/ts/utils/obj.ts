@@ -1,9 +1,9 @@
-import { CTX, NIL } from "../core/consts";
+import { CTX, NIL, INERTIA } from "../core/consts";
 import { ReactorEvent } from "../core/event";
 import { Payload } from "../types/reactor";
 import type { DeepMerge, Unflatten, WildPaths, PathValue, PathBranchValue } from "../types/obj";
 
-const arrRx = /^([^\[\]]+)\[(\d+)\]$/;
+export const arrRegex = /^([^\[\]]+)\[(\d+)\]$/;
 
 // Type Guards
 
@@ -18,7 +18,7 @@ export function isPOJO<T extends object = object>(obj: any, config: { crossRealm
 
 /** Returns whether a value can be proxied by the reactor runtime. */
 export function canHandle(obj: any, config: { crossRealms?: boolean; preserveContext?: boolean } = NIL, typecheck = true): boolean {
-  if (typecheck && !isObj(obj, false)) return false;
+  if ((typecheck && !isObj(obj, false)) || (obj as any)[INERTIA]) return false;
   if (Array.isArray(obj) || (!config.preserveContext && isPOJO(obj, config, false))) return true;
   if (config.preserveContext) return !(obj instanceof Map) && !(obj instanceof Set) && !(obj instanceof WeakMap) && !(obj instanceof WeakSet) && !(obj instanceof Error) && !(obj instanceof Number) && !(obj instanceof Date) && !(obj instanceof String) && !(obj instanceof RegExp) && !(obj instanceof ArrayBuffer) && !(obj instanceof Promise);
   return false;
@@ -39,7 +39,7 @@ export function getAny<T extends object, const S extends string = ".", P extends
   let currObj: any = source;
   for (let i = 0, len = keys.length; i < len; i++) {
     const key = keyFunc ? keyFunc(keys[i]) : keys[i],
-      match = key.includes("[") && key.match(arrRx);
+      match = key.includes("[") && key.match(arrRegex);
     if (match) {
       const [, key, iStr] = match;
       if (!Array.isArray(currObj[key]) || !(key in currObj)) return undefined!;
@@ -67,7 +67,7 @@ export function setAny<T extends object, const S extends string = ".", P extends
   const keys = key.split(separator);
   for (let currObj: any = target, i = 0, len = keys.length; i < len; i++) {
     const key = keyFunc ? keyFunc(keys[i]) : keys[i],
-      match = key.includes("[") && key.match(arrRx);
+      match = key.includes("[") && key.match(arrRegex);
     if (match) {
       const [, key, iStr] = match;
       if (!Array.isArray(currObj[key])) currObj[key] = [];
@@ -96,7 +96,7 @@ export function deleteAny<T extends object, const S extends string = ".", P exte
   const keys = key.split(separator);
   for (let currObj: any = target, i = 0, len = keys.length; i < len; i++) {
     const key = keyFunc ? keyFunc(keys[i]) : keys[i],
-      match = key.includes("[") && key.match(arrRx);
+      match = key.includes("[") && key.match(arrRegex);
     if (match) {
       const [, key, iStr] = match;
       if (!Array.isArray(currObj[key]) || !(key in currObj)) return;
@@ -122,7 +122,7 @@ export function inAny<T extends object, const S extends string = ".", P extends 
   const keys = key.split(separator);
   for (let currObj: any = source, i = 0, len = keys.length; i < len; i++) {
     const key = keyFunc ? keyFunc(keys[i]) : keys[i],
-      match = key.includes("[") && key.match(arrRx);
+      match = key.includes("[") && key.match(arrRegex);
     if (match) {
       const [, key, iStr] = match;
       if (!Array.isArray(currObj[key]) || !(key in currObj)) return false;
@@ -156,61 +156,78 @@ export function parseAnyObj<T extends Record<string, any>, const S extends strin
 }
 
 /** Normalizes boolean/object event options into a single options object. */
-export function parseEvtOpts<T extends object>(options: T | boolean | undefined, opts: (keyof T)[] | readonly (keyof T)[], boolOpt: keyof T = opts[0], result = {} as T): T {
-  return Object.assign(result, "boolean" === typeof options ? { [boolOpt]: options } : options), result;
+export function parseEvtOpts<T extends object, const K extends (keyof T)[] | readonly (keyof T)[], const O extends K[number] = K[0]>(options: T | boolean | undefined, opts: K, boolOpt: O = opts[0] as O, result = {} as T): T & { [P in O]-?: T[P] } {
+  return Object.assign(result, "boolean" === typeof options ? { [boolOpt]: options } : options), result as T & { [P in O]-?: T[P] };
 }
 
 // Merging & Traversal
 
+export interface FanoutTuple extends Partial<Record<(typeof fanoutOptsArr)[number], any>> {
+  /** Whether to merge values before fanout, useful for patching usecases. */
+  merge?: boolean;
+  /** How many levels to fan out, set based on your listener paths max dots. `true` is `Infinity`, defaults to `1` for event cascading otherwise `Infinity`. */
+  depth?: number | boolean;
+  /** Whether to assign arrays as a whole and only touch `.length` for common cases. Only works with the `path` parameter overload or in nested levels.
+   * Arrays can lead to unnecessary work as more often than not, you won't be watching index paths but waiting on the parent bubble instead.
+   * If you happen to be watching, it might be more optimal to re-set it yourself if it's only a few indexes or just turn set this to `false`. */
+  atomic?: boolean;
+}
 /**
  * Unified expansion utility.
- * Bridges Coarse (Immutable replacement) writes into Fine-grained (Reactive) writes by
- * surgically expanding a single object write into multiple granular child operations.
+ * Bridges Coarse (Immutable replacement) writes into Fine-grained (Reactive) writes by surgically
+ * expanding a single object write into multiple granular child operations for deep optimal xbubbling.
  * @example
  * // Event Mode (Cascading after-write)
- * rtr.on("user", (e) => fanout(e, { depth: 1 })); // defaults to 1 level deep
+ * rtr.on("user", (e) => fanout(e, { depth: 1 })); // defaults to 1 level deep for events
  * @example
  * // Direct Mode (Patching before-write)
- * fanout(state, "user", { session: { id: 1, name: "Kosi", role: "admin" } }, { depth: Infinity }); // use this or `true` to fanout all nested keys
+ * fanout(state.user, { session: { id: 1, name: "Kosi", role: "admin" } }, { depth: Infinity }); // default to `Infinity` here
  */
-export function fanout<T extends object>(event: ReactorEvent<T> | Payload<T>, options?: { merge?: boolean; depth?: number | boolean; crossRealms?: boolean }): void;
-export function fanout<T extends object>(state: T, path: WildPaths<T>, value: any, options?: { merge?: boolean; depth?: number | boolean; crossRealms?: boolean }): void;
+export function fanout<T extends object>(event: ReactorEvent<T> | Payload<T>, options?: { crossRealms?: boolean } & FanoutTuple): void;
+export function fanout<T extends object>(target: T, value: Partial<T>, options?: { crossRealms?: boolean } & FanoutTuple): void;
+export function fanout<T extends object, P extends WildPaths<T> = WildPaths<T>>(state: T, path: P, value: Partial<PathValue<T, P>>, options?: { crossRealms?: boolean } & FanoutTuple): void;
 export function fanout(a: any, b?: any, c?: any, d?: any): void {
-  const isEvtPld = !!a?.target,
-    [state, path, news, olds, opts, type] = isEvtPld ? [a.root, a.currentTarget.path, a.currentTarget.value, a.currentTarget.oldValue, b || NIL, a.type] : [a, b, c, (d || NIL).merge ? getAny(a, b) : NIL, d || NIL],
-    target = path === "*" ? state : getAny(state, path as any);
-  if ((isEvtPld && type !== "set" && type !== "delete") || !target || !canHandle(news, opts)) return;
+  const isEvPd = !!a?.target,
+    isPath = !isEvPd && "string" === typeof b,
+    [state, path, olds, news, opts, type] = isEvPd ? [a.root, a.currentTarget.path, a.currentTarget.oldValue, a.currentTarget.value, b || NIL, a.type] : isPath ? [a, b, getAny(a, b), c, d || NIL, undefined] : [undefined, undefined, a, b, c || NIL, undefined],
+    target = isEvPd ? getAny(a.root, a.currentTarget.path) : isPath ? getAny(state, path) : olds; // to avoid stale refs during write-walk
+  if ((isEvPd && type !== "set" && type !== "delete") || !target || !canHandle(news, opts)) return;
   const prev = CTX.isCascading;
-  CTX.isCascading = isEvtPld; // if event or payload, already written values can bypass equality checks
+  CTX.isCascading = isEvPd; // if event or payload, already written values can bypass equality checks
   try {
-    const walk = (target: any, obj: any, depth = 1, keys = Object.keys(obj)) => {
+    const walk = (target: any, obj: any, depth = isEvPd ? 1 : Infinity, keys = Object.keys(obj)) => {
       for (let i = 0, len = keys.length; i < len; i++) {
         const val = obj[keys[i]];
         try {
-          depth > 1 && canHandle(val, opts) ? walk((target[keys[i]] ||= {}), val, depth - 1) : (target[keys[i]] = val);
-        } catch {} // call a spade a spade and just skip, no descriptor gymanstics
+          if ((opts.atomic ?? true) && Array.isArray(val)) (target[keys[i]] = val), (target[keys[i]].length = target[keys[i]].length); // ping commoners
+          else depth > 1 && canHandle(val, opts) ? walk((target[keys[i]] ||= {}), val, depth - 1) : (target[keys[i]] = val);
+        } catch (e) {
+          if (e instanceof RangeError) throw e; // internals can skip, not users
+        } // call a spade a spade and just skip, no descriptor gymanstics
       }
     };
-    walk(target, opts.merge && canHandle(olds, opts) ? mergeObjs(olds, news) : news, opts.depth === true ? Infinity : +opts.depth);
+    if ((opts.atomic ?? true) && Array.isArray(news) && isPath) setAny(state, path, news), (getAny(state, path).length = news.length); // ping commoners
+    else walk(target, opts.merge ? mergeObjs(olds, news, opts) : news, opts.depth === true ? Infinity : opts.depth);
   } finally {
     CTX.isCascading = prev;
   }
 }
+export const fanoutOptsArr = ["merge", "depth", "atomic"] as const;
 
 /**
- * Deep-merges object-like values.
+ * Deep-merges object-like values, does necessary checks so use without doubts.
  * @example
- * const next = mergeObjs({ user: { name: "Kosi" } }, { user: { role: "admin" } });
+ * const next = mergeObjs({ user: { name: "Kosi" } }, { user: { role: "admin" } }); // { ...o1, ...o2 } // o2 over o1 and deep!
  */
-export function mergeObjs<T1 extends object, T2 extends object>(o1: T1, o2: T2): DeepMerge<T1, T2>;
-export function mergeObjs<T1 extends object>(o1: T1): T1;
-export function mergeObjs<T2 extends object>(o1: undefined | null, o2: T2): T2;
-export function mergeObjs(o1: any = {}, o2: any = {}): any {
+export function mergeObjs<T1 extends object, T2 extends object>(o1?: T1 | null, o2?: T2 | null, config?: { crossRealms?: boolean }, pojocheck?: boolean): DeepMerge<T1, T2>;
+export function mergeObjs(o1?: any, o2?: any, config?: { crossRealms?: boolean }, pojocheck = true): any {
+  if (pojocheck && (!isPOJO(o1 || NIL, config) || !isPOJO(o2 || NIL, config))) return o2;
   const merged = { ...(o1 ||= {}), ...(o2 ||= {}) },
     keys = Object.keys(merged);
   for (let i = 0, len = keys.length; i < len; i++) {
-    const k = keys[i];
-    if (isObj(o1[k]) && isObj(o2[k])) merged[k] = mergeObjs(o1[k], o2[k]);
+    const o1C = o1[keys[i]],
+      o2C = o2[keys[i]];
+    if (isPOJO(o1C, config) && isPOJO(o2C, config)) merged[keys[i]] = mergeObjs(o1C, o2C, config, false); // fewer writes is less costly here
   }
   return merged;
 }
@@ -241,7 +258,9 @@ export function deepClone<T>(obj: T, config: { crossRealms?: boolean; preserveCo
   for (let i = 0, len = keys.length; i < len; i++)
     try {
       clone[keys[i]] = deepClone((obj as any)[keys[i]], config, seen);
-    } catch {} // call a spade a spade and just skip, no descriptor gymanstics
+    } catch (e) {
+      if (e instanceof RangeError) throw e; // internals can skip, not users
+    } // call a spade a spade and just skip, no descriptor gymanstics
   return clone;
 } // POJO|Arr|Dynamic Deep cloner
 

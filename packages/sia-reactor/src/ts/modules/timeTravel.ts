@@ -1,7 +1,7 @@
 import { BaseReactorModule, ReactorModuleId, wpArr } from "./base";
 import { Reactor } from "../core/reactor";
 import type { REvent } from "../types/reactor";
-import { setAny, deleteAny, deepClone } from "../utils/obj";
+import { setAny, deleteAny, fanout, deepClone } from "../utils/obj";
 import { setTimeout } from "../utils/fn";
 import { clamp } from "../utils/num";
 import type { Paths } from "../types/obj";
@@ -20,7 +20,7 @@ export interface HistoryEntry {
   /** Did the Power Line disapprove?; why? */
   rejected?: string; // optional for lighter payloads
   /** Did the key for the value exist on its parent object? */
-  hadKey: boolean;
+  hadKey?: boolean; // optional for lighter payloads
   /** For chronological re-enactment */
   deltat: number;
   /** For multi-reactor management, identifies who the entry belongs to */
@@ -89,10 +89,10 @@ export class TimeTravelModule<T extends object = any> extends BaseReactorModule<
   /** Chronicling the lifecycle of the system, Captures the essence of every mutation wave that bubbles up. */
   protected record(e: REvent<any, any>, rid = this.rids.get(e.reactor)!) {
     if (!this.state.paused) return;
-    if (this.state.currentFrame < this.state.history.length) this.state.history = this.state.history.slice(0, this.state.currentFrame); // we must destroy the "Alternate Future" (the redo stack) before recording.
-    if (this.state.history.length >= this.config.maxHistoryLength!) this.state.history = this.state.history.slice(1); // Drop the oldest memory if we exceed the limit
-    this.state.history.push({ path: e.target.path, value: e.reactor.snapshot(false, e.target.value), oldValue: e.reactor.snapshot(false, e.target.oldValue), type: e.staticType, hadKey: e.target.hadKey, deltat: e.timestamp! - this.lastTimestamp, rid });
-    if (e.rejected) this.state.history[this.state.history.length - 1].rejected = e.rejected;
+    if (this.state.currentFrame < this.state.history.length) fanout(this.state, "history", this.state.history.slice(0, this.state.currentFrame), { atomic: true }); // we must destroy the "Alternate Future" (the redo stack) before recording.
+    if (this.state.history.length >= this.config.maxHistoryLength!) fanout(this.state, "history", this.state.history.slice(1), { atomic: true }); // Drop the oldest memory if we exceed the limit
+    const en: HistoryEntry = { path: e.target.path, value: e.reactor.snapshot(false, e.target.value), oldValue: e.reactor.snapshot(false, e.target.oldValue), type: e.staticType, deltat: e.timestamp! - this.lastTimestamp, rid };
+    (e.rejected && (en.rejected = e.rejected), !e.target.hadKey && (en.hadKey = false)), this.state.history.push(en);
     this.state.currentFrame = this.state.history.length; // Lock the playhead to the absolute present
     this.lastTimestamp = e.timestamp!; // Update the metronome with the timestamp of the latest event
   }
@@ -119,7 +119,7 @@ export class TimeTravelModule<T extends object = any> extends BaseReactorModule<
       if (!e) break;
       const rtr = this.rtrs.get(e.rid) || this.rtrs.values().next().value!; // owner of the entry index for (single||multi)-reactor management
       if (forward) e.type === "delete" ? deleteAny(rtr.core, e.path as any) : setAny(rtr.core, e.path as any, deepClone(e.value, rtr.config));
-      else !e.hadKey ? deleteAny(rtr.core, e.path as any) : setAny(rtr.core, e.path as any, deepClone(e.oldValue, rtr.config));
+      else e.hadKey === false ? deleteAny(rtr.core, e.path as any) : setAny(rtr.core, e.path as any, deepClone(e.oldValue, rtr.config));
       forward ? this.state.currentFrame++ : this.state.currentFrame--; // 3. Move the playhead
       if (e.rejected) rtr.log(`[Reactor ${this.name} Module] ${forward ? "Replaying" : "Reversing"} REJECTED intent at "${e.path}"`);
     }
@@ -162,25 +162,17 @@ export class TimeTravelModule<T extends object = any> extends BaseReactorModule<
   // ===========================================================================
   /** Exports the current session as a JSON string. */
   public export(replacer?: JSONReplacer, space?: string | number): string {
-    try {
-      return JSON.stringify(this.state, replacer as any, space);
-    } catch (e) {
-      return this.rtrs.values().next().value?.log(`[Reactor ${this.name} Module] Failed to export session`), "";
-    }
+    return JSON.stringify(this.state, replacer as any, space);
   }
   /** Imports a session from a JSON string, allowing you to replay or analyze past states. */
   public import(json: string, reviver?: JSONReviver) {
-    try {
-      setAny(this.state, "*", JSON.parse(json, reviver) as TimeTravelState);
-      this.lastTimestamp = performance.now();
-      const resume = !this.state.paused,
-        target = this.state.currentFrame;
-      this.state.paused = false; // Shield import reconstruction from being recorded into history
-      for (const [rid, rtr] of this.rtrs) setAny(rtr.core, "*" as any, deepClone(this.state.initialState[rid], rtr.config)), rtr.tick(); // Flush the genesis wave to the UI
-      (this.state.currentFrame = 0), this.jumpTo(target), resume && this.play(); // Anchor at genesis before reconstructing target frame
-    } catch (e) {
-      this.rtrs.values().next().value?.log(`[Reactor ${this.name} Module] Failed to load session`);
-    }
+    setAny(this.state, "*", JSON.parse(json, reviver) as TimeTravelState);
+    this.lastTimestamp = performance.now();
+    const resume = !this.state.paused,
+      target = this.state.currentFrame;
+    this.state.paused = false; // Shield import reconstruction from being recorded into history
+    for (const [rid, rtr] of this.rtrs) setAny(rtr.core, "*" as any, deepClone(this.state.initialState[rid], rtr.config)), rtr.tick(); // Flush the genesis wave to the UI
+    (this.state.currentFrame = 0), this.jumpTo(target), resume && this.play(); // Anchor at genesis before reconstructing target frame
   }
 }
 

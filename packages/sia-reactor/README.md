@@ -102,7 +102,7 @@ import { setAny, getAny, mergeObjs } from "sia-reactor/utils";
 
 ```javascript
 import { reactive, Reactor } from "sia-reactor";
-import "sia-reactor/utils"; // deep object helpers (setAny/getAny/deleteAny/inAny/parseAnyObj/fanout/mergeObjs/deepClone/nuke...)
+import "sia-reactor/utils"; // deep object helpers (setAny/getAny/deleteAny/inAny/parseAnyObj/fanout/mergeObjs/deepClone/nuke...) take note of `fanout`!
 import "sia-reactor/modules"; // built-in modules + storage adapters
 import "sia-reactor/adapters/vanilla"; // Autotracker + effect API + TimeTravelOverlay class
 import "sia-reactor/adapters/react"; // useReactor/useSelector/usePath hooks
@@ -245,7 +245,7 @@ const persist = new PersistModule({ // Plug it in. State is now automatically hy
   key: "APP_PREFS",
   paths: ["theme", "settings.brightness"],
   throttle: 5000, 
-  fanout: true, // async hydration should use leaf writes incase UI listeners already initialized.
+  fanout: true, // async hydration should use leaf writes to sync already initialized listeners.
   adapter: new IndexedDBAdapter({ dbName: "Session", version: 1, onversionchange: () => location.reload(), useSnapshot: true }) // or `LocalStorageAdapter` (instance or signature)
 };
 state.use(persist, getReactor(state)));  // Put `Reactor` as second constructor arg if you want type inference, e.g. for the paths in the array.
@@ -346,7 +346,7 @@ player.on("intent.playing", (e) => {
 ### Troubleshooting
 
 - Listener timing feels late: `on(path, ...)` is microtask-batched by design; use `watch(path, ...)` only for strict immediate engine sync on leaf paths preferably.
-- Listeners don't react to changes: use `fanout(state, path, object, { depth: n })` instead of direct object sets to keep immutable semantics.
+- Listeners don't react to changes: use `fanout(target, object, { depth: n })` instead of direct object sets to keep immutable semantics.
 - `reject()` appears ignored: call it in capture phase and ensure branch is wrapped in `intent(...)`, also remember it's the listener's choice to comply.
 - Snapshot behavior feels stale: enable `referenceTracking: true` with `smartCloning: true`, also use these when persisting to environments that don't take proxies, e.g. IndexedDB.
 - Cross-frame data is skipped: enable `crossRealms: true` for iframe/other realm objects.
@@ -475,7 +475,7 @@ rtr.on("todos", ({ type, target: { path, key } }) => {
   if (type === "update") console.log(path, key);
 }, { depth: 1 });
 // Better: narrow first, then destructure inside
-rtr.on("todos", (e: REvent<user, "todos", 1>) => {
+rtr.on("todos", (e: REvent<User, "todos", 1>) => {
   if (e.type === "update") {
     const { path, key } = e.target;
     console.log(path, key); // or e.target.path, e.target.key

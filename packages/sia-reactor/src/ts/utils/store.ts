@@ -29,7 +29,7 @@ export interface MemoryAdapterConfig extends StorageAdapterConfig {
   /** stored as strings to mimic local constraints */
   store: Map<string, string>;
 }
-export interface IndexedDBAdapterConfig extends StorageAdapterConfig {
+export interface IndexedDBAdapterConfig extends StorageAdapterConfig, IDBTransactionOptions {
   /** The name of the IndexedDB database to be created or retrieved. */
   dbName: string;
   /** Database version tag to use during creation or retrieval. */
@@ -306,7 +306,7 @@ export class CookieAdapter extends StorageAdapter<CookieAdapterConfig> {
    * @param opts Optional per-call cookie options.
    * @returns `true` when write succeeds, else `false`.
    */
-  public override set(key: string, value: any, opts: Partial<CookieOptions> = NIL, replacer = this.config.replacer) {
+  public override set(key: string, value: any, opts?: Partial<CookieOptions>, replacer = this.config.replacer) {
     try {
       return (document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(JSON.stringify(value, replacer as any))}; ${this.deets(opts)}`), true;
     } catch {
@@ -319,7 +319,7 @@ export class CookieAdapter extends StorageAdapter<CookieAdapterConfig> {
    * @param opts Optional per-call scope overrides.
    * @returns `true` when removal succeeds, else `false`.
    */
-  public override remove(key: string, opts: Partial<CookieOptions> = NIL) {
+  public override remove(key: string, opts?: Partial<CookieOptions>) {
     try {
       return (document.cookie = `${encodeURIComponent(key)}=; ${this.deets({ ...opts, maxAge: 0, expires: new Date(0) })}`), true; // standard deletion technique
     } catch {
@@ -331,7 +331,7 @@ export class CookieAdapter extends StorageAdapter<CookieAdapterConfig> {
    * @param opts Optional per-call scope overrides.
    * @returns `true` when clear succeeds, else `false`.
    */
-  public override clear(opts: Partial<CookieOptions> = NIL) {
+  public override clear(opts?: Partial<CookieOptions>) {
     try {
       for (const pair of document.cookie ? document.cookie.split("; ") : []) {
         const idx = pair.indexOf("=");
@@ -375,9 +375,9 @@ export class IndexedDBAdapter extends AsyncStorageAdapter<IndexedDBAdapterConfig
    * @param store Optional object-store override.
    * @returns Stored value, or `undefined` when missing/unreadable.
    */
-  public override async get(key: string, store = this.config.stores[0]): Promise<any> {
+  public override async get(key: string, store = this.config.stores[0], options: Partial<IDBTransactionOptions> = this.config): Promise<any> {
     try {
-      const req = (await this.idb()).transaction(store).objectStore(store).get(key);
+      const req = (await this.idb()).transaction(store, "readonly", options).objectStore(store).get(key);
       return new Promise((res) => (req.onsuccess = () => res(req.result)));
     } catch {
       return this.warn("get", undefined, store), undefined;
@@ -390,9 +390,9 @@ export class IndexedDBAdapter extends AsyncStorageAdapter<IndexedDBAdapterConfig
    * @param store Optional object-store override.
    * @returns `true` when write succeeds, else `false`.
    */
-  public override async set(key: string, value: any, store = this.config.stores[0]): Promise<boolean> {
+  public override async set(key: string, value: any, store = this.config.stores[0], options: Partial<IDBTransactionOptions> = this.config): Promise<boolean> {
     try {
-      const req = (await this.idb()).transaction(store, "readwrite").objectStore(store).put(value, key);
+      const req = (await this.idb()).transaction(store, "readwrite", options).objectStore(store).put(value, key);
       return new Promise((res) => (req.onsuccess = () => res(true)));
     } catch (e) {
       return this.warn("put", undefined, store), false;
@@ -404,9 +404,9 @@ export class IndexedDBAdapter extends AsyncStorageAdapter<IndexedDBAdapterConfig
    * @param store Optional object-store override.
    * @returns `true` when delete succeeds, else `false`.
    */
-  public override async remove(key: string, store = this.config.stores[0]): Promise<boolean> {
+  public override async remove(key: string, store = this.config.stores[0], options: Partial<IDBTransactionOptions> = this.config): Promise<boolean> {
     try {
-      const req = (await this.idb()).transaction(store, "readwrite").objectStore(store).delete(key);
+      const req = (await this.idb()).transaction(store, "readwrite", options).objectStore(store).delete(key);
       return new Promise((res) => (req.onsuccess = () => res(true)));
     } catch (e) {
       return this.warn("delete", undefined, store), false;
@@ -417,11 +417,11 @@ export class IndexedDBAdapter extends AsyncStorageAdapter<IndexedDBAdapterConfig
    * @param stores Store name or list of store names to clear.
    * @returns `true` when all clears succeed, else `false`.
    */
-  public override async clear(stores: string | string[] = this.config.stores): Promise<boolean> {
+  public override async clear(stores: string | string[] = this.config.stores, options: Partial<IDBTransactionOptions> = this.config): Promise<boolean> {
     let success = true;
     for (const store of Array.isArray(stores) ? stores : [stores])
       try {
-        const req = (await this.idb()).transaction(store, "readwrite").objectStore(store).clear();
+        const req = (await this.idb()).transaction(store, "readwrite", options).objectStore(store).clear();
         await new Promise((res) => (req.onsuccess = () => res(true)));
       } catch (e) {
         this.warn("clear", undefined, store), (success = false);
