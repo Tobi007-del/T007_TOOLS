@@ -28,7 +28,9 @@ export abstract class BaseReactorModule<T extends object = any, Config = any, St
   protected rtrs = new Map<ReactorModuleId, Reactor<any>>();
   protected rids = new WeakMap<Reactor<any>, ReactorModuleId>(); // for quick 0(1) lookups over iteration
   protected wired = false;
+  /** The reactive configuration object for the module, manipulate to change behaviour. */
   public config!: Config extends object ? Reactive<Config> : Config;
+  /** The reactive state object for the module, watch to see exposed lifecycle changes. */
   public readonly state!: State extends object ? Reactive<State> : State;
 
   constructor(config?: Config, rtr?: Reactor<T>, state?: State) {

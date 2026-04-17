@@ -277,7 +277,7 @@ describe("S.I.A. Engine: 10,000 RPM Stress Test", () => {
 
 const state = reactive({ user: { profile: { name: { first: "a", fam: { nick: { test: { testt: { testtt: { testttt: { testtttt: { lover: "Kosi" } } } } } } } } }, age: 1 } });
 state.on(
-  "user.profile",
+  "*",
   (e) => {
     if (e.type === "update") {
       e.target.key;
@@ -289,5 +289,5 @@ state.on(
       e.currentTarget.value;
     }
   },
-  { depth: 2 }
+  { depth: 1 }
 ); // Manual depth inference typecheck

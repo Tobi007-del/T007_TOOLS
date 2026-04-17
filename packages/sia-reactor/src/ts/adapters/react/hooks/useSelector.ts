@@ -5,6 +5,7 @@ import { Reactor } from "../../../core/reactor";
 import { type Reactive, getReactor } from "../../../core/mixins";
 import type { EffectOptions, ReactorBuild } from "../../../types/reactor";
 import { Autotracker, withTracker } from "../../autotracker";
+import { DeepReadonly } from "../../../super";
 
 /**
  * Subscribes to a derived slice of Reactor state.
@@ -78,7 +79,7 @@ export function useAnySelector<R>(sel: () => R, eq = Object.is, options: EffectO
 
 /**
  * Subscribes to a derived slice of Reactor state.
- * The selector runs against a tracked snapshot and uses the provided equality function
+ * The selector runs against a readonly tracked snapshot and uses the provided equality function
  * to suppress unchanged results.
  * @typeParam T Root state object type.
  * @typeParam R Selector return type.
@@ -97,7 +98,7 @@ export function useAnySelector<R>(sel: () => R, eq = Object.is, options: EffectO
  * const rtr = new Reactor({ user: { name: "Kosi" } });
  * const c = useSelectorSnapshot(rtr, (s) => s.user.name);
  */
-export function useSelectorSnapshot<T extends object, R>(target: T | Reactor<T> | Reactive<T>, sel: (state: T) => R, eq = Object.is, options?: EffectOptions, build: ReactorBuild<T> = { referenceTracking: true, smartCloning: true }): R {
+export function useSelectorSnapshot<T extends object, R>(target: T | Reactor<T> | Reactive<T>, sel: (state: DeepReadonly<T>) => R, eq = Object.is, options?: EffectOptions, build: ReactorBuild<T> = { referenceTracking: true, smartCloning: true }): R {
   const tgtRef = useRef<T | Reactor<T> | Reactive<T>>(),
     rtrRef = useRef<Reactor<T>>(),
     rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = getReactor(target, true, build))) : rtrRef.current,

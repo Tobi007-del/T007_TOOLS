@@ -2,6 +2,7 @@ import type { Inert } from "./reactor";
 
 export type Primitive = string | number | boolean | bigint | symbol | null | undefined;
 export type NoTraverse =
+  | Inert<unknown>
   | Primitive
   | Function
   | Date
@@ -12,15 +13,7 @@ export type NoTraverse =
   | WeakMap<any, any>
   | Set<any>
   | WeakSet<any>
-  | HTMLElement
-  | Element
-  | Node
-  | EventTarget
-  | Window
-  | Document
-  | DOMTokenList
-  | AbortSignal
-  | Inert<unknown>;
+  | EventTarget; // Covers Window, Document, Node, Element, etc.
 
 /** Dot-path union for traversable keys in `T` up to depth `D{11}`. */
 export type Paths<T, S extends string = ".", D extends number = MaxDepth> = [D] extends [0]
@@ -42,11 +35,10 @@ export type ChildPaths<
   P extends WildPaths<T>,
   S extends string = ".",
   D extends number = MaxDepth
-> = P extends "*"
-  ? Paths<T, S>
-  : [D] extends [AllDepth] // hardcoded since already at ts deep limits
-  ? Extract<Paths<T, S, AddDepth<PathDepth<P, S>, D>>, `${P}${S}${string}`>
-  : Extract<Paths<T, S, AddDepth<PathDepth<P, S>, D>>, `${P}${S}${string}`>;
+> = Extract<
+  Paths<T, S, AddDepth<PathDepth<P, S>, D>>,
+  `${P extends "*" ? "" : P}${P extends "*" ? "" : S}${string}`
+>;
 
 /** Leaf key name extracted from a path. */
 export type PathKey<T, P extends string = Paths<T>, S extends string = "."> = P extends "*"
@@ -98,9 +90,13 @@ type UnflattenKey<
 // --- Helpers ---
 
 /** Calculates the depth of a dot-separated path with a max of D{11}. */
-export type PathDepth<P extends string, S extends string = ".", D extends number = MaxDepth> = [
-  D
-] extends [0]
+export type PathDepth<
+  P extends string,
+  S extends string = ".",
+  D extends number = MaxDepth
+> = P extends "*"
+  ? 0
+  : [D] extends [0]
   ? 0
   : P extends `${infer _}${S}${infer Rest}`
   ? NextDepth[PathDepth<Rest, S, PrevDepth[D]>]
@@ -159,6 +155,10 @@ export type DeepKeys<T, D extends number = MaxDepth> = [D] extends [0]
 /** Recursive merge result type for `T1` and `T2` up to depth `D{11}`. */
 export type DeepMerge<T1, T2, D extends number = MaxDepth> = [D] extends [0]
   ? never
+  : T1 extends NoTraverse
+  ? T2
+  : T2 extends NoTraverse
+  ? T2
   : T2 extends object
   ? T1 extends object
     ? {
@@ -176,7 +176,7 @@ export type DeepMerge<T1, T2, D extends number = MaxDepth> = [D] extends [0]
 /** Recursive partial type up to depth `D{11}`. */
 export type DeepPartial<T, D extends number = MaxDepth> = [D] extends [0]
   ? never
-  : T extends Function
+  : T extends NoTraverse
   ? T
   : T extends Array<infer U>
   ? Array<DeepPartial<U, PrevDepth[D]>>
@@ -189,7 +189,7 @@ export type DeepPartial<T, D extends number = MaxDepth> = [D] extends [0]
 /** Recursive required type up to depth `D{11}`. */
 export type DeepRequired<T, D extends number = MaxDepth> = [D] extends [0]
   ? never
-  : T extends Function
+  : T extends NoTraverse
   ? T
   : T extends Array<infer U>
   ? Array<DeepRequired<U, PrevDepth[D]>>
@@ -199,17 +199,26 @@ export type DeepRequired<T, D extends number = MaxDepth> = [D] extends [0]
   ? { [P in keyof T]-?: DeepRequired<T[P], PrevDepth[D]> }
   : T;
 
+/** Recursive readonly type up to depth `D{11}`. */
+export type DeepReadonly<T, D extends number = MaxDepth> = [D] extends [0]
+  ? never
+  : T extends NoTraverse
+  ? T
+  : T extends Array<infer U>
+  ? ReadonlyArray<DeepReadonly<U, PrevDepth[D]>>
+  : T extends object
+  ? { readonly [P in keyof T]: DeepReadonly<T[P], PrevDepth[D]> }
+  : T;
+
 // --- RECURSION LIMITERS ---
 
 /** Config for defining recursive limits for all parts of the application */
 export interface DepthConfig {
-  max: 11;
-  all: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19; // observed bundler recursive limit for state trees
+  max: 11; // 19 is observed bundler recursive limit for state trees
   prev: [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
   next: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 }
 /** Current recursive depth limit */
 export type MaxDepth = DepthConfig["max"];
-export type AllDepth = DepthConfig["all"];
 export type PrevDepth = DepthConfig["prev"];
 export type NextDepth = DepthConfig["next"];

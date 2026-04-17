@@ -20,7 +20,7 @@ export function isPOJO<T extends object = object>(obj: any, config: { crossRealm
 export function canHandle(obj: any, config: { crossRealms?: boolean; preserveContext?: boolean } = NIL, typecheck = true): boolean {
   if ((typecheck && !isObj(obj, false)) || (obj as any)[INERTIA]) return false;
   if (Array.isArray(obj) || (!config.preserveContext && isPOJO(obj, config, false))) return true;
-  if (config.preserveContext) return !(obj instanceof Map) && !(obj instanceof Set) && !(obj instanceof WeakMap) && !(obj instanceof WeakSet) && !(obj instanceof Error) && !(obj instanceof Number) && !(obj instanceof Date) && !(obj instanceof String) && !(obj instanceof RegExp) && !(obj instanceof ArrayBuffer) && !(obj instanceof Promise);
+  if (config.preserveContext) return !(obj instanceof String) && !(obj instanceof Number) && !(obj instanceof Function) && !(obj instanceof Date) && !(obj instanceof Error) && !(obj instanceof RegExp) && !(obj instanceof Promise) && !(obj instanceof Map) && !(obj instanceof WeakMap) && !(obj instanceof Set) && !(obj instanceof WeakSet) && !(obj instanceof EventTarget); // matching types
   return false;
 } // universal proxy gate for all reactive logic
 
@@ -149,8 +149,9 @@ export function parseAnyObj<T extends Record<string, any>, const S extends strin
   const result: any = {},
     keys = Object.keys(obj);
   for (let i = 0, len = keys.length; i < len; i++) {
-    const k: any = keys[i];
-    k === "*" || k.includes(separator) ? setAny(result, k, parseAnyObj(obj[k] as any, separator, keyFunc, seen), separator, keyFunc) : (result[k] = isObj(obj[k]) ? parseAnyObj(obj[k] as any, separator, keyFunc, seen) : obj[k]);
+    const key: any = keys[i],
+      val: any = obj[key];
+    key === "*" || key.includes(separator) ? setAny(result, key, parseAnyObj(val, separator, keyFunc, seen), separator, keyFunc) : (result[key] = isObj(val) ? parseAnyObj(val, separator, keyFunc, seen) : val);
   }
   return result as Unflatten<T, S>;
 }
@@ -197,10 +198,11 @@ export function fanout(a: any, b?: any, c?: any, d?: any): void {
   try {
     const walk = (target: any, obj: any, depth = isEvPd ? 1 : Infinity, keys = Object.keys(obj)) => {
       for (let i = 0, len = keys.length; i < len; i++) {
-        const val = obj[keys[i]];
+        const key = keys[i],
+          val = obj[key];
         try {
-          if ((opts.atomic ?? true) && Array.isArray(val)) (target[keys[i]] = val), (target[keys[i]].length = target[keys[i]].length); // ping commoners
-          else depth > 1 && canHandle(val, opts) ? walk((target[keys[i]] ||= {}), val, depth - 1) : (target[keys[i]] = val);
+          if ((opts.atomic ?? true) && Array.isArray(val)) (target[key] = val), (target[key].length = target[key].length); // ping commoners
+          else depth > 1 && canHandle(val, opts) ? walk((target[key] ||= {}), val, depth - 1) : (target[key] = val);
         } catch (e) {
           if (e instanceof RangeError) throw e; // internals can skip, not users
         } // call a spade a spade and just skip, no descriptor gymanstics
@@ -225,9 +227,10 @@ export function mergeObjs(o1?: any, o2?: any, config?: { crossRealms?: boolean }
   const merged = { ...(o1 ||= {}), ...(o2 ||= {}) },
     keys = Object.keys(merged);
   for (let i = 0, len = keys.length; i < len; i++) {
-    const o1C = o1[keys[i]],
-      o2C = o2[keys[i]];
-    if (isPOJO(o1C, config) && isPOJO(o2C, config)) merged[keys[i]] = mergeObjs(o1C, o2C, config, false); // fewer writes is less costly here
+    const key = keys[i],
+      o1C = o1[key],
+      o2C = o2[key];
+    if (isPOJO(o1C, config) && isPOJO(o2C, config)) merged[key] = mergeObjs(o1C, o2C, config, false); // fewer writes is less costly here
   }
   return merged;
 }
@@ -236,7 +239,10 @@ export function mergeObjs(o1?: any, o2?: any, config?: { crossRealms?: boolean }
 export function getTrailRecords<T extends object>(obj: T, path: WildPaths<T>, reverse = false): [WildPaths<T>, PathBranchValue<T, WildPaths<T>>, PathValue<T, WildPaths<T>>][] {
   const parts = path.split("."),
     chain: ReturnType<typeof getTrailRecords<T>> = [["*", obj, obj]];
-  for (let acc = "", currObj: any = obj, i = 0, len = parts.length; i < len; i++) chain.push([(acc += (i ? "." : "") + parts[i]) as WildPaths<T>, currObj, (currObj = currObj?.[parts[i]])]); // one iteration per depth, one-time storage over rcurrent derivation
+  for (let acc = "", currObj: any = obj, i = 0, len = parts.length; i < len; i++) {
+    const part = parts[i];
+    chain.push([(acc += (i ? "." : "") + part) as WildPaths<T>, currObj, (currObj = currObj?.[part])]); // one iteration per depth, one-time storage over rcurrent derivation
+  }
   return reverse ? chain.reverse() : chain;
 }
 
@@ -255,12 +261,14 @@ export function deepClone<T>(obj: T, config: { crossRealms?: boolean; preserveCo
   const clone: any = config.preserveContext ? Object.create(Object.getPrototypeOf(obj)) : Array.isArray(obj) ? [] : {};
   seen.set(obj, clone);
   const keys = config.preserveContext ? Reflect.ownKeys(obj) : Object.keys(obj);
-  for (let i = 0, len = keys.length; i < len; i++)
+  for (let i = 0, len = keys.length; i < len; i++) {
+    const key = keys[i];
     try {
-      clone[keys[i]] = deepClone((obj as any)[keys[i]], config, seen);
+      clone[key] = deepClone((obj as any)[key], config, seen);
     } catch (e) {
       if (e instanceof RangeError) throw e; // internals can skip, not users
     } // call a spade a spade and just skip, no descriptor gymanstics
+  }
   return clone;
 } // POJO|Arr|Dynamic Deep cloner
 
@@ -272,10 +280,11 @@ export function nuke(target: any): void {
   while (proto && proto !== Object.prototype) {
     const keys = Object.getOwnPropertyNames(proto);
     for (let i = 0, len = keys.length; i < len; i++) {
-      if (keys[i] === "constructor") continue;
+      const key = keys[i];
+      if (key === "constructor") continue;
       const desc = Object.getOwnPropertyDescriptor(proto, keys[i]);
       if (desc && ("function" === typeof desc.value || desc.get || desc.set)) continue;
-      proto[keys[i]] = null; // See ya!, it's armageddon baby!
+      proto[key] = null; // See ya!, it's armageddon baby!
     }
     proto = Object.getPrototypeOf(proto);
   }

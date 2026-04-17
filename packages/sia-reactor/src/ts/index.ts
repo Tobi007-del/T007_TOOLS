@@ -10,4 +10,4 @@ export type { Inert, Live, Intent, State, Volatile, Stable, Target, Payload, Dir
 
 export type { Reactive, ReactivePreferences } from "./core/mixins";
 
-export type { Primitive, NoTraverse, Paths, WildPaths, ChildPaths, PathKey, StrictPathKey, PathValue, PathBranchValue, Unflatten, PathDepth, PathLeaf, PathBranch, UnionToIntersection, AddDepth, SubtractDepth, DeepKeys, DeepMerge, DeepPartial, DeepRequired, DepthConfig, MaxDepth, AllDepth, PrevDepth, NextDepth } from "./types/obj";
+export type { Primitive, NoTraverse, Paths, WildPaths, ChildPaths, PathKey, StrictPathKey, PathValue, PathBranchValue, Unflatten, PathDepth, PathLeaf, PathBranch, UnionToIntersection, AddDepth, SubtractDepth, DeepKeys, DeepMerge, DeepPartial, DeepRequired, DeepReadonly, DepthConfig, MaxDepth, PrevDepth, NextDepth } from "./types/obj";

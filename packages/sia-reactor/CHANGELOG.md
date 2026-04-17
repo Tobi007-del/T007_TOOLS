@@ -1,5 +1,17 @@
 # sia-reactor
 
+## 0.0.24
+
+### Patch Changes
+
+- Types reinforcement and multiple optimizations.
+
+## 0.0.23
+
+### Patch Changes
+
+- Bug fixes and fanout optimized with others
+
 ## 0.0.22
 
 ### Patch Changes

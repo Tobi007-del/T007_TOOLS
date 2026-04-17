@@ -1,7 +1,7 @@
 import { CTX, NIL, RAW } from "../core/consts";
 import { Reactor } from "../core/reactor";
 import type { EffectOptions } from "../types/reactor";
-import type { WildPaths } from "../types/obj";
+import type { WildPaths, DeepReadonly } from "../types/obj";
 import { canHandle, nuke } from "../utils/obj";
 
 export let activeTracker: Autotracker<any> | null = null;
@@ -33,19 +33,19 @@ export class Autotracker<T extends object> {
   }
 
   /**
-   * Starts a new tracking pass and returns a tracking proxy for `target` if `this` was instantiated with a `Reactor`.
+   * Starts a new tracking pass and returns a readonly tracking proxy for `target` if `this` was instantiated with a `Reactor`.
    * @param target Snapshot (or state branch) to track reads from.
-   * @returns Read-tracking proxy.
+   * @returns Read-tracking readonly proxy.
    * @example
    * const atrkr = new Autotracker(rtr);
    * const state = atrkr.tracked(rtr.snapshot());
    * const name = state.user.profile.name;
    */
-  public tracked(target: T): T {
-    return this.unblock(), this.rtr ? (this.proxy = this.proxied(target, "")) : target;
+  public tracked(target: T): DeepReadonly<T> {
+    return this.unblock(), (this.proxy = this.proxied(target, "")) as DeepReadonly<T>;
   }
   protected proxied<O extends object>(obj: O, path: string): O {
-    if (!obj || "object" !== typeof obj) return obj;
+    if (!this.rtr || !obj || "object" !== typeof obj) return obj;
     const cached = this.proxyCache.get(obj);
     if (cached) return cached;
     if (!canHandle(obj, this.rtr!.config, false)) return obj;

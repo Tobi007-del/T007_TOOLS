@@ -6,13 +6,13 @@ import { Reactor } from "../core/reactor";
 import type { REvent, Inert } from "../types/reactor";
 import type { Paths } from "../types/obj";
 
-export interface PersistConfig<T extends object> {
+export interface PersistConfig<T extends object, P extends Paths<T> = Paths<T>> {
   /** Whether the persistence is disabled and cleared */
   disabled: boolean;
   /** The key under which to store the persisted data */
   key: string;
-  /** Specific paths only, no "*"; instead don't pass anything */
-  paths: Paths<T>[];
+  /** Specific paths only, no need for "*"; instead don't pass anything */
+  paths: P[];
   /** Storage adapter class or instance to use, can satisfy `instanceof` or just definition, cast to `any` if the latter */
   adapter: Inert<StorageAdapter> | Inert<AsyncStorageAdapter> | Inert<StorageAdapterConstructor> | Inert<AsyncStorageAdapterConstructor>; // pass in the instance if u wanna do custom config
   /** Throttle time for saving changes */
@@ -35,7 +35,7 @@ export interface PersistState {
  * Path-based persistence for fine-grained control over what gets persisted across single or multiple reactors, merges into a single serialized state tree.
  * When using async adapters, listen to `state.hydrated` (preferably `once`) before the setup of modules that should ignore hydration waves.
  */
-export class PersistModule<T extends object = any> extends BaseReactorModule<T, PersistConfig<T>, PersistState> {
+export class PersistModule<T extends object = any, P extends Paths<T> = Paths<T>> extends BaseReactorModule<T, PersistConfig<T, P>, PersistState> {
   public static readonly moduleName: string = "persist";
   public adapter!: StorageAdapter | AsyncStorageAdapter;
   protected hydrateSeq = 0;
@@ -51,8 +51,8 @@ export class PersistModule<T extends object = any> extends BaseReactorModule<T, 
     return res;
   }
 
-  constructor(config?: Partial<PersistConfig<T>>, rtr?: Reactor<T>) {
-    super(mergeObjs(PERSIST_MODULE_BUILD, config) as PersistConfig<T>, rtr, { hydrated: false });
+  constructor(config?: Partial<PersistConfig<T, P>>, rtr?: Reactor<T>) {
+    super(mergeObjs(PERSIST_MODULE_BUILD, config) as PersistConfig<T, P>, rtr, { hydrated: false });
   }
 
   public wire() {
@@ -69,7 +69,7 @@ export class PersistModule<T extends object = any> extends BaseReactorModule<T, 
     for (const p of this.config.paths ?? wpArr) !this.config.disabled ? rtr.on(p as any, this.handleSave, { signal: this.signal, immediate: true }) : rtr.off(p as any, this.handleSave);
   }
 
-  protected async handleAdapter({ value = LocalStorageAdapter }: REvent<PersistConfig<T>, "adapter">) {
+  protected async handleAdapter({ value = LocalStorageAdapter }: REvent<PersistConfig<T, P>, "adapter">) {
     const seq = ++this.hydrateSeq;
     if (this.adapter && value === this.adapter.constructor) return;
     this.state.hydrated = false;
@@ -93,19 +93,19 @@ export class PersistModule<T extends object = any> extends BaseReactorModule<T, 
     }
   }
 
-  protected handleDisabled({ value }: REvent<PersistConfig<T>, "disabled">) {
+  protected handleDisabled({ value }: REvent<PersistConfig<T, P>, "disabled">) {
     for (const rtr of this.rtrs.values()) this.onAttach(rtr);
     value && this.adapter?.remove(this.config.key);
   }
 
-  protected handlePaths({ value: paths = wpArr, oldValue: prevs = wpArr }: REvent<PersistConfig<T>, "paths">) {
+  protected handlePaths({ value: paths = wpArr, oldValue: prevs = wpArr }: REvent<PersistConfig<T, P>, "paths">) {
     for (const rtr of this.rtrs.values()) {
-      for (const p of prevs) rtr.off(p as any, this.handleSave);
-      for (const p of paths) rtr.off(p as any, this.handleSave), !this.config.disabled && rtr.on(p as any, this.handleSave, { signal: this.signal, immediate: true });
+      for (const p of prevs) rtr.off(p, this.handleSave);
+      for (const p of paths) rtr.off(p, this.handleSave), !this.config.disabled && rtr.on(p, this.handleSave, { signal: this.signal, immediate: true });
     }
   }
 
-  protected handleSave(e: REvent<any, any>) {
+  protected handleSave(e: REvent<any, P>) {
     if (!this.state.hydrated) return e.stopImmediatePropagation(); // told y'all to register persist module first, really hope y'all did
     if (!this.saveTimeoutId) this.saveTimeoutId = setTimeout(() => (this.adapter.set(this.config.key, this.payload), (this.saveTimeoutId = 0)), this.config.throttle, this.signal);
   }

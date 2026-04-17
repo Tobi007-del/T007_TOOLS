@@ -4,19 +4,19 @@ import type { REvent } from "../types/reactor";
 import { setAny, deleteAny, fanout, deepClone } from "../utils/obj";
 import { setTimeout } from "../utils/fn";
 import { clamp } from "../utils/num";
-import type { Paths } from "../types/obj";
+import type { Paths, PathValue } from "../types/obj";
 import { JSONReplacer, JSONReviver } from "../utils/store";
 
 /** The DNA of a specific moment in time, Records the 'Desire' (Intent) or the 'Fact' (State). */
-export interface HistoryEntry {
+export interface HistoryEntry<T extends object = any, P extends Paths<T> = Paths<T>> {
   /** The surgical address in the Reactor */
-  path: string;
+  path: P;
   /** The data payload at that moment */
-  value: any;
+  value: PathValue<T, P>;
   /** The "Undo" antidote (Previous value), if applicable */
   oldValue: any;
   /**  Was it a 'set' or a 'delete' surgery? */
-  type: REvent<any, any>["staticType"];
+  type: REvent<any, P>["staticType"];
   /** Did the Power Line disapprove?; why? */
   rejected?: string; // optional for lighter payloads
   /** Did the key for the value exist on its parent object? */
@@ -27,20 +27,20 @@ export interface HistoryEntry {
   rid: ReactorModuleId; // lightweight for minimal storage overhead
 }
 
-export interface TimeTravelConfig<T extends object = any> {
+export interface TimeTravelConfig<T extends object, P extends Paths<T> = Paths<T>> {
   /** Specific paths only, no "*"; instead don't pass anything */
-  paths: Paths<T>[];
+  paths: P[];
   /** Maximum number of history entries to keep (Memory Cap), you lose replaying Sessions or the Genesis */
   maxHistoryLength: number;
   /** Max delay between events during playback (ms) */
   maxPlaybackDelay: number;
 }
 
-export interface TimeTravelState {
+export interface TimeTravelState<T extends object, P extends Paths<T> = Paths<T>> {
   /** The "Genesis" snapshot (Raw Data) */
   initialState: { [rid: ReactorModuleId]: any }; // serializable
   /** The "Timeline" of mutations (Chronological Log) */
-  history: HistoryEntry[];
+  history: HistoryEntry<T, P>[];
   /** The manual playhead (Index in the Timeline) */
   currentFrame: number;
   /** Whether playback is currently paused (Automatic Replay) */
@@ -53,13 +53,13 @@ export interface TimeTravelState {
  * Allows history from single or multiple reactors to be recorded and replayed in a synchronized manner, even if they have different shapes.
  * If paired with async persistence, `use()` or `setup()` this module after hydration where applicable to avoid recording restore waves.
  */
-export class TimeTravelModule<T extends object = any> extends BaseReactorModule<T, TimeTravelConfig<T>, TimeTravelState> {
+export class TimeTravelModule<T extends object = any, P extends Paths<T> = Paths<T>> extends BaseReactorModule<T, TimeTravelConfig<T, P>, TimeTravelState<T, P>> {
   public static readonly moduleName: string = "timeTravel";
   protected lastTimestamp: number = 0;
   protected playbackTimeoutId: number = -1;
 
-  constructor(config?: Partial<TimeTravelConfig<T>>, rtr?: Reactor<T>) {
-    super({ ...TIME_TRAVEL_MODULE_BUILD, ...config } as TimeTravelConfig<T>, rtr, { initialState: {}, history: [], currentFrame: 0, paused: true } as TimeTravelState);
+  constructor(config?: Partial<TimeTravelConfig<T, P>>, rtr?: Reactor<T>) {
+    super({ ...TIME_TRAVEL_MODULE_BUILD, ...config } as TimeTravelConfig<T, P>, rtr, { initialState: {}, history: [], currentFrame: 0, paused: true } as TimeTravelState<T, P>);
   }
 
   // ===========================================================================
@@ -80,18 +80,18 @@ export class TimeTravelModule<T extends object = any> extends BaseReactorModule<
     if (!this.state.history.length || !this.state.initialState[rid]) this.state.initialState[rid] = rtr.snapshot();
     for (const p of this.config.paths ?? wpArr) rtr.on(p as any, this.record, { signal: this.signal });
   }
-  protected handlePaths({ value: paths = wpArr, oldValue: prevs = wpArr }: REvent<TimeTravelConfig<T>, "paths">) {
+  protected handlePaths({ value: paths = wpArr, oldValue: prevs = wpArr }: REvent<TimeTravelConfig<T, P>, "paths">) {
     for (const rtr of this.rtrs.values()) {
       for (const p of prevs) rtr.off(p, this.record);
       for (const p of paths) rtr.off(p, this.record), rtr.on(p, this.record, { signal: this.signal });
     }
   }
   /** Chronicling the lifecycle of the system, Captures the essence of every mutation wave that bubbles up. */
-  protected record(e: REvent<any, any>, rid = this.rids.get(e.reactor)!) {
+  protected record(e: REvent<any, P>, rid = this.rids.get(e.reactor)!) {
     if (!this.state.paused) return;
     if (this.state.currentFrame < this.state.history.length) fanout(this.state, "history", this.state.history.slice(0, this.state.currentFrame), { atomic: true }); // we must destroy the "Alternate Future" (the redo stack) before recording.
     if (this.state.history.length >= this.config.maxHistoryLength!) fanout(this.state, "history", this.state.history.slice(1), { atomic: true }); // Drop the oldest memory if we exceed the limit
-    const en: HistoryEntry = { path: e.target.path, value: e.reactor.snapshot(false, e.target.value), oldValue: e.reactor.snapshot(false, e.target.oldValue), type: e.staticType, deltat: e.timestamp! - this.lastTimestamp, rid };
+    const en = { path: e.target.path, value: e.reactor.snapshot(false, e.target.value), oldValue: e.reactor.snapshot(false, e.target.oldValue), type: e.staticType, deltat: e.timestamp! - this.lastTimestamp, rid } as HistoryEntry<any, P>;
     (e.rejected && (en.rejected = e.rejected), !e.target.hadKey && (en.hadKey = false)), this.state.history.push(en);
     this.state.currentFrame = this.state.history.length; // Lock the playhead to the absolute present
     this.lastTimestamp = e.timestamp!; // Update the metronome with the timestamp of the latest event
@@ -166,7 +166,7 @@ export class TimeTravelModule<T extends object = any> extends BaseReactorModule<
   }
   /** Imports a session from a JSON string, allowing you to replay or analyze past states. */
   public import(json: string, reviver?: JSONReviver) {
-    setAny(this.state, "*", JSON.parse(json, reviver) as TimeTravelState);
+    setAny(this.state, "*", JSON.parse(json, reviver) as TimeTravelState<T, P>);
     this.lastTimestamp = performance.now();
     const resume = !this.state.paused,
       target = this.state.currentFrame;
@@ -176,4 +176,4 @@ export class TimeTravelModule<T extends object = any> extends BaseReactorModule<
   }
 }
 
-export const TIME_TRAVEL_MODULE_BUILD: Partial<TimeTravelConfig> = { maxPlaybackDelay: 2000 };
+export const TIME_TRAVEL_MODULE_BUILD: Partial<TimeTravelConfig<any>> = { maxPlaybackDelay: 2000 };

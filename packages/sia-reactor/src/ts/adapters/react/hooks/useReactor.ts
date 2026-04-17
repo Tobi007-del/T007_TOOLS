@@ -4,6 +4,7 @@ import { CTX, NIL, NOOP } from "../../../core/consts";
 import { Reactor } from "../../../core/reactor";
 import { type Reactive, getReactor } from "../../../core/mixins";
 import type { EffectOptions, ReactorBuild } from "../../../types/reactor";
+import type { DeepReadonly } from "../../../types/obj";
 import { Autotracker } from "../../autotracker";
 
 /**
@@ -64,7 +65,7 @@ export function useAnyReactor(options: EffectOptions = NIL): void {
 }
 
 /**
- * Subscribes a component to Reactor state and returns a tracked snapshot.
+ * Subscribes a component to Reactor state and returns a readonly tracked snapshot.
  * Rule of thumb: read from snapshots, mutate the source.
  * The hook uses access tracking so re-renders occur only when accessed fields change.
  * @typeParam T Root state object type.
@@ -81,7 +82,7 @@ export function useAnyReactor(options: EffectOptions = NIL): void {
  * const rtr = new Reactor({ user: { name: "Kosi" } });
  * const c = useReactorSnapshot(rtr);
  */
-export function useReactorSnapshot<T extends object>(target: T | Reactor<T> | Reactive<T>, options?: EffectOptions, build: ReactorBuild<T> = { referenceTracking: true, smartCloning: true }): T {
+export function useReactorSnapshot<T extends object>(target: T | Reactor<T> | Reactive<T>, options?: EffectOptions, build: ReactorBuild<T> = { referenceTracking: true, smartCloning: true }): DeepReadonly<T> {
   const tgtRef = useRef<T | Reactor<T> | Reactive<T>>(),
     rtrRef = useRef<Reactor<T>>(),
     rtr = tgtRef.current !== target || !rtrRef.current ? ((tgtRef.current = target), (rtrRef.current = getReactor(target, true, build))) : rtrRef.current,

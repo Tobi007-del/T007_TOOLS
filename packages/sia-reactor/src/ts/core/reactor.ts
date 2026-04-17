@@ -19,6 +19,7 @@ import { BaseReactorModule as ReactorModule, ReactorModuleId } from "../modules/
  * 9. Core's Class Syntax over global functional closures for instance's lighter memory footprint
  * 10. Avoided object pooling since V8 excels at generational GC for short-lived payloads so no
  * "Stop the World"s, also no need for wasted recurrent logic, serialize or forget about payloads.
+ * 11. With all this, the right has now been earned to run on your hot path; sit back and relax :)
  */
 
 // ===========================================================================
@@ -225,7 +226,10 @@ export class Reactor<T extends object> {
     seen.add(target);
     const es = (this.lineage ??= new WeakMap()).get(target);
     if (!es) return paths as Paths<T>[];
-    for (let i = 0, len = es.length; i < len; i += 2) this.trace(es[i] as object, es[i + 1] ? es[i + 1] + "." + path : path, paths, seen);
+    for (let i = 0, len = es.length; i < len; i += 2) {
+      const prev = es[i + 1];
+      this.trace(es[i] as object, prev ? prev + "." + path : path, paths, seen);
+    }
     return paths as Paths<T>[];
   } // won't be called without `.config.referenceTracking` so internal guard avoided
   protected link(target: any, parent: object, key: string, typecheck = true, es?: (object | string)[]): boolean {
@@ -259,9 +263,10 @@ export class Reactor<T extends object> {
       isSet = type === "set",
       mediators = isGet ? this.getters : isSet ? this.setters : this.deleters;
     for (let i = !isGet ? 0 : cords.length - 1, len = !isGet ? cords.length : -1; i !== len; i += !isGet ? 1 : -1) {
-      const response: any = isGet ? (cords[i] as GetterRecord<T>).cb(value, payload) : isSet ? (cords[i] as SetterRecord<T>).cb(value, terminated, payload) : (cords[i] as DeleterRecord<T>).cb(terminated, payload); // all will mediate
+      const cord = cords[i],
+        response: any = isGet ? (cord as GetterRecord<T>).cb(value, payload) : isSet ? (cord as SetterRecord<T>).cb(value, terminated, payload) : (cord as DeleterRecord<T>).cb(terminated, payload); // all will mediate
       if (isGet || !(terminated ||= payload.terminated = response === TERMINATOR)) value = response as PathValue<T, P>;
-      if (cords[i].once) cords.splice((len--, i--), 1), !cords.length && mediators!.delete(path);
+      if (cord.once) cords.splice((len--, i--), 1), !cords.length && mediators!.delete(path);
     }
     return value; // set - FIFO, get - LIFO
   }
@@ -272,13 +277,15 @@ export class Reactor<T extends object> {
         cords = this.watchers.get(path) as Array<WatcherRecord<T, P>> | undefined;
       if (cords)
         for (let i = 0, len = cords.length; i < len; i++) {
-          cords[i].cb(payload.target.value as PathValue<T, P>, payload); // watchers do not terminate as they're after the OP
-          if (cords[i].once) cords.splice((len--, i--), 1), !cords.length && this.watchers!.delete(path);
+          const cord = cords[i];
+          cord.cb(payload.target.value as PathValue<T, P>, payload); // watchers do not terminate as they're after the OP
+          if (cord.once) cords.splice((len--, i--), 1), !cords.length && this.watchers!.delete(path);
         }
       if (wildcords)
         for (let i = 0, len = wildcords.length; i < len; i++) {
-          wildcords[i].cb(payload.target.value, payload as Payload<T, "*">);
-          if (wildcords[i].once) wildcords.splice((len--, i--), 1), !wildcords.length && this.watchers!.delete("*");
+          const wildcord = wildcords[i];
+          wildcord.cb(payload.target.value, payload as Payload<T, "*">);
+          if (wildcord.once) wildcords.splice((len--, i--), 1), !wildcords.length && this.watchers!.delete("*");
         }
     }
     this.listeners && this.schedule(path, payload); // batch is undefined till listeners are available
@@ -323,14 +330,15 @@ export class Reactor<T extends object> {
     e.type = path !== e.target.path ? "update" : e.staticType; // `update` for ancestors
     e.currentTarget = { path, value, oldValue: e.type !== "update" ? e.target.oldValue : undefined, key: (e.type !== "update" ? path : path.slice(path.lastIndexOf(".") + 1) || "") as PathKey<T>, hadKey: e.type !== "update" ? e.target.hadKey : true, object: object as PathBranchValue<T> };
     for (let i = 0, len = cords.length, tDepth; i < len; i++) {
+      const cord = cords[i];
       if (e.immediatePropagationStopped) break;
-      if (cords[i].capture !== isCapture) continue;
-      if (cords[i].depth !== undefined) {
+      if (cord.capture !== isCapture) continue;
+      if (cord.depth !== undefined) {
         tDepth ??= this.getDepth(e.target.path); // calc only if ever needed
-        if (tDepth > cords[i].lDepth! + cords[i].depth!) continue;
+        if (tDepth > cord.lDepth! + cord.depth!) continue;
       }
-      cords[i].cb(e);
-      if (cords[i].once) cords.splice((len--, i--), 1), !cords.length && this.listeners!.delete(path);
+      cord.cb(e);
+      if (cord.once) cords.splice((len--, i--), 1), !cords.length && this.listeners!.delete(path);
     }
   }
 
@@ -398,12 +406,14 @@ export class Reactor<T extends object> {
     const clone = !raw ? (this.config.preserveContext ? Object.create(Object.getPrototypeOf(obj)) : Array.isArray(obj) ? [] : {}) : obj;
     seen.set(obj, clone);
     const keys = this.config.preserveContext ? Reflect.ownKeys(obj) : Object.keys(obj);
-    for (let i = 0, len = keys.length; i < len; i++)
+    for (let i = 0, len = keys.length; i < len; i++) {
+      const key = keys[i];
       try {
-        clone[keys[i]] = this.cloned(obj[keys[i]], raw, seen);
+        clone[key] = this.cloned(obj[key], raw, seen);
       } catch (e) {
         if (e instanceof RangeError) throw e; // internals can skip, not users
       } // call a spade a spade and just skip, no descriptor gymanstics
+    }
     if (!raw && this.config.smartCloning) this.snapCache!.set(obj, clone), (obj[SSVERSION] = version);
     return clone;
   }
@@ -414,11 +424,13 @@ export class Reactor<T extends object> {
     let cords = store.get(path),
       cord: GetterRecord<T> | SetterRecord<T> | DeleterRecord<T> | WatcherRecord<T> | undefined;
     if (cords)
-      for (let i = 0, len = cords.length; i < len; i++)
-        if (Object.is(cords[i].cb, cb)) {
-          cord = cords[i];
+      for (let i = 0, len = cords.length; i < len; i++) {
+        const excord = cords[i];
+        if (Object.is(excord.cb, cb)) {
+          cord = excord;
           break;
         }
+      }
     if (cord) return cord.clup;
     let task: () => void;
     cord = { cb, once, clup: () => (lazy && this.nostall(task), this[`no${key}` as "noget"](path, cb)) };
@@ -430,7 +442,10 @@ export class Reactor<T extends object> {
   protected syncDrop<P extends WildPaths<T>>(store: Map<WildPaths<T>, any[]> | undefined, path: P, cb: any): boolean | undefined {
     const cords = store?.get(path);
     if (!cords) return undefined;
-    for (let i = 0, len = cords.length; i < len; i++) if (Object.is(cords[i].cb, cb)) return cords[i].sclup!(), cords.splice((len--, i--), 1), !cords.length && store!.delete(path), true;
+    for (let i = 0, len = cords.length; i < len; i++) {
+      const cord = cords[i];
+      if (Object.is(cord.cb, cb)) return cord.sclup!(), cords.splice((len--, i--), 1), !cords.length && store!.delete(path), true;
+    }
     return false;
   }
 
@@ -555,11 +570,13 @@ export class Reactor<T extends object> {
     let cords = this.listeners.get(path),
       cord: ListenerRecord<T> | undefined;
     if (cords)
-      for (let i = 0, len = cords.length; i < len; i++)
-        if (Object.is(cords![i].cb, callback) && capture === cords![i].capture) {
-          cord = cords![i];
+      for (let i = 0, len = cords.length; i < len; i++) {
+        const excord = cords[i];
+        if (Object.is(excord.cb, callback) && capture === excord.capture) {
+          cord = excord;
           break;
         }
+      }
     if (cord) return cord.clup;
     cord = { cb: callback as Listener<T>, capture, depth: depth as MaxDepth, once, clup: () => this.off<P, D>(path, callback, options), lDepth: depth !== undefined ? this.getDepth(path) : depth };
     if (immediate && (immediate !== "auto" || inAny(this.core, path))) {
@@ -588,7 +605,10 @@ export class Reactor<T extends object> {
     const cords = this.listeners?.get(path);
     if (!cords) return undefined;
     const { capture } = parseEvtOpts(options, EVT_OPTS.LISTENER);
-    for (let i = 0, len = cords.length; i < len; i++) if (Object.is(cords[i].cb, callback) && cords[i].capture === capture) return cords[i].sclup!(), cords.splice((len--, i--), 1), !cords.length && this.listeners!.delete(path), true;
+    for (let i = 0, len = cords.length; i < len; i++) {
+      const cord = cords[i];
+      if (Object.is(cord.cb, callback) && cord.capture === capture) return cord.sclup!(), cords.splice((len--, i--), 1), !cords.length && this.listeners!.delete(path), true;
+    }
     return false;
   }
 
