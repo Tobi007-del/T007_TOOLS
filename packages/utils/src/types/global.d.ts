@@ -2,7 +2,7 @@ import type { ScrollAssistControl } from "../quirks/scroll";
 
 declare global {
   interface T007Namespace {
-    VIRTUAL_RESOURCE: unique symbol;
+    VIRTUAL_RESOURCE: symbol;
 
     _resourceCache: Partial<Record<string, Promise<HTMLElement | void>>>;
     _scrollers?: WeakMap<HTMLElement, ScrollAssistControl>;

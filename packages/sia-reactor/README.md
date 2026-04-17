@@ -156,21 +156,20 @@ reactor.core.player.volume = 100; // re-assign core if desired
 All methods are available on `Reactor` instances or objects wrapped in `reactive()`.
 
 #### **Mediators (Synchronous Gatekeepers)**
-- **`set(path, callback, options)`**: Intercept memory writes. Return a value to modify it, or return `TERMINATOR` to block the write entirely.
-- **`get(path, callback, options)`**: Intercept and format data during retrieval.
-- **`delete(path, callback, options)`**: Intercept property deletion.
+- **`set(path, callback, options)` <-> `noset(path, callback)`**: Intercept memory writes. Return a value to modify it, or return `TERMINATOR` to block the write entirely.
+- **`get(path, callback, options)` <-> `noget(path, callback)`**: Intercept and format data during retrieval.
+- **`delete(path, callback, options)` <-> `nodelete(path, callback)`**: Intercept property deletion.
 
 #### **Watchers (Synchronous Observers)**
-- **`watch(path, callback, options)`**: Fires instantly after a mutation. Use strictly for critical internal engine syncing on leaf paths preferably, sees only direct operations.
+- **`watch(path, callback, options)` <-> `nowatch(path, callback)`**: Fires instantly after a mutation. Use strictly for critical internal engine syncing on leaf paths preferably, sees only direct operations.
 
 #### **Listeners (Asynchronous/Batched UI Observers)**
-- **`on(path, callback, options)`**: Attach DOM-style event listeners that respect `depth`. Supports `{ capture: true, depth: 1, once: true, immediate: true }`.
-- **`once(path, callback, options)`**: Fires once and self-destructs.
-- **`off(path, callback, options)`**: Removes a listener.
+- **`on(path, callback, options)` <-> `off(path, callback, options)`**: Attach DOM-style event listeners that respect `depth`. Supports `{ capture: true, depth: 1, once: true, immediate: true }`.
+- **`once(path, callback, options)`**: Fires once and self-destructs, others have too: `sonce(...)`, `gonce(...)`, `donce(...)`, `wonce(...)`.
 
 #### **Lifecycle & Utilities**
 - **`tick(path)`**: Forces a synchronous flush of the batch queue for a specific path.
-- **`stall(task)` / `nostall(task)`**: Manually stall the queue to wait for calculations before rendering.
+- **`stall(task)` <-> `nostall(task)`**: Manually stall the queue to wait for calculations before rendering.
 - **`snapshot(raw)`**: Generates a strict, structurally-shared, un-proxied clone of the current state tree.
 - **`use(new ReactorModule(config), id)`**: Allows extended behaviour with external logic.
 - **`reset()`**: Clears all records bringing everything back to a clean slate.
@@ -178,18 +177,18 @@ All methods are available on `Reactor` instances or objects wrapped in `reactive
 
 ### Memory & Granular Control Flags
 
-You can wrap properties in special flags *before* initializing the reactor to dictate exactly how the Proxy treats them.
+You can wrap properties in special flags *before* initializing the reactor to dictate exactly how the Proxy treats them. e.g. `reactive(volatile(intent({ behavior: "auto" })))`, e.t.c.
 
-- **`inert(obj)` / `live(obj)`**: Tells the proxy to completely ignore an object. It will not be deeply tracked.
-- **`intent(obj)` / `state(obj)`**: Marks an object as rejectable. Allows listeners to call `e.reject()` during the Capture phase.
-- **`volatile(obj)` / `stable(obj)`**: Forces the reactor to fire event waves even if the new value is identical to the old value (bypassing the Proxy's unchanged performance check).
+- **`intent(obj)` <-> `state(obj)`**: Marks an object as rejectable. Allows listeners to call `e.reject()` during the Capture phase.
+- **`inert(obj)` <-> `live(obj)`**: Tells the proxy to completely ignore an object. It will not be deeply tracked.
+- **`volatile(obj)` <-> `stable(obj)`**: Forces the reactor to fire event waves even if the new value is identical to the old value (bypassing the Proxy's unchanged performance check).
 
 ```javascript
 import { reactive, intent, volatile, inert } from "sia-reactor";
 
 const data = reactive({
   apiResponse: inert({ heavy: "data" }), // Proxy won't traverse this
-  userWish: intent({ flying: false }),  // Can be rejected by a Higher Power
+  userWish: intent({ flying: false }),  // Can be rejected by a Handler or a Higher Power
   trigger: volatile({ clickCount: 0 })  // Fires events even if set to 0 again
 });
 ```

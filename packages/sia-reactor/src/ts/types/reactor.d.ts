@@ -133,9 +133,11 @@ export type Watcher<T, P extends WildPaths<T> = WildPaths<T>> = (
 ) => void;
 
 /** Listener callback (batched/asynchronous by default). */
-export type Listener<T, P extends WildPaths<T> = WildPaths<T>, D extends number = MaxDepth> = (
-  event: REvent<T, P, D>
-) => void;
+export type Listener<
+  T extends object,
+  P extends WildPaths<T> = WildPaths<T>,
+  D extends number = MaxDepth
+> = (event: REvent<T, P, D>) => void;
 
 // ===========================================================================
 // ENGINE RECORDS (Internal Storage)

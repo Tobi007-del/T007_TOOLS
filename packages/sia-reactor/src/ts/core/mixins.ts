@@ -54,31 +54,6 @@ export function reactive<T extends object, const P extends ReactivePreferences |
 }
 
 /**
- * Marks an object as inert so it is skipped by proxy mediation.
- * @param target Object to mark.
- * @returns The same object with inert typing.
- */
-export function inert<T extends object>(target: T): Inert<T> {
-  return (getRaw(target as any)[INERTIA] = true), target as Inert<T>;
-}
-/**
- * Removes the inert marker from an object.
- * @param target Object to unmark.
- * @returns The same object with live typing.
- */
-export function live<T extends object>(target: T): Live<T> {
-  return delete getRaw(target as any)[INERTIA], target as Live<T>;
-}
-/**
- * Checks whether an object is marked as inert.
- * @param target Object to test.
- * @returns `true` when inert.
- */
-export function isInert<T extends object>(target: T = NIL): target is Inert<T> {
-  return !!getRaw(target as any)[INERTIA];
-}
-
-/**
  * Marks an object as intent (rejectable).
  * @param target Object to mark.
  * @returns The same object with intent typing.
@@ -101,6 +76,31 @@ export function state<T extends object>(target: T): State<T> {
  */
 export function isIntent<T extends object>(target: T = NIL): target is Intent<T> {
   return !!getRaw(target as any)[REJECTABLE];
+}
+
+/**
+ * Marks an object as inert so it is skipped by proxy mediation.
+ * @param target Object to mark.
+ * @returns The same object with inert typing.
+ */
+export function inert<T extends object>(target: T): Inert<T> {
+  return (getRaw(target as any)[INERTIA] = true), target as Inert<T>;
+}
+/**
+ * Removes the inert marker from an object.
+ * @param target Object to unmark.
+ * @returns The same object with live typing.
+ */
+export function live<T extends object>(target: T): Live<T> {
+  return delete getRaw(target as any)[INERTIA], target as Live<T>;
+}
+/**
+ * Checks whether an object is marked as inert.
+ * @param target Object to test.
+ * @returns `true` when inert.
+ */
+export function isInert<T extends object>(target: T = NIL): target is Inert<T> {
+  return !!getRaw(target as any)[INERTIA];
 }
 
 /**

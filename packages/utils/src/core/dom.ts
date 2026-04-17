@@ -18,7 +18,7 @@ export type LoadResourceOptions = Partial<{
 export { createEl, assignEl };
 
 // Resource Loading
-export const VIRTUAL_RESOURCE: unique symbol = Symbol.for("T007_VIRTUAL_RESOURCE");
+export const VIRTUAL_RESOURCE: symbol = Symbol.for("T007_VIRTUAL_RESOURCE");
 export function loadResource(req: string | symbol, type: ResourceType = "style", { module, media, crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, attempts = 3, retryKey = false }: LoadResourceOptions = {}, w = window): Promise<HTMLElement | void> {
   (w.t007 ??= {} as any), (w.t007._resourceCache ??= {});
   if (req === VIRTUAL_RESOURCE || isSym(req)) return Promise.resolve();

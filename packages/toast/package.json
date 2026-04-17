@@ -1,6 +1,6 @@
 {
   "name": "@t007/toast",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "A lightweight, pure JS toast system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -53,6 +53,6 @@
     "promise"
   ],
   "dependencies": {
-    "@t007/utils": "^0.0.23"
+    "@t007/utils": "^0.0.22"
   }
 }

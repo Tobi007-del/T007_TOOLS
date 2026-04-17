@@ -21,7 +21,7 @@ export type Paths<T, S extends string = ".", D extends number = MaxDepth> = [D] 
   : T extends NoTraverse
   ? never
   : T extends readonly (infer U)[]
-  ? `${Extract<keyof T, number>}` | `${Extract<keyof T, number>}${S}${Paths<U, S, PrevDepth[D]>}`
+  ? `${Extract<keyof T, number>}` | `${Extract<keyof T, number>}${S}${Paths<U, S, PrevDepth[D]>}` // or just `${number}`
   : {
       [K in keyof T & (string | number)]: T[K] extends Primitive
         ? `${K}`
@@ -38,7 +38,8 @@ export type ChildPaths<
 > = Extract<
   Paths<T, S, AddDepth<PathDepth<P, S>, D>>,
   `${P extends "*" ? "" : P}${P extends "*" ? "" : S}${string}`
->;
+> &
+  Paths<T, S>; // bundlers can shutup and just believe
 
 /** Leaf key name extracted from a path. */
 export type PathKey<T, P extends string = Paths<T>, S extends string = "."> = P extends "*"
@@ -214,7 +215,7 @@ export type DeepReadonly<T, D extends number = MaxDepth> = [D] extends [0]
 
 /** Config for defining recursive limits for all parts of the application */
 export interface DepthConfig {
-  max: 11; // 19 is observed bundler recursive limit for state trees
+  max: 11; // 19 is observed bundler recursive limit for state trees so, raise amm!!!
   prev: [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
   next: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 }

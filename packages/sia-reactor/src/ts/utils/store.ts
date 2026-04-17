@@ -34,7 +34,7 @@ export interface IndexedDBAdapterConfig extends StorageAdapterConfig, IDBTransac
   dbName: string;
   /** Database version tag to use during creation or retrieval. */
   version: number;
-  /** First store is default during operations if none provided */
+  /** First store is default during operations if none is provided, i.e. ["VAULT", "TEMP"] -> clear(store = "VAULT") {} */
   stores: string[];
   /** return a preffered instance or `throw` to prevent accessing the database */
   onidb: () => any;

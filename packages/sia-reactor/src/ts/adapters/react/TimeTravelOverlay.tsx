@@ -1,10 +1,10 @@
 import { useRef } from "react";
 import { TimeTravelModule } from "../../modules";
-import { type TimeTravelConfig, TimeTravelOverlay as VTimeTravelOverlay } from "../vanilla/TimeTravelOverlay";
+import { type TimeTravelOverlayConfig, TimeTravelOverlay as VTimeTravelOverlay } from "../vanilla/TimeTravelOverlay";
 import { useISOLayoutEffect } from "./utils";
 
 /** React props for controlling the vanilla TimeTravel overlay. */
-export interface TimeTravelOverlayProps extends Partial<TimeTravelConfig> {
+export interface TimeTravelOverlayProps extends Partial<TimeTravelOverlayConfig> {
   /** Module instance controlled by this overlay bridge. */
   time: TimeTravelModule;
 }

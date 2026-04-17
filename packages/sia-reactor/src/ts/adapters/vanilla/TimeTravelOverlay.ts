@@ -10,7 +10,7 @@ const keys: keysSettings = {
 };
 
 /** Reactive options for the TimeTravel overlay instance. */
-export interface TimeTravelConfig {
+export interface TimeTravelOverlayConfig {
   /** Header text shown at the top of the overlay panel. */
   title: string;
   /** Accent color used to derive panel theme variables. */
@@ -31,7 +31,7 @@ export interface TimeTravelConfig {
 export class TimeTravelOverlay {
   public static count = 0;
   public index = TimeTravelOverlay.count;
-  public config: TimeTravelConfig;
+  public config: TimeTravelOverlayConfig;
   public readonly state = reactive({ open: false, import: "" });
   public readonly time: TimeTravelModule;
   public readonly els: Record<string, HTMLElement>;
@@ -42,9 +42,9 @@ export class TimeTravelOverlay {
    * @param time TimeTravel module instance that owns timeline operations.
    * @param build Optional initial overlay config overrides.
    */
-  constructor(time: TimeTravelModule, build: Partial<TimeTravelConfig> = {}) {
+  constructor(time: TimeTravelModule, build: Partial<TimeTravelOverlayConfig> = {}) {
     this.time = time;
-    this.config = reactive({ title: `Time Travel Overlay ${(this.index = ++TimeTravelOverlay.count)}`, ...build } as TimeTravelConfig);
+    this.config = reactive({ title: `Time Travel Overlay ${(this.index = ++TimeTravelOverlay.count)}`, ...build } as TimeTravelOverlayConfig);
     this.state.open = !!this.config.startOpen;
     const s = this.time.state,
       host = createEl("div", { className: "tt-overlay-host" }),
