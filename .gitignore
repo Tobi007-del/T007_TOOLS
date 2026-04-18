@@ -3,8 +3,6 @@ node_modules/
 
 # Build outputs
 dist/
-!packages/sia-reactor/demo/dist/
-!packages/sia-reactor/demo/dist/**
 .turbo/
 
 # OS/Editor files

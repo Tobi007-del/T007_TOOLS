@@ -12,11 +12,11 @@ This monorepo is divided into decoupled packages that can be used independently 
 
 | Package            | Description                                                                 |
 | ------------------ | --------------------------------------------------------------------------- |
-| **`sia-reactor`**  | State, Intent, and Architecture (SIA) engine for complex event propagation. |
-| **`@t007/toast`**  | Blazing fast, animated, promise-ready toast notifications.                  |
-| **`@t007/dialog`** | Accessible, fully-featured modal and dialog system.                         |
-| **`@t007/input`**  | Advanced form validation, file-upload, and input masking manager.           |
-| **`@t007/utils`**  | Zero-dependency DOM and object utilities powering the ecosystem.            |
+| **[`sia-reactor`](https://github.com/Tobi007-del/sia-reactor)**  | State, Intent, and Architecture (SIA) engine for complex event propagation. |
+| **[`@t007/toast`](https://github.com/Tobi007-del/t007-tools/tree/main/packages/toast#readme)**  | Blazing fast, animated, promise-ready toast notifications.                  |
+| **[`@t007/dialog`](https://github.com/Tobi007-del/t007-tools/tree/main/packages/dialog#readme)** | Accessible, fully-featured modal and dialog system.                         |
+| **[`@t007/input`](https://github.com/Tobi007-del/t007-tools/tree/main/packages/input#readme)**  | Advanced form validation, file-upload, and input masking manager.           |
+| **[`@t007/utils`](https://github.com/Tobi007-del/t007-tools/tree/main/packages/utils#readme)**  | Zero-dependency DOM and object utilities powering the ecosystem.            |
 
 ## 🚀 Installation
 
