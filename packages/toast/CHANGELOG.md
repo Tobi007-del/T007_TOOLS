@@ -1,5 +1,13 @@
 # @t007/toast
 
+## 0.0.21
+
+### Patch Changes
+
+- JSDoc Comments added for better devx
+- Updated dependencies
+  - @t007/utils@0.0.23
+
 ## 0.0.20
 
 ### Patch Changes

@@ -1,16 +1,27 @@
 import { isSym, isSameURL } from "..";
 import { createEl, assignEl } from "sia-reactor/utils";
 
+/** Resource type accepted by loadResource. */
 export type ResourceType = "style" | "script" | string;
+/** Options used when loading a script or stylesheet resource. */
 export type LoadResourceOptions = Partial<{
+  /** Load the script as a module. */
   module: boolean;
+  /** Media query applied to loaded stylesheets. */
   media: string;
+  /** crossorigin attribute for the resource element. */
   crossOrigin: "anonymous" | "use-credentials" | string | null;
+  /** Subresource integrity hash. */
   integrity: string;
+  /** Referrer policy for the resource element. */
   referrerPolicy: "no-referrer" | "origin" | "strict-origin-when-cross-origin" | string;
+  /** nonce attribute for CSP-enabled environments. */
   nonce: string;
+  /** fetchpriority hint for the browser. */
   fetchPriority: "high" | "low" | "auto";
+  /** Number of attempts before rejecting. */
   attempts: number;
+  /** Cache-busting retry token key. */
   retryKey: boolean | string; // retry token
 }>;
 
@@ -18,7 +29,15 @@ export type LoadResourceOptions = Partial<{
 export { createEl, assignEl };
 
 // Resource Loading
+/** Virtual resource marker used to skip real network loading. */
 export const VIRTUAL_RESOURCE: symbol = Symbol.for("T007_VIRTUAL_RESOURCE");
+/** Load a stylesheet or script into the current document with retry support.
+ * @param req Resource URL or virtual resource symbol.
+ * @param type Resource type to load.
+ * @param options Resource loading options.
+ * @param w Window-like target used for DOM insertion.
+ * @returns Promise resolving to the created element or void.
+ */
 export function loadResource(req: string | symbol, type: ResourceType = "style", { module, media, crossOrigin, integrity, referrerPolicy, nonce, fetchPriority, attempts = 3, retryKey = false }: LoadResourceOptions = {}, w = window): Promise<HTMLElement | void> {
   (w.t007 ??= {} as any), (w.t007._resourceCache ??= {});
   if (req === VIRTUAL_RESOURCE || isSym(req)) return Promise.resolve();

@@ -1,21 +1,36 @@
 import { createEl } from "..";
 
 // ============ Vertical Scrollerator ============
+/** Configuration for the vertical edge-scrolling helper. */
 interface ScrolleratorOptions {
+  /** Starting lines-per-second speed. */
   baseSpeed?: number;
+  /** Maximum accelerated speed. */
   maxSpeed?: number;
+  /** Delay before acceleration kicks in. */
   stepDelay?: number;
+  /** Base frame rate used to estimate movement. */
   baseRate?: number;
+  /** Approximate line height in pixels. */
   lineHeight?: number;
+  /** Edge margin that triggers scrolling. */
   margin?: number;
+  /** Scroll container or window target. */
   car?: Window | HTMLElement;
 }
 
+/** Scrolling controls returned by initVScrollerator. */
 interface Scrollerator {
+  /** Trigger a scroll frame and return the computed distance. */
   drive: (clientY: number, brake?: boolean, offsetY?: number) => number;
+  /** Reset speed and timers. */
   reset: () => void;
 }
 
+/** Create an edge-driven vertical scrolling controller.
+ * @param options Scrollerator configuration.
+ * @returns Drive and reset controls for the controller.
+ */
 export function initVScrollerator({ baseSpeed = 3, maxSpeed = 10, stepDelay = 2000, baseRate = 16, lineHeight = 80, margin = 80, car = window }: ScrolleratorOptions = {}): Scrollerator {
   let linesPerSec = baseSpeed,
     accelId: ReturnType<typeof setTimeout> | null = null,
@@ -35,18 +50,31 @@ export function initVScrollerator({ baseSpeed = 3, maxSpeed = 10, stepDelay = 20
 }
 
 // ============ Scroll Assist ============
+/** Scroll assist control object returned by initScrollAssist. */
 export interface ScrollAssistControl {
+  /** Recompute assist visibility. */
   update: () => void;
+  /** Tear down observers and assist elements. */
   destroy: () => void;
 }
 
+/** Configuration for scroll assist overlays. */
 interface ScrollAssistOptions {
+  /** Scroll speed in pixels per second. */
   pxPerSecond?: number;
+  /** Class name applied to assist overlays. */
   assistClassName?: string;
+  /** Enable vertical assist overlays. */
   vertical?: boolean;
+  /** Enable horizontal assist overlays. */
   horizontal?: boolean;
 }
 
+/** Attach directional scroll assist overlays to an element.
+ * @param el Scrollable element to enhance.
+ * @param options Scroll assist configuration.
+ * @returns Scroll assist controls or void when the element is already managed.
+ */
 export function initScrollAssist(el: HTMLElement, { pxPerSecond = 80, assistClassName = "tmg-video-controls-scroll-assist", vertical = true, horizontal = true }: ScrollAssistOptions = {}): ScrollAssistControl | void {
   t007._scrollers ??= new WeakMap<HTMLElement, ScrollAssistControl>();
   t007._scroller_r_observer ??= new ResizeObserver((entries) => entries.forEach(({ target }) => t007._scrollers!.get(target as HTMLElement)?.update()));
@@ -125,4 +153,7 @@ export function initScrollAssist(el: HTMLElement, { pxPerSecond = 80, assistClas
   return (update(), t007._scrollers!.get(el));
 }
 
+/** Remove scroll assist from an element.
+ * @param el Target element.
+ */
 export const removeScrollAssist = (el: HTMLElement) => t007._scrollers!.get(el)?.destroy();

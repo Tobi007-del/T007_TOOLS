@@ -1,5 +1,11 @@
 # @t007/utils
 
+## 0.0.23
+
+### Patch Changes
+
+- JSDoc Comments added for better devx
+
 ## 0.0.22
 
 ### Patch Changes

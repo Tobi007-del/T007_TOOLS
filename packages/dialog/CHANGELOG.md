@@ -1,5 +1,13 @@
 # @t007/dialog
 
+## 0.0.20
+
+### Patch Changes
+
+- JSDoc Comments added for better devx
+- Updated dependencies
+  - @t007/utils@0.0.23
+
 ## 0.0.19
 
 ### Patch Changes
