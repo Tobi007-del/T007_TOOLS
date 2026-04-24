@@ -258,14 +258,14 @@ window.exportFormJSON = function exportFormJSON() {
 };
 
 window.saveToLocal = function saveToLocal(e) {
-  localStorage.setItem("savedForm", JSON.stringify(getFieldsData()));
+  localStorage.setItem("t007SavedForm", JSON.stringify(getFieldsData()));
   if (document.activeElement.tagName == "BUTTON") {
     Toast.success("Saved Session to Local Storage", { tag: "save" });
   }
 };
 
 window.loadFromLocal = function loadFromLocal() {
-  const json = localStorage.getItem("savedForm");
+  const json = localStorage.getItem("t007SavedForm");
   if (!json) return;
   const fields = JSON.parse(json);
   dropZone.innerHTML = "";

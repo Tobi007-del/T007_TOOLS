@@ -1,6 +1,6 @@
 {
   "name": "@t007/dialog",
-  "version": "0.0.20",
+  "version": "0.0.22",
   "description": "A lightweight, pure JS dialog system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -55,6 +55,6 @@
     "accessible"
   ],
   "dependencies": {
-    "@t007/utils": "^0.0.23"
+    "@t007/utils": "^0.0.25"
   }
 }

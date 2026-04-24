@@ -75,7 +75,7 @@ interface ScrollAssistOptions {
  * @param options Scroll assist configuration.
  * @returns Scroll assist controls or void when the element is already managed.
  */
-export function initScrollAssist(el: HTMLElement, { pxPerSecond = 80, assistClassName = "tmg-video-controls-scroll-assist", vertical = true, horizontal = true }: ScrollAssistOptions = {}): ScrollAssistControl | void {
+export function initScrollAssist(el: HTMLElement, { pxPerSecond = 80, assistClassName = "t007-scroll-assist", vertical = true, horizontal = true }: ScrollAssistOptions = {}): ScrollAssistControl | void {
   t007._scrollers ??= new WeakMap<HTMLElement, ScrollAssistControl>();
   t007._scroller_r_observer ??= new ResizeObserver((entries) => entries.forEach(({ target }) => t007._scrollers!.get(target as HTMLElement)?.update()));
   t007._scroller_m_observer ??= new MutationObserver((entries) => {

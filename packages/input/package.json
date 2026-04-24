@@ -1,6 +1,6 @@
 {
   "name": "@t007/input",
-  "version": "0.0.21",
+  "version": "0.0.23",
   "description": "A lightweight, pure JS input system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -55,6 +55,6 @@
     "monkey-patch"
   ],
   "dependencies": {
-    "@t007/utils": "^0.0.23"
+    "@t007/utils": "^0.0.25"
   }
 }

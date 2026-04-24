@@ -109,7 +109,7 @@ var formManager = {
       });
     if (floatingLabel) floatingLabel.ontransitionend = () => floatingLabel.classList.remove("t007-input-shake");
     if (eyeOpen && eyeClosed) eyeOpen.onclick = eyeClosed.onclick = () => t007.FM.togglePasswordType(input);
-    initScrollAssist(field.querySelector(".t007-input-helper-text-wrapper"), { vertical: false });
+    initScrollAssist(field.querySelector(".t007-input-helper-text-wrapper"), { vertical: false, assistClassName: "t007-input-scroll-assist" });
   },
   setUpField(field) {
     if (field.dataset.setUp) return;

@@ -1,5 +1,17 @@
 # @t007/utils
 
+## 0.0.25
+
+### Patch Changes
+
+- UI fixes
+
+## 0.0.24
+
+### Patch Changes
+
+- Updated sia-reactor external dependencies to have updated jsdocs for devx
+
 ## 0.0.23
 
 ### Patch Changes
