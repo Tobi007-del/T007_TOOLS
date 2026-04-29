@@ -1,4 +1,4 @@
-// import toast from "https://esm.sh/@t007/toast@latest";
+import toast from "https://esm.sh/@t007/toast@latest";
 
 let rootElement; // For testing scoped toasts
 

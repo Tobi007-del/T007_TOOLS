@@ -1,4 +1,4 @@
-// import { alert, confirm, prompt } from "https://esm.sh/@t007/dialog@latest";
+import { alert, confirm, prompt } from "https://esm.sh/@t007/dialog@latest";
 
 let rootElement = undefined; // For testing scoped dialogs
 
