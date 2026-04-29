@@ -14,12 +14,12 @@
   --t007-dialog-border: 0.05rem solid rgba(255, 255, 255, 0.25);
   --t007-dialog-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5), -2px -2px 6px rgba(0, 0, 0, 0.5);
   --t007-dialog-backdrop-background: rgba(0, 0, 0, 0.2);
-  --t007-dialog-backdrop-blur: blur(6px);
+  --t007-dialog-backdrop-filter: blur(6px);
   --t007-dialog-message-color: whitesmoke;
   --t007-dialog-message-font-size: 0.9rem;
-  --t007-dialog-button-font-size: 0.8rem;
+  --t007-dialog-button-font-size: 0.85rem;
   --t007-dialog-button-text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-  --t007-dialog-button-min-width: 4.7rem;
+  --t007-dialog-button-min-width: 4.5rem;
   --t007-dialog-button-width: unset;
   --t007-dialog-button-max-width: unset;
   --t007-dialog-button-min-height: 2.3rem;
@@ -42,7 +42,7 @@
   --t007-confirm-button-background: var(--t007-cancel-button-color);
   --t007-cancel-button-color: greenyellow;
   --t007-cancel-button-background: var(--t007-confirm-button-color);
-  --t007-confirm-button-outline-color: var(--t007-confirm-button-color);
+  --t007-confirm-button-outline-color: var(--t007-cancel-button-color);
   --t007-cancel-button-outline-color: var(--t007-cancel-button-color);
 }
 
@@ -67,12 +67,12 @@
 }
 
 .t007-dialog *:focus {
-  outline-style: dashed;
-  outline-offset: 0.1rem;
+  outline-style: solid;
+  outline-offset: 2px;
   outline-width: 0;
 }
 
-.t007-dialog *:focus-visible {
+.t007-dialog *:is(:focus-visible, :where(.focus-outline:focus)) {
   outline-width: 0.15rem;
   transition: none !important;
 }
@@ -99,8 +99,14 @@ body:has(.t007-dialog[open]) {
   overflow-y: visible; /* incase anyone has sticky content */
 }
 
+*:where(:has(> .t007-dialog.t007-dialog-scoped[open])) {
+  position: relative;
+  overflow: hidden !important;
+}
+
 .t007-dialog,
-.t007-dialog::backdrop {
+.t007-dialog::backdrop,
+.t007-dialog.t007-dialog-scoped::before {
   position: fixed;
   inset: 0;
   margin: auto;
@@ -109,7 +115,16 @@ body:has(.t007-dialog[open]) {
   transition-duration: var(--t007-dialog-start-duration);
   transition-behavior: allow-discrete;
 }
+.t007-dialog.t007-dialog-scoped,
+.t007-dialog.t007-dialog-scoped::before {
+  position: absolute;
+}
 
+.t007-dialog,
+.t007-dialog form {
+  flex-direction: column;
+  gap: var(--t007-dialog-gap);
+}
 .t007-dialog {
   padding: 0;
   margin: auto;
@@ -123,9 +138,15 @@ body:has(.t007-dialog[open]) {
   box-shadow: var(--t007-dialog-box-shadow);
   opacity: var(--t007-dialog-start-opacity);
   transform: var(--t007-dialog-start-transform);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+.t007-dialog.t007-dialog-scoped {
+  z-index: 2147483647;
 }
 
 .t007-dialog[open] {
+  display: flex;
   opacity: 1;
   transform: none;
 }
@@ -136,28 +157,29 @@ body:has(.t007-dialog[open]) {
   }
 }
 
-.t007-dialog,
-.t007-dialog form {
-  flex-direction: column;
-  gap: var(--t007-dialog-gap);
-}
-.t007-dialog[open],
-.t007-dialog form {
-  display: flex;
-}
-
-.t007-dialog::backdrop {
+.t007-dialog::backdrop,
+.t007-dialog.t007-dialog-scoped::before {
   background-color: transparent;
 }
+.t007-dialog.t007-dialog-scoped::before {
+  content: "";
+  top: -100lvh;
+  left: -100lvw;
+  width: 200lvw;
+  height: 200lvh;
+  transform: translateZ(-1px);
+}
 
-.t007-dialog[open]::backdrop {
+.t007-dialog[open]::backdrop,
+.t007-dialog.t007-dialog-scoped[open]::before {
   display: block;
   background-color: var(--t007-dialog-backdrop-background);
   -webkit-backdrop-filter: var(--t007-dialog-backdrop-blur);
   backdrop-filter: var(--t007-dialog-backdrop-blur);
 }
 @starting-style {
-  .t007-dialog[open]::backdrop {
+  .t007-dialog[open]::backdrop,
+  .t007-dialog.t007-dialog-scoped[open]::before {
     background-color: transparent;
   }
 }
@@ -183,6 +205,10 @@ body:has(.t007-dialog[open]) {
 
 .t007-dialog:has(.field) .t007-dialog-top-section {
   padding-block-end: 0;
+}
+
+.t007-dialog form {
+  display: flex;
 }
 
 .t007-dialog-question {

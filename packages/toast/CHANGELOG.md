@@ -1,5 +1,13 @@
 # @t007/toast
 
+## 0.0.24
+
+### Patch Changes
+
+- Major refactoring and API standardization with react integrations
+- Updated dependencies
+  - @t007/utils@0.0.26
+
 ## 0.0.23
 
 ### Patch Changes

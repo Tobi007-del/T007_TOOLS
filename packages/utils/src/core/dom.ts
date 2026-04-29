@@ -1,6 +1,17 @@
 import { isSym, isSameURL } from "..";
 import { createEl, assignEl } from "sia-reactor/utils";
 
+// Element Factory
+
+export { createEl, assignEl };
+
+/** Exhaustive Selector used for interactive, tabbable UI controls. */
+export const INTERACTIVE_SELECTOR = 'button,[href],input,label,select,textarea,details>summary,[contenteditable],iframe,audio[controls],video[controls],[tabindex]:not([tabindex="-1"])';
+/** Check whether an event target points to an interactive element. */
+export const isInteractive = (target: EventTarget | null): target is HTMLElement => target instanceof HTMLElement && target.matches(INTERACTIVE_SELECTOR);
+
+// Resource Loading
+
 /** Resource type accepted by loadResource. */
 export type ResourceType = "style" | "script" | string;
 /** Options used when loading a script or stylesheet resource. */
@@ -25,10 +36,6 @@ export type LoadResourceOptions = Partial<{
   retryKey: boolean | string; // retry token
 }>;
 
-// Element Factory
-export { createEl, assignEl };
-
-// Resource Loading
 /** Virtual resource marker used to skip real network loading. */
 export const VIRTUAL_RESOURCE: symbol = Symbol.for("T007_VIRTUAL_RESOURCE");
 /** Load a stylesheet or script into the current document with retry support.
@@ -64,4 +71,13 @@ export function loadResource(req: string | symbol, type: ResourceType = "style",
     })(attempts);
   });
   return w.t007._resourceCache[src];
+}
+
+/** Get the currently active element, traversing into shadow roots if necessary.
+ * @param root Root node to start searching from, defaults to the main document.
+ * @returns The active element or null if none found.
+ */
+export function getActiveElement(root: Document | ShadowRoot = document): Element | null {
+  const activeEl = root.activeElement;
+  return !activeEl ? null : activeEl.shadowRoot ? getActiveElement(activeEl.shadowRoot) : activeEl;
 }

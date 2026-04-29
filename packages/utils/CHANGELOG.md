@@ -1,5 +1,13 @@
 # @t007/utils
 
+## 0.0.26
+
+### Patch Changes
+
+- Major refactoring and API standardization with react integrations
+- Updated dependencies
+  - @t007/input@0.0.24
+
 ## 0.0.25
 
 ### Patch Changes

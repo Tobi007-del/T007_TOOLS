@@ -4,7 +4,7 @@
   --t007-input-width: 100%;
   --t007-input-height: 3rem;
   --t007-input-font-size: 1rem;
-  --t007-input-floating-label-scale: 0.75;
+  --t007-input-floating-label-scale: 0.85;
   --t007-input-border-width: 1px;
   --t007-input-focused-border-width: 2px;
   --t007-input-border-style: solid;
@@ -66,9 +66,9 @@
   /* derived */
   --t007-input-padding: calc(var(--t007-input-height) / 4);
   --t007-input-floating-label-font-size: calc(var(--t007-input-font-size) * var(--t007-input-floating-label-scale));
-  --t007-input-helper-font-size: calc(var(--t007-input-font-size) * 0.7);
+  --t007-input-helper-font-size: calc(var(--t007-input-font-size) * var(--t007-input-floating-label-scale));
   --t007-input-border-radius: calc(var(--t007-input-height) / 12);
-  --t007-input-p-meter-font-size: calc(var(--t007-input-font-size) * 0.75);
+  --t007-input-p-meter-font-size: calc(var(--t007-input-font-size) * var(--t007-input-floating-label-scale));
   --t007-input-p-meter-gap: calc(var(--t007-input-font-size) * 0.25);
   --t007-input-p-meter-height: calc(var(--t007-input-font-size) * 0.25);
   --t007-input-checkbox-font-size: calc(var(--t007-input-font-size) * 0.9);
@@ -286,7 +286,9 @@
 .t007-input-floating-label {
   position: relative;
   top: calc(var(--t007-input-height) / 2);
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--t007-input-font-size) / 3);
   max-width: 100%;
   transform: translateY(-50%);
   color: var(--t007-input-current-label-color);

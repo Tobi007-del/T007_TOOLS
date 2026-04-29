@@ -1,6 +1,6 @@
 # @t007/utils
 
-> The foundational utility belt and central nervous system for the `@t007` UI ecosystem. A collection of highly optimized, zero-dependency vanilla JavaScript helpers for DOM manipulation, async resource loading, and math operations.
+> The foundational utility belt and central nervous system for the `@t007` UI ecosystem. A collection of highly optimized, JavaScript helpers for DOM manipulation, async resource loading, and math operations.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Tobi007-del/t007-tools/blob/main/LICENSE)
 [![NPM Version](https://img.shields.io/npm/v/@t007/utils.svg)](https://www.npmjs.com/package/@t007/utils)
@@ -32,7 +32,6 @@
 
 - ✅ **Tree-Shakeable:** Every utility is exported individually. Modern bundlers will only compile the exact code you import, resulting in zero bloat.
 - ✅ **Shared Memory:** By acting as a peer dependency for the other `@t007` packages, it ensures that your application doesn't download duplicate helper functions.
-- ✅ **Zero Frameworks:** 100% pure vanilla JavaScript. 
 
 ---
 
@@ -50,7 +49,7 @@
 
 ### Built with
 
-- Vanilla JavaScript (ES6+)
+- JavaScript (ES6+)
 - Bundled via `tsup` (ESM, CJS, IIFE outputs)
 - Built for extreme execution speed and minimal byte size.
 
@@ -86,7 +85,95 @@ import { createEl, loadResource, uid } from '@t007/utils';
 const myBtn = createEl('button', { className: 'my-custom-btn', textContent: 'Click Me' });
 
 // Inject a stylesheet dynamically
-await loadResource('https://cdn.example.com/styles.css, 'link');
+await loadResource('https://cdn.example.com/styles.css', 'link');
+```
+
+### Built-in Hooks
+
+| React Hook      | Vanilla Counterpart |
+| --------------- | ------------------- |
+| useRipple       | rippleHandler       |
+| useScrollAssist | initScrollAssist    |
+| useFocusTrap    | initFocusTrap       |
+| useOutsideClick | initOutsideClick    |
+| useHighlight    | N/A                 |
+| N/A             | initVScrollerator   |
+
+### Built-in Components
+| React Component | Vanilla Counterpart |
+| --------------- | ------------------- |
+| HighlightText   | N/A                 |
+
+### Code  Sample
+
+```tsx
+import { useRef } from "react";
+import { useScrollAssist, useRipple } from "@t007/utils/hooks/react";
+import { HighlightText } from "@t007/utils/components/react";
+import '@t007/utils/styles/ripple.css';
+import "@t007/utils/styles/scroll-assist.css";
+
+export function HelperTextScroller() {
+  const ref = useRef<HTMLDivElement>(null);
+  useScrollAssist(ref, { vertical: false, assistClassName: "scroll-assist" });
+  const rippleHandler = useRipple();
+
+  return (
+    <div className="text-wrapper">
+      <p ref={ref} className="text">
+        <HighlightText query="helper" className="highlight">
+          Long helper text to demonstrate highlighting and scroll assistance.
+        </HighlightText>
+      </p>
+      <button onPointerDown={rippleHandler}>Click Me</button>
+    </div>
+  );
+}
+```
+
+### Styles
+
+It includes:
+- `.t007-ripple-wrapper`, `.t007-ripple`, `.t007-ripple-hold`, `.t007-ripple-fade` (default ripple classes)
+- `.t007-scroll-assist` (default assist class)
+
+All defaults are exposed as root-level, `t007`-prefixed variables:
+
+```css
+:root {
+  /** default ripple values */
+  --t007-ripple-initial-opacity: 0.4;
+  --t007-ripple-initial-scale: 0.5;
+  --t007-ripple-expand-scale: 2.05;
+  --t007-ripple-color: rgb(0 0 0 / 0.24);
+  --t007-ripple-expand-duration: 350ms;
+  --t007-ripple-fade-duration: 350ms;
+  /** default scroll assist values */
+  --t007-scroll-assist-color: rgb(0 0 0 / 1);
+  --t007-scroll-assist-opacity: 0.07;
+  --t007-scroll-assist-min-width: 2rem;
+  --t007-scroll-assist-height: 2rem;
+  --t007-scroll-assist-inline-offset: -0.35rem;
+  --t007-scroll-assist-block-offset: 0;
+}
+
+/** custom pre-requisites */
+.highlight {
+  background-color: yellow;
+}
+.text-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 2rem;
+}
+.text {
+  white-space: nowrap;
+  overflow: auto hidden;
+  scrollbar-width: none;
+}
+.text::-webkit-scrollbar {
+  display: none;
+}
 ```
 
 -----

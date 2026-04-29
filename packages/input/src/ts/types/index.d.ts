@@ -1,52 +1,24 @@
 import "@t007/utils";
+import { BaseProps, CheckboxInputAddon, DateInputAddon, FileInputAddon, SelectElementAddon } from "../react";
 
-/** Configuration accepted by the field() helper. */
-export interface FieldOptions extends Partial<
-  Omit<HTMLInputElement, "type" | "className" | "children">
-> {
-  /** Wrap the field in its own container. */
-  isWrapper?: boolean;
+interface BaseOptions extends Omit<BaseProps, "error"> {
   /** Visible label text. */
   label?: string;
-  /** Input type to render. */
-  type?: string;
-  /** Placeholder text. */
-  placeholder?: string;
-  /** Custom CSS class or class list. */
-  custom?: string;
-  /** Minimum value length or count. */
-  minSize?: number;
-  /** Maximum value length or count. */
-  maxSize?: number;
-  /** Minimum total size allowed across the field value. */
-  minTotalSize?: number;
-  /** Maximum total size allowed across the field value. */
-  maxTotalSize?: number;
-  /** Options used by select-like fields. */
-  options?: Array<string | { value: string; option: string }>;
-  /** Whether the checkbox is partially selected. */
-  indeterminate?: boolean;
-  /** Show the password visibility toggler. */
-  eyeToggler?: boolean;
-  /** Enable the password strength meter. */
-  passwordMeter?: boolean;
-  /** Helper text shown under the field. */
-  helperText?: false | Record<string, string>;
-  /** Class applied to the root field element. */
-  className?: string;
-  /** Class applied to the inner field control. */
-  fieldClassName?: string;
   /** Optional child element rendered inside the field wrapper. */
   children?: HTMLElement;
-  /** End icon rendered inside the field control. */
-  endIcon?: string;
-  /** Native icon rendered by the browser control. */
-  nativeIcon?: string;
-  /** Icon shown when the password is visible. */
-  passwordVisibleIcon?: string;
-  /** Icon shown when the password is hidden. */
-  passwordHiddenIcon?: string;
 }
+type InputAttrs = Partial<Omit<HTMLInputElement, "type" | "children">>;
+type SelectAttrs = Partial<Omit<HTMLSelectElement, "type" | "children">>;
+type TextareaAttrs = Partial<Omit<HTMLTextAreaElement, "type" | "children">>;
+type PasswordFieldOptions = BaseOptions & InputAttrs & Omit<FileInputAddon, "passwordVisibleIcon" | "passwordHiddenIcon"> & { passwordVisibleIcon?: HTMLElement; passwordHiddenIcon?: HTMLElement };
+type FileFieldOptions = BaseOptions & InputAttrs & FileInputAddon;
+type CheckboxFieldOptions = BaseOptions & InputAttrs & CheckboxInputAddon;
+type DateFieldOptions = BaseOptions & InputAttrs & DateInputAddon;
+type GenericFieldOptions = BaseOptions & InputAttrs & { type?: Exclude<HTMLInputElement["type"], "password" | "file" | "checkbox" | NativeType> };
+type TextareaFieldOptions = BaseOptions & TextareaAttrs & { type: "textarea" };
+type SelectFieldOptions = BaseOptions & SelectAttrs & SelectElementAddon;
+/** Configuration accepted by the field() helper. */
+export type FieldOptions = PasswordFieldOptions | FileFieldOptions | CheckboxFieldOptions | DateFieldOptions | GenericFieldOptions | TextareaFieldOptions | SelectFieldOptions;
 
 /** Form-level manager used to build and validate inputs. */
 export interface FormManager {
@@ -63,10 +35,7 @@ export interface FormManager {
    * @param opts Validation options.
    * @returns Violation information and user-facing message.
    */
-  getFilesHelper(
-    files: FileList | File[],
-    opts: any,
-  ): { violation: string | null; message: string };
+  getFilesHelper(files: FileList | File[], opts: any): { violation: string | null; message: string };
   /** Format a file size for display.
    * @param size Size in bytes.
    * @param decimals Decimal precision.
@@ -135,13 +104,13 @@ declare global {
     handleFormValidation?: T007Namespace["handleFormValidation"];
   }
   interface HTMLFormElement {
-    /** Client-side submit hook. */
-    onSubmit?(): void;
-    /** Check validation on the client. */
+    /** Vanilla-only Client-side submit hook. Use instead of `onsubmit` to escape browser behavior. */
+    onSubmit?(e: Event): void;
+    /** Vanilla-only Check validation on the client. Reference to internals for manual use. */
     validateOnClient?(): boolean;
-    /** Check validation on the server. */
+    /** Vanilla-only Check validation on the server. Assign custom server-side validation logic. */
     validateOnServer?(): Promise<boolean>;
-    /** Toggle the global error state. */
+    /** Vanilla-only Toggle the global error state. Reference to internals for manual use. */
     toggleGlobalError?(bool: boolean): void;
   }
 }

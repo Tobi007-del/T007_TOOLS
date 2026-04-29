@@ -1,0 +1,8 @@
+import { useEffect, type RefObject } from "react";
+import { initOutsideClick, type OutsideClickConfig } from "../vanilla/outsideClick";
+import { NIL } from "sia-reactor";
+
+/** React hook to attach outside-click, escape, and optional focus-out handling to an element. */
+export function useOutsideClick<T extends HTMLElement>(ref: RefObject<T>, config: OutsideClickConfig = NIL) {
+  useEffect(() => (ref.current ? initOutsideClick(ref.current, config) : undefined), [ref, config.enabled, config.onOutsideClick, config.clickOnEscape, config.clickOnClick, config.clickOnFocusOut, config.allowInputs, config.root, config.scoped, config.capture]);
+}

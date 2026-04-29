@@ -29,7 +29,7 @@
 
 ## Overview
 
-**@t007/dialog** is a sophisticated UI library that completely overrides the ugly, thread-blocking native browser dialogs with beautiful, non-blocking, Promise-based alternatives.
+**@t007/dialog** is a lightweight UI library that completely overrides the "ugly", thread-blocking native browser dialogs with beautiful, non-blocking, Promise-based alternatives.
 
 ### Why @t007/dialog?
 
@@ -62,7 +62,6 @@ Integrates with the `t007.FM` (Form Manager) to capture, validate, and return us
 - **Promise-Based API**: Use `async/await` for incredibly clean control flow.
 - **Form Validation**: Native form validation built directly into the prompt modal.
 - **Keyboard Navigation**: Native `Esc` key cancellation and auto-focusing capabilities.
-- **Tree-Shakeable**: Import only the specific dialogs you need.
 - **Highly Customizable**: Clean DOM structure with distinct CSS classes for easy overriding.
 
 ---
@@ -163,7 +162,11 @@ Displays a simple message and a confirmation button.
 
   - **`message`** *(String)*: The text to display.
   - **`options`** *(Object)*: Optional configuration.
+      - `options.id` *(String)*: Unique identifier for the dialog for programmatic dismissal.
       - `options.confirmText` *(String)*: Custom text for the button (Default: `"OK"`).
+      - `options.closedBy` *(String)*: Browser behavior for handling dialog closure.
+      - `options.rootElement` *(HTMLElement)*: Render dialog inside this element.
+      - `options.scoped` *(Boolean)*: Whether to restrict interactions to `rootElement` if provided. Defaults to `true`.
   - **Returns**: `Promise<true>`
 
 ### `confirm(question, options)`
@@ -172,8 +175,12 @@ Displays a question with confirm and cancel buttons.
 
   - **`question`** *(String)*: The question to ask the user.
   - **`options`** *(Object)*: Optional configuration.
+      - `options.id` *(String)*: Unique identifier for the dialog for programmatic dismissal.
       - `options.confirmText` *(String)*: Custom text for the confirm button (Default: `"OK"`).
       - `options.cancelText` *(String)*: Custom text for the cancel button (Default: `"Cancel"`).
+      - `options.closedBy` *(String)*: Browser behavior for handling dialog closure.
+      - `options.rootElement` *(HTMLElement)*: Render dialog inside this element.
+      - `options.scoped` *(Boolean)*: Whether to restrict interactions to `rootElement` if provided. Defaults to `true`.
   - **Returns**: `Promise<boolean>` (`true` if confirmed, `false` if cancelled).
 
 ### `prompt(question, defaultValue, options)`
@@ -182,11 +189,26 @@ Displays an input field to collect data from the user. Note: This automatically 
 
   - **`question`** *(String)*: The prompt instructions.
   - **`defaultValue`** *(String)*: The initial value placed inside the input.
-  - **`options`** *(Object)*: Optional configuration passed directly to the input field generation.
+  - **`options`** *(Object)*: Optional @t007/input configuration passed directly to the input field generation.
+      - `options.id` *(String)*: Unique identifier for the dialog for programmatic dismissal, also used as the input's ID.
       - `options.confirmText` *(String)*: Custom text for the submit button.
       - `options.cancelText` *(String)*: Custom text for the cancel button.
+      - `options.closedBy` *(String)*: Browser behavior for handling dialog closure.
+      - `options.rootElement` *(HTMLElement)*: Render dialog inside this element.
       - *Accepts standard HTML input attributes (type, required, placeholder, etc.)*
+      - `options.scoped` *(Boolean)*: Whether to restrict interactions to `rootElement` if provided. Defaults to `true`.
   - **Returns**: `Promise<String | null>` (Returns the string value, or `null` if cancelled).
+
+### `dismiss(id, response)`
+Programatically dismiss a dialog by id or all dialogs when no id is provided.
+
+  - **`id`** *(String)*: Optional unique identifier of the dialog to dismiss. If not provided, all dialogs will be dismissed.
+  - **`response`** *(Any)*: Optional value to resolve the dialog's promise with. If not provided, defaults to `true` for confirm and alert dialogs, and `null` for prompt dialogs.
+
+#### Backdrop behavior
+
+- Default mode uses native `<dialog>.showModal()` and native `::backdrop`.
+- Scoped mode (`rootElement`) uses `<dialog>.show()` with a pseudo backdrop.
 
 -----
 
@@ -194,7 +216,7 @@ Displays an input field to collect data from the user. Note: This automatically 
 
 The dialogs are built with semantic, easily targetable CSS classes. You can easily override these in your own stylesheet to match your application's theme.
 
-### CSS Selectors
+### CSS Selectors & Variables
 
   - `.t007-dialog`: The main `<dialog>` container.
   - `.t007-dialog-top-section`: The wrapper for the text content.
@@ -204,16 +226,27 @@ The dialogs are built with semantic, easily targetable CSS classes. You can easi
   - `.t007-dialog-cancel-button`: The secondary/cancel button.
   - `.t007-input-form`: The form wrapper used exclusively in the `prompt` dialog.
 
-Example override:
+#### Override Starter (Chrome like)
 
 ```css
-/* Change the confirm button to a red destructive button */
-.t007-dialog-confirm-button {
-  background-color: #dc3545;
-  color: white;
-  border-radius: 8px;
+:root {
+  --t007-dialog-backdrop-background: rgba(0, 0, 0, 0.6);
+  --t007-dialog-backdrop-filter: none;
+  --t007-cancel-button-color: dodgerblue;
+  /* ...check source code for all variables... */
+}
+.t007-dialog {
+  margin-top: 0;
 }
 ```
+
+#### Specificity Note
+
+- Start with `:root` for shared dialog tokens.
+- If a token does not apply, override directly on `.t007-dialog`.
+- For targeted styling, use child selectors like `.t007-dialog-question`, `.t007-dialog-confirm-button`, and `.t007-dialog-cancel-button`.
+- For strong app themes (e.g. `html[data-theme="dark"]`), use equal/stronger selectors like `html[data-theme="dark"] .t007-dialog`.
+- Check source code for more details.
 
 -----
 

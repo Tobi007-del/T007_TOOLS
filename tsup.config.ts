@@ -1,21 +1,31 @@
-import { defineConfig } from "tsup";
-import fs from "fs";
+import { defineConfig, type Options } from "tsup";
+import { copyFileSync, existsSync } from "node:fs";
 
-export default defineConfig([
+const config: Options[] = [
   // 1. The NPM Build (ESM)
   {
-    entry: ["src/index.js"],
+    entry: ["src/js/index.js"],
     format: ["esm"],
     clean: true,
   },
   // 2. The Browser IIFE Build
   {
-    entry: ["src/index.js"],
+    entry: ["src/js/index.js"],
     format: ["iife"],
     noExternal: ["@t007/utils"],
     async onSuccess() {
       const typePath = "src/ts/types/index.d.ts";
-      if (fs.existsSync(typePath)) fs.copyFileSync(typePath, "dist/index.d.ts"), console.log("✅ Custom types copied to dist!");
+      if (existsSync(typePath)) copyFileSync(typePath, "dist/index.d.ts"), console.log("✅ Custom types copied to dist!");
     },
   },
-]);
+];
+
+if (existsSync("src/ts/react.ts")) {
+  config.push({
+    entry: ["src/ts/react.ts"],
+    format: ["esm"],
+    dts: true
+  });
+}
+
+export default defineConfig(config);

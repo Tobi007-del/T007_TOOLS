@@ -1,6 +1,7 @@
 import { isStr } from "..";
 
 // Generation
+
 /** Create a short unique string with an optional prefix.
  * @param prefix Prefix added to the generated id.
  * @returns A browser-safe unique id string.

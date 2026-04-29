@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,19 +6,87 @@
     <title>T007 Toast Library</title>
     <link rel="icon" type="image/jpeg" sizes="32x32" href="../../../assets/images/my_profile_s.jpeg" />
     <style>
+      :root {
+        --app-surface: #ffffff;
+        --app-text: #202124;
+        --app-muted: #5f6368;
+        --app-muted-2: #9aa0a6;
+      }
+      * {
+        box-sizing: border-box;
+      }
       body {
         height: 100vh;
+        margin: 0;
+        padding: 8px;
         background-image: linear-gradient(330deg, rgba(255, 0, 0, 0.8), rgba(255, 166, 0, 0.8), rgba(255, 255, 0, 0.8), rgba(0, 128, 0, 0.8), rgba(0, 0, 255, 0.5), rgba(76, 0, 130, 0.8), rgba(238, 130, 238, 0.8));
         background-repeat: no-repeat;
         background-size: cover;
         font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+      .info-wrapper {
+        position: relative;
+        flex: 1;
+        margin: auto;
+        padding: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      html.scoped .info-wrapper {
+        max-height: 50vh;
+        border: 2px dashed black;
+      }
+      .info-text {
+        color: black;
+        text-align: center;
+        font-size: 18px;
+      }
+      html.corporate .t007-toast {
+        --t007-toast-type-color: var(--app-text);
+        --t007-toast-background: var(--app-surface);
+        --t007-toast-text-shadow: none;
+        --t007-toast-text-stroke: 0;
+        --t007-toast-x-color: var(--app-muted-2);
+        --t007-toast-action-button-font-weight: 600;
+      }
+      html.corporate .t007-toast-container {
+        --t007-toast-unit: 0.9rem;
+        --t007-toast-width: calc(var(--t007-toast-unit) * 25);
+        --t007-toast-min-height: 3.25rem;
+        --t007-toast-progress-height: calc(var(--t007-toast-unit) / 6);
+        --t007-toast-icon-width: calc(var(--t007-toast-unit) * 1.25);
+        --t007-toast-icon-height: calc(var(--t007-toast-unit) * 1.25);
+        --t007-toast-x-size: calc(var(--t007-toast-unit) * 1.5);
+      }
+      html.scoped #try-scoped-btn {
+        left: 8px !important;
+      }
+      @media (max-width: 40rem) {
+        html.corporate .t007-toast-container {
+          --t007-toast-unit: 0.95rem;
+          --t007-toast-container-margin: 16px;
+        }
       }
     </style>
   </head>
   <body>
-    <button type="button" title="Show Toast" onclick="showToast()">Show Toast</button>
-    <button type="button" title="Show Promise Toast" onclick="showPromiseToast()">Show Promise Toast</button>
+    <div>
+      <button type="button" title="Show Toast" onclick="showToast()">Show Toast</button>
+      <button type="button" title="Show Promise Toast" onclick="showPromiseToast()">Show Promise Toast</button>
+      <button type="button" title="Try Corporate" id="try-corporate-btn" onclick="toggleCorporateTheme()">Try Corporate</button>
+    </div>
+    <div class="info-wrapper">
+      <button type="button" title="Use Scoped" id="try-scoped-btn" onclick="useScoped()" style="position: absolute; top: 8px; left: 0">Use Scoped</button>
+      <p class="info-text">You can go to the console and test out the toasts, they work right away and are attached to the global scope of wherever they're initialized i.e window.toast</p>
+    </div>
     <p class="notice" style="position: absolute; bottom: 0; left: 50%; translate: -50%; text-align: center; font-size: 14px; font-weight: bold; margin: 0">This is just a preview, a proper documentation will soon be available!</p>
-    <script type="module" src="Test.js"></script>
+    <script type="module" src="./js/Test.js"></script>
+    <script>
+      window.T007_TOAST_CSS_SRC = "./css/index.css";
+    </script>
+    <script src="../dist/index.global.js"></script>
   </body>
 </html>

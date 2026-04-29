@@ -1,0 +1,55 @@
+:root {
+  --t007-ripple-initial-opacity: 0.4;
+  --t007-ripple-initial-scale: 0.5;
+  --t007-ripple-expand-scale: 2.05;
+  --t007-ripple-color: rgb(0 0 0 / 0.3);
+  --t007-ripple-expand-duration: 350ms;
+  --t007-ripple-fade-duration: 350ms;
+}
+
+:where(*:has(> .t007-ripple-wrapper)) {
+  position: relative;
+}
+
+.t007-ripple-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+  contain: strict;
+}
+
+.t007-ripple {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0;
+  background-color: var(--t007-ripple-color);
+  transform: scale(0);
+}
+
+.t007-ripple-hold {
+  animation: t007-ripple-expand var(--t007-ripple-expand-duration) ease-out forwards;
+}
+
+.t007-ripple-fade {
+  animation: t007-ripple-fade var(--t007-ripple-fade-duration) ease-in forwards;
+}
+
+@keyframes t007-ripple-expand {
+  50% {
+    transform: scale(var(--t007-ripple-initial-scale));
+  }
+  to {
+    transform: scale(var(--t007-ripple-expand-scale));
+  }
+}
+
+@keyframes t007-ripple-fade {
+  from {
+    opacity: var(--t007-ripple-initial-opacity);
+  }
+  to {
+    opacity: 0;
+  }
+}

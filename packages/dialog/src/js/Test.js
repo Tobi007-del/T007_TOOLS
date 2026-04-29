@@ -1,24 +1,26 @@
-import { alert, confirm, prompt } from "https://esm.sh/@t007/dialog@latest";
+// import { alert, confirm, prompt } from "https://esm.sh/@t007/dialog@latest";
+
+let rootElement = undefined; // For testing scoped dialogs
 
 window.showAlert = async function () {
-  await alert("Hello, I'm Tobi007");
+  await alert("Hello, I'm Tobi007", { rootElement });
 };
 
 window.showConfirm = async function () {
-  await confirm("You are about to know my identity, I'm Tobi007");
+  await confirm("You are about to know my identity, I'm Tobi007", { rootElement });
 };
 
 window.showPrompt = async function () {
-  await prompt("Do you know who I am now?", "Yes");
+  await prompt("Do you know who I am now?", "Yes", { rootElement });
 };
 
 window.playGame = async function () {
   async function log(...[message, formatting = "", options = {}]) {
     console.log(`${formatting ? "%c" : ""}${message}`, formatting);
-    await alert(message, options);
+    await alert(message, { ...options, rootElement });
   }
   (async function init() {
-    let userChoice = await prompt("🎮 Would you like to play a game of Rock, Paper, Scissors? ✊ ✋ ✌️", "", { placeholder: "'y' for YES, 'n' for NO", required: true });
+    let userChoice = await prompt("🎮 Would you like to play a game of Rock, Paper, Scissors? ✊ ✋ ✌️", "", { placeholder: "'y' for YES, 'n' for NO", required: true, rootElement });
     if (userChoice?.toLowerCase?.() === "y" || userChoice?.toUpperCase?.() === "YES") {
       await log("🔥 There are three rounds!!! 🔥");
       await playGame();
@@ -58,13 +60,7 @@ window.playGame = async function () {
       return choices[Math.floor(Math.random() * 3)];
     }
     async function getHumanChoice() {
-      return await prompt("✊ Rock, Paper or Scissors? ✋ ✌️", "", {
-        label: "Choose your pick 🕹️",
-        required: true,
-        minLength: 4,
-        maxLength: 8,
-        confirmText: "GO",
-      });
+      return await prompt("✊ Rock, Paper or Scissors? ✋ ✌️", "", { label: "Choose your pick 🕹️", required: true, minLength: 4, maxLength: 8, confirmText: "GO", rootElement });
     }
     for (let rounds = 1; rounds < 4; rounds++) {
       await log(`🎲 Round ${rounds} begins!`, "", { confirmText: "Sure" });
@@ -74,4 +70,15 @@ window.playGame = async function () {
     else if (computerScore < humanScore) await log(`🏆 You win! Score: ${humanScore} 🆚 Computer: ${computerScore}`, "color: green; font-weight: bolder;", { confirmText: "I'm the best!" });
     else if (computerScore === humanScore) await log(`🤝 It's a tie! Both scored ${humanScore}!`, "color: brown;", { confirmText: "Too bad :(" });
   }
+};
+
+window.useScoped = function () {
+  rootElement = rootElement ? undefined : document.querySelector(".info-wrapper");
+  document.documentElement.classList.toggle("scoped", !!rootElement);
+  document.getElementById("try-scoped-btn").textContent = rootElement ? "Use Global" : "Use Scoped";
+};
+
+window.toggleChromeTheme = function () {
+  document.documentElement.classList.toggle("chrome-like");
+  document.getElementById("try-chrome-btn").textContent = document.documentElement.classList.contains("chrome-like") ? "Back to Default" : "Try Chromelike";
 };

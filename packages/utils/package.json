@@ -1,6 +1,6 @@
 {
   "name": "@t007/utils",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "description": "High-performance, zero-dependency utility functions for the t007 ecosystem.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -15,20 +15,42 @@
   "module": "./dist/index.js",
   "browser": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
-    }
+    },
+    "./hooks/react": {
+      "types": "./dist/hooks/react.d.ts",
+      "import": "./dist/hooks/react.js",
+      "require": "./dist/hooks/react.cjs",
+      "default": "./dist/hooks/react.js"
+    },
+    "./hooks/vanilla": {
+      "types": "./dist/hooks/vanilla.d.ts",
+      "import": "./dist/hooks/vanilla.js",
+      "require": "./dist/hooks/vanilla.cjs",
+      "default": "./dist/hooks/vanilla.js"
+    },
+    "./components/react": {
+      "types": "./dist/components/react.d.ts",
+      "import": "./dist/components/react.js",
+      "require": "./dist/components/react.cjs",
+      "default": "./dist/components/react.js"
+    },
+    "./styles/ripple.css": "./dist/styles/ripple.css",
+    "./styles/scroll-assist.css": "./dist/styles/scroll-assist.css"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "build": "tsup --config tsup.config.ts && shx cp src/styles/ripple.css dist/styles/ripple.css && shx cp src/styles/scroll-assist.css dist/styles/scroll-assist.css",
     "prepublishOnly": "shx cp ../../LICENSE ."
   },
   "files": [
@@ -38,13 +60,29 @@
     "t007",
     "ecosystem",
     "vanilla-js",
+    "react",
     "utils",
     "helpers",
     "dom-manipulation",
     "shared-logic",
     "performance"
   ],
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
   "dependencies": {
+    "@t007/input": "^0.0.24",
     "sia-reactor": "^0.0.30"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }

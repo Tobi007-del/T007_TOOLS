@@ -65,6 +65,13 @@ Beautiful floating labels with native error state handling.
 - **Horizontal Scroll Assist**: Built-in helper for long error messages overflowing the container.
 - **Tree-Shakeable**: Import only the utilities you need.
 
+### Vanilla Perks & Hooks
+
+- **`form.onSubmit`**: Optional callback on a form that runs instead of `form.submit()` when provided, allowing custom JS submission flows.
+- **`form.validateOnServer`**: Async hook; if defined the form will await its result before proceeding. Returning `false` prevents submission and shows a global error.
+- **`form.validateOnClient`**: Reference to the internal client-side validation function, allowing you to trigger validation manually or integrate it into custom UI flows.
+- **`form.toggleGlobalError(bool)`**: Programmatic API to display a form-level error state and shake all fields, used internally if `form.validateOnServer` returns false.
+
 ---
 
 ## Tech Stack
@@ -120,6 +127,25 @@ myForm.appendChild(emailInput);
 
 // 3. Initialize the validation engine
 handleFormValidation(myForm);
+```
+
+### React
+
+```tsx
+import { Input, WordsInput, useFormManager } from "@t007/input/react";
+
+export function SignupForm() {
+  const formRef = useRef<HTMLFormElement>(null); // use in a non-form setup or for manual `validate` triggers
+  const { handleSubmit, validate, fireInput } = useFormManager((e) => console.log("submitted"), formRef); // first in line to replace browser behaviour effectively
+
+  return (
+    <form noValidate className="t007-input-form" onSubmit={handleSubmit} ref={formRef}>
+      <Input type="email" label="Email" required helperText={{ typeMismatch: "Enter a valid email." }} />
+      <WordsInput type="textarea" label="Bio" maxCount={120} />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
 ```
 
 ### CDN / Browser (Global)
@@ -190,7 +216,7 @@ The core object injected into the global namespace containing utility functions 
 
 ### File Validation
 
-The library extends native file inputs with custom attributes for strict size enforcement:
+The library extends native file inputs with custom attributes for strict size enforcement, and the same validation logic is available directly through `t007.FM.getFilesHelper(files, opts)`:
 
 ```javascript
 const fileUploader = field({
@@ -202,6 +228,23 @@ const fileUploader = field({
   maxTotalSize: 15000000, // 15MB max total upload
   maxLength: 3 // Max 3 files allowed
 });
+```
+
+To use the helper directly, map the same fields into `getFilesHelper` and feed the returned message into your own resolver or `helperText` path:
+
+```javascript
+const { violation, message } = t007.FM.getFilesHelper(input.files, {
+  accept: input.accept, // -> typeMismatch
+  multiple: input.multiple, // respects file count limits
+  maxSize: input.maxSize, // -> rangeOverflow
+  minSize: input.minSize, // -> rangeUnderflow
+  maxTotalSize: input.maxTotalSize, // -> rangeOverflow
+  minTotalSize: input.minTotalSize, // -> rangeUnderflow
+  maxLength: input.maxLength, // -> tooLong
+  minLength: input.minLength, // -> tooShort
+});
+
+if (message) input.setCustomValidity(message);
 ```
 
 ### Password Management
@@ -216,19 +259,38 @@ field({ type: 'password', custom: 'password', label: 'Password' });
 field({ type: 'password', custom: 'confirm_password', label: 'Confirm Password' });
 ```
 
+There's other custom features like `onward_date`, `past_date`.
+
 -----
 
 ## Customization
 
 You can deeply customize the look and feel by overriding the built-in CSS variables or targeting the specific classes.
 
-### Important Selectors
+### CSS Selectors & Variables
 
   - `.t007-input`: The actual `<input>` element.
   - `.t007-input-floating-label`: The label text.
   - `.t007-input-outline`: The border wrapper holding the label.
   - `[data-error]`: Attribute added dynamically on validation failure.
   - `.t007-input-password-strength-meter`: The container for the 4 strength bars.
+
+#### Override Starter
+
+```css
+.t007-input-field {
+  --t007-input-color: var(--app-theme-color);
+  /* ...check source code for all variables... */
+}
+```
+
+#### Specificity Note
+
+- Start with `:root` for shared input tokens.
+- If a token does not apply, override directly on `.t007-input-field`.
+- For precise control, target element selectors like `.t007-input`, `.t007-input-floating-label`, and `.t007-input-outline`.
+- For strong app themes (e.g. `html[data-theme="dark"]`), use equal/stronger selectors like `html[data-theme="dark"] .t007-input-field`.
+- Check source code for more details.
 
 -----
 

@@ -1,10 +1,10 @@
 import { isStr } from "..";
 
-// ============ Timer Helpers ============
+// Timer Helpers
 
 export { setTimeout, setInterval, requestAnimationFrame } from "sia-reactor/utils";
 
-// ============ Limited Call Helpers ============
+// Limited Call Helpers
 
 export interface LimitedOptions {
   /** Storage key used to persist call counts. */
@@ -48,7 +48,7 @@ export function limited<T extends (...args: any[]) => any>(FN_KEY: string, fn: T
   return handle;
 } // Locally limited fn calls, make a closure with FN_KEY for ease of use
 
-// ============ Async Helpers ============
+// Async Helpers
 
 /** Resolve on the next task tick.
  * @param timeout Delay in milliseconds.
@@ -68,7 +68,7 @@ export const breath = (w = window) => new Promise((res) => w.requestAnimationFra
  */
 export const deepBreath = (w = window) => new Promise((res) => w.requestAnimationFrame(() => w.requestAnimationFrame(res))); // The "Double Frame" breathe - guaranteed layout completion
 
-// ============ Generic Helpers ============
+// Generic Helpers
 
 /** Run cleanup immediately or on abort, then return the callable cleanup.
  * @param cleanup Cleanup function to protect.

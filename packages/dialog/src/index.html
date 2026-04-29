@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,8 +6,13 @@
     <title>T007 Dialog Library</title>
     <link rel="icon" type="image/jpeg" sizes="32x32" href="../../../assets/images/my_profile_s.jpeg" />
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
         height: 100vh;
+        margin: 0;
+        padding: 8px;
         background-image: linear-gradient(330deg, rgba(255, 0, 0, 0.8), rgba(255, 166, 0, 0.8), rgba(255, 255, 0, 0.8), rgba(0, 128, 0, 0.8), rgba(0, 0, 255, 0.5), rgba(76, 0, 130, 0.8), rgba(238, 130, 238, 0.8));
         background-repeat: no-repeat;
         background-size: cover;
@@ -16,14 +21,33 @@
         flex-direction: column;
       }
       .info-wrapper {
+        position: relative;
         flex: 1;
+        margin: auto;
+        padding: 8px;
         display: flex;
+        justify-content: center;
         align-items: center;
+      }
+      html.scoped .info-wrapper {
+        max-height: 50vh;
+        border: 2px dashed black;
       }
       .info-text {
         color: black;
         text-align: center;
         font-size: 18px;
+      }
+      html.chrome-like {
+        --t007-dialog-backdrop-background: rgb(0, 0, 0, 0.6);
+        --t007-dialog-backdrop-filter: none;
+      }
+      html.chrome-like .t007-dialog {
+        --t007-dialog-cancel-button-color: dodgerblue;
+        margin-top: 0;
+      }
+      html.scoped #try-scoped-btn {
+        left: 8px !important;
       }
     </style>
   </head>
@@ -33,11 +57,24 @@
       <button type="button" title="Show Confirm" onclick="showConfirm()">Show Confirm</button>
       <button type="button" title="Show Prompt" onclick="showPrompt()">Show Prompt</button>
       <button type="button" title="Show Prompt" onclick="playGame()">Play Game</button>
+      <button type="button" title="Try Chromelike" id="try-chrome-btn" onclick="toggleChromeTheme()">Try Chromelike</button>
     </div>
     <div class="info-wrapper">
+      <button type="button" title="Use Scoped" id="try-scoped-btn" onclick="useScoped()" style="position: absolute; top: 8px; left: 0">Use Scoped</button>
       <p class="info-text">You can go to the console and test out the dialogs, they work the same way as the browser default dialogs just in title case i.e window.Alert, window.Confirm, window.Prompt</p>
     </div>
     <p class="notice" style="position: absolute; bottom: 0; left: 50%; translate: -50%; text-align: center; font-size: 14px; font-weight: bold; margin: 0">This is just a preview, a proper documentation will soon be available!</p>
-    <script type="module" src="Test.js"></script>
+    <script type="module" src="./js/Test.js"></script>
+    <script>
+      window.T007_DIALOG_CSS_SRC = "./css/index.css";
+      window.T007_INPUT_CSS_SRC = "../../input/dist/index.css";
+      window.T007_INPUT_JS_SRC = "../../input/dist/index.global.js";
+    </script>
+    <script src="../dist/index.global.js"></script>
+    <script>
+      window.alert = t007.alert;
+      window.confirm = t007.confirm;
+      window.prompt = t007.prompt;
+    </script>
   </body>
 </html>

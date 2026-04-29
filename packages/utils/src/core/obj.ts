@@ -1,5 +1,7 @@
 import { isObj } from "sia-reactor/utils";
+
 // Type Guards
+
 export function isDef(val: any): boolean {
   return "undefined" !== typeof val;
 }

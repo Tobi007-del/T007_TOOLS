@@ -1,16 +1,16 @@
-import type { ScrollAssistControl } from "../quirks/scroll";
+import { ArrowNavigationHandle } from "../hooks/vanilla/arrowNavigation";
+import type { ScrollAssistHandle } from "../hooks/vanilla/scrollAssist";
 
 declare global {
   interface T007Namespace {
     /** Symbol used to mark virtual resources that should not load a real asset. */
     VIRTUAL_RESOURCE: symbol;
-    /** Cache used to deduplicate resource loading promises. */
     _resourceCache: Partial<Record<string, Promise<HTMLElement | void>>>;
-    /** Active scroll assist controllers keyed by element. */
-    _scrollers?: WeakMap<HTMLElement, ScrollAssistControl>;
-    /** Resize observer used by scroll assist controllers. */
+    _ftrappers?: WeakMap<HTMLElement, () => void>;
+    _outsiders?: WeakMap<HTMLElement, () => void>;
+    _ashooters?: WeakMap<HTMLElement, ArrowNavigationHandle>;
+    _scrollers?: WeakMap<HTMLElement, ScrollAssistHandle>;
     _scroller_r_observer?: ResizeObserver;
-    /** Mutation observer used by scroll assist controllers. */
     _scroller_m_observer?: MutationObserver;
   }
   interface Window {

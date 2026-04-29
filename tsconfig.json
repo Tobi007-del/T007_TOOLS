@@ -10,6 +10,7 @@
     "declaration": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "preserveSymlinks": true
+    "preserveSymlinks": true,
+    "types": ["node"]
   }
 }
