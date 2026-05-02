@@ -1,7 +1,7 @@
 import { DEFAULT_CONFIG, H_NAV_KEYS, NAV_KEYS } from "../react/useArrowNavigation/consts";
 import { getCommonAncestor, getGrid, getTargetIndex } from "../react/useArrowNavigation/utils";
 import type { Config as ArrowNavigationConfig, KeyEvent } from "../react/useArrowNavigation/types";
-import { getActiveElement } from "../../core/dom";
+import { getActiveEl } from "../../core/dom";
 
 export type ArrowNavigationHandle = {
   /** Current computed horizontal grid size. */
@@ -30,7 +30,7 @@ export type ArrowNavigationHandle = {
 
 /** A vanilla JavaScript utility for managing robust arrow-key roving focus navigation. */
 export function initArrowNavigation(container: HTMLElement, config: ArrowNavigationConfig = {}): ArrowNavigationHandle | void {
-  const existing = (t007._ashooters ??= new WeakMap<HTMLElement, ArrowNavigationHandle>()).get(container);
+  const existing = (t007._arrownavs ??= new WeakMap<HTMLElement, ArrowNavigationHandle>()).get(container);
   if (!config.enabled || existing) return existing ? existing : undefined;
   const { enabled: isEnabled, selector, focusOnHover, loop, virtual, typeahead, resetMs, activeClass, inputSelector, defaultTabbableIndex, baseTabIndex, grid, rtl: isRtl, focusOptions, scrollIntoView, onSelect, onFocusOut, rovingTab } = { ...DEFAULT_CONFIG, ...config };
   let gridX = grid.x || 1,
@@ -42,7 +42,7 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
     items: HTMLElement[] = [];
   const enabled = isEnabled ?? virtual,
     roving = rovingTab ?? !virtual,
-    rtl = isRtl ?? getComputedStyle(container).direction === "rtl",
+    rtl = isRtl ??  ("undefined" === typeof document ? false : getComputedStyle(container).direction === "rtl"),
     shouldSnub = () => !enabled || !container,
     isItemDisabled = (el?: HTMLElement) => !el || el.hasAttribute("disabled") || el.hasAttribute("aria-disabled"),
     getItems = () => (items = Array.from(container.querySelectorAll<HTMLElement>(selector)));
@@ -100,15 +100,16 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
   };
 
   const simulateKey = (e: KeyEvent) => {
-    if (shouldSnub() || getActiveElement()?.matches("option")) return;
+    const t = e.target as HTMLElement;
+    if (shouldSnub() || getActiveEl(t?.ownerDocument)?.matches("option")) return;
     const { key } = e;
     if (!items.length) return;
     if (virtual && (key === " " || key === "Enter")) return items[activeIndex]?.click();
-    if ((e.target as HTMLElement)?.matches(DEFAULT_CONFIG.inputSelector) && !virtual) return;
+    if (t?.matches(DEFAULT_CONFIG.inputSelector) && !virtual) return;
     if (typeahead && key.length === 1 && /^[a-z0-9]$/i.test(key)) return typeAhead(key);
     if (!NAV_KEYS.includes(key)) return;
     if (!((e.currentTarget as HTMLElement)?.matches(DEFAULT_CONFIG.inputSelector) && gridX <= 1 && H_NAV_KEYS.includes(key))) e.preventDefault?.(), e.stopPropagation?.(); // virtual inputs can allow horizontal :)
-    const currIndex = virtual ? activeIndex : items.indexOf(getActiveElement() as HTMLElement),
+    const currIndex = virtual ? activeIndex : items.indexOf(getActiveEl(t?.ownerDocument) as HTMLElement),
       targetIndex = getTargetIndex({ currIndex, gridX, gridY, vGridY, length: items.length, loop, rtl, key, ctrlKey: e.ctrlKey });
     goToIndex(targetIndex, e);
   };
@@ -165,7 +166,7 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
   };
 
   const handle = { gridX: () => gridX, gridY: () => gridY, vGridY: () => vGridY, items: () => items, activeIndex: () => activeIndex, activeItem: () => items[activeIndex] ?? null, getAbleIndex, typeAhead, goToIndex, simulateKey, destroy };
-  return t007._ashooters.set(container, handle), handle;
+  return t007._arrownavs.set(container, handle), handle;
 }
 
-export const removeArrowNavigation = (container: HTMLElement) => t007._ashooters?.get(container)?.destroy();
+export const removeArrowNavigation = (container: HTMLElement) => t007._arrownavs?.get(container)?.destroy();

@@ -1,6 +1,6 @@
 {
   "name": "@t007/utils",
-  "version": "0.0.26",
+  "version": "0.0.29",
   "description": "High-performance, zero-dependency utility functions for the t007 ecosystem.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -74,8 +74,8 @@
     "react-dom": "^18.3.1"
   },
   "dependencies": {
-    "@t007/input": "^0.0.24",
-    "sia-reactor": "^0.0.30"
+    "@t007/input": "^0.0.27",
+    "sia-reactor": "^0.0.32"
   },
   "peerDependencies": {
     "react": "^18.0.0"

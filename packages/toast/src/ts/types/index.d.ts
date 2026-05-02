@@ -127,16 +127,16 @@ export interface Toast {
   /** Create a default toast.
    * @param render Body text for the toast.
    * @param options Toast configuration.
-   * @returns Toast id.
+   * @returns Toast `id`.
    */
   (render?: string, options?: ToastOptions): string;
-  /** Check if a toast is currently active.
-   * @param id Toast id.
-   * @returns True if the toast is active, false otherwise.
+  /** Check if a toast is currently active with the id or any toast if no `id` provided.
+   * @param id Toast `id`.
+   * @returns True if the toast is visibly active, i.e, not delayed; false otherwise.
    */
   isActive(id: string): boolean;
-  /** Update an existing toast by id.
-   * @param id Toast id.
+  /** Update an existing toast by `id`.
+   * @param id Toast `id`.
    * @param options Options to apply.
    * @returns Updated toast id or false when no toast was found.
    */
@@ -144,31 +144,31 @@ export interface Toast {
   /** Show an info toast.
    * @param renderOrId Body text or toast id.
    * @param options Toast configuration.
-   * @returns Toast id.
+   * @returns Toast `id`.
    */
   info(renderOrId?: string, options?: ToastOptions): string;
   /** Show a success toast.
    * @param renderOrId Body text or toast id.
    * @param options Toast configuration.
-   * @returns Toast id.
+   * @returns Toast `id`.
    */
   success(renderOrId?: string, options?: ToastOptions): string;
   /** Show a warning toast.
    * @param renderOrId Body text or toast id.
    * @param options Toast configuration.
-   * @returns Toast id.
+   * @returns Toast `id`.
    */
   warn(renderOrId?: string, options?: ToastOptions): string;
   /** Show an error toast.
    * @param renderOrId Body text or toast id.
    * @param options Toast configuration.
-   * @returns Toast id.
+   * @returns Toast `id`.
    */
   error(renderOrId?: string, options?: ToastOptions): string;
   /** Show a loading toast.
    * @param renderOrId Body text or toast id.
    * @param options Toast configuration.
-   * @returns Toast id.
+   * @returns Toast `id`.
    */
   loading(renderOrId?: string, options?: ToastOptions): string;
   /** Bind a promise to the toast lifecycle.
@@ -178,23 +178,23 @@ export interface Toast {
    */
   promise<T>(promise: Promise<T>, config?: ToastPromiseConfig<T>): Promise<T>;
   /** Dismiss a single toast or the whole stack.
-   * @param id Toast id to dismiss.
+   * @param id Toast `id` to dismiss.
    * @param manner Removal mode.
    * @param timeElapsed Whether the auto-close timer already elapsed.
    */
   dismiss(id?: string, manner?: "smooth" | "instant", timeElapsed?: boolean): void;
-  /** Dismiss every toast that matches an optional prefix.
-   * @param groupId Optional id prefix filter.
+  /** Dismiss every toast that matches an optional group id or the whole stack.
+   * @param groupId Optional group id filter.
    */
   dismissAll(groupId?: string): void;
   /** Run an action against every matching toast instance.
    * @param action Instance method to invoke.
    * @param options Options forwarded to the instance method.
-   * @param groupId Optional id prefix filter.
+   * @param groupId Optional group id filter.
    */
   doForAll(action: string, options?: any, groupId?: string): void;
   /** Return every matching toast instance.
-   * @param groupId Optional id prefix filter.
+   * @param groupId Optional group id filter.
    * @returns Matching toast instances.
    */
   getAll(groupId?: string): ToastInstance[];

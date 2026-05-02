@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import type { Config, KeyEvent } from "./types";
 import { getTargetIndex, getGrid, getCommonAncestor } from "./utils";
 import { DEFAULT_CONFIG, NAV_KEYS, H_NAV_KEYS } from "./consts";
-import { getActiveElement } from "../../../core/dom";
+import { getActiveEl } from "../../../core/dom";
 
 /** A React hook for managing robustarrow-key roving focus navigation. */
 export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, config: Config = {}) {
@@ -16,7 +16,7 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
     itemsRef = useRef<HTMLElement[]>([]),
     enabled = isEnabled ?? virtual,
     roving = rovingTab ?? !virtual,
-    rtl = useMemo(() => (isRtl !== null ? isRtl : getComputedStyle(containerRef.current || document.body).direction === "rtl"), [containerRef, isRtl]),
+    rtl = useMemo(() => isRtl ?? ("undefined" === typeof document ? false : getComputedStyle(containerRef.current || document.body).direction === "rtl"), [containerRef, isRtl]),
     mutationObserverRef = useRef<MutationObserver | null>(null),
     shouldSnub = useCallback(() => !enabled || !containerRef.current, [enabled, containerRef]),
     isItemDisabled = useCallback((el: HTMLElement) => (!el ? true : el.hasAttribute("disabled") || el.hasAttribute("aria-disabled")), []),
@@ -88,16 +88,17 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
 
   const simulateKey = useCallback(
     (e: KeyEvent) => {
-      if (shouldSnub() || getActiveElement()?.matches("option")) return;
+      const t = e.target as HTMLElement;
+      if (shouldSnub() || getActiveEl(t?.ownerDocument)?.matches("option")) return;
       const all = itemsRef.current,
         { key } = e;
       if (!all.length) return;
       if (virtual && (key === " " || key === "Enter")) return all[activeIndex]?.click();
-      if ((e.target as HTMLElement)?.matches(DEFAULT_CONFIG.inputSelector) && !virtual) return;
+      if (t?.matches(DEFAULT_CONFIG.inputSelector) && !virtual) return;
       if (typeahead && key.length === 1 && /^[a-z0-9]$/i.test(key)) return typeAhead(key);
       if (!NAV_KEYS.includes(key)) return;
       if (!((e.currentTarget as HTMLElement)?.matches(DEFAULT_CONFIG.inputSelector) && gridX <= 1 && H_NAV_KEYS.includes(key))) e.preventDefault?.(), e.stopPropagation?.(); // virtual inputs can allow horizontal :)
-      const currIndex = virtual ? activeIndex : all.indexOf(getActiveElement() as HTMLElement),
+      const currIndex = virtual ? activeIndex : all.indexOf(getActiveEl(t?.ownerDocument) as HTMLElement),
         targetIndex = getTargetIndex({ currIndex, gridX, gridY, vGridY, length: all.length, loop, rtl, key, ctrlKey: e.ctrlKey });
       goToIndex(targetIndex, e);
     },

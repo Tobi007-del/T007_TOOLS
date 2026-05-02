@@ -7,12 +7,12 @@ export interface OutsideClickConfig {
   /** Callback invoked when an outside interaction is detected. Defaults to `()=>{}`. */
   onOutsideClick?: (e: MouseEvent | TouchEvent | KeyboardEvent | FocusEvent) => void;
   /** Whether pointer/touch outside interactions should trigger callback. Defaults to `true`. */
-  clickOnClick?: boolean;
+  outOnClick?: boolean;
   /** Whether Escape key should trigger callback. Defaults to `true`. */
-  clickOnEscape?: boolean;
+  outOnEscape?: boolean;
   /** Whether focus leaving the container should trigger callback. Defaults to `false`. */
-  clickOnFocusOut?: boolean;
-  /** Allow interactive elements like outsiders to bypass click callback. Defaults to `true`. */
+  outOnFocusOut?: boolean;
+  /** Allow interactive elements including outsiders to bypass click callback. Defaults to `false`. */
   allowInputs?: boolean;
   /** Optional root used to scope focus listeners to an element instead of the window. Defaults to `window`. */
   root?: HTMLElement | Document | Window;
@@ -22,11 +22,10 @@ export interface OutsideClickConfig {
   capture?: boolean;
 }
 
-const stacks = new WeakMap<EventTarget, HTMLElement[]>();
-
 /** Hook to attach outside-click, escape, and optional focus-out handling to an element. */
-export function initOutsideClick(el: HTMLElement, { enabled = false, onOutsideClick = NOOP, clickOnClick = true, clickOnEscape = true, clickOnFocusOut = false, allowInputs = true, root = window, scoped = true, capture = true }: OutsideClickConfig = NIL): (() => void) | void {
-  const existing = (t007._outsiders ??= new WeakMap<HTMLElement, () => void>()).get(el);
+export function initOutsideClick(el: HTMLElement, { enabled = false, onOutsideClick = NOOP, outOnClick = true, outOnEscape = true, outOnFocusOut = false, allowInputs = false, root = window, scoped = true, capture = true }: OutsideClickConfig = NIL): (() => void) | void {
+  const stacks = (t007._outsiders_stacks ??= new WeakMap<EventTarget, HTMLElement[]>()),
+    existing = (t007._outsiders ??= new WeakMap<HTMLElement, () => void>()).get(el);
   if (!enabled || existing) return existing ? existing : undefined;
   (scoped = scoped && root instanceof HTMLElement), (root = scoped ? root : root === document ? document : window); // reassigning for predictability
   const stack = stacks.get(root) ?? [],
@@ -34,9 +33,9 @@ export function initOutsideClick(el: HTMLElement, { enabled = false, onOutsideCl
       if (stack.at(-1) !== el || (p.clientX >= rect.left && p.clientX <= rect.right && p.clientY >= rect.top && p.clientY <= rect.bottom)) return false; // pseudo elements, you can run but you can't hide :)
       return (!scoped ? true : (root as HTMLElement).contains(t)) && onOutsideClick(e); // it's "outside" the dialog content, check if it's within our sandbox or the whole doc.
     },
-    handleClick = ((e: MouseEvent | TouchEvent) => clickOnClick && !(allowInputs && isInteractive(e.target)) && onScopedOut(e, e.target as Node)) as EventListener,
-    handleEscape = ((e: KeyboardEvent) => clickOnEscape && e.key === "Escape" && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && stack.at(-1) === el && onOutsideClick(e)) as EventListener,
-    handleFocusOut = (e: FocusEvent) => clickOnFocusOut && onScopedOut(e, e.relatedTarget as Node);
+    handleClick = ((e: MouseEvent | TouchEvent) => outOnClick && !(allowInputs && isInteractive(e.target)) && onScopedOut(e, e.target as Node)) as EventListener,
+    handleEscape = ((e: KeyboardEvent) => outOnEscape && e.key === "Escape" && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && stack.at(-1) === el && onOutsideClick(e)) as EventListener,
+    handleFocusOut = (e: FocusEvent) => outOnFocusOut && !el.contains(e.relatedTarget as Node) && onScopedOut(e, e.relatedTarget as Node);
 
   root.addEventListener("mousedown", handleClick, capture), root.addEventListener("touchstart", handleClick, { passive: true, capture });
   root.addEventListener("keydown", handleEscape, capture), el.addEventListener("focusout", handleFocusOut, capture);

@@ -1,43 +1,45 @@
 :where(:root) {
   --t007-dialog-font-family: inherit;
-  --t007-dialog-unit: 1rem;
   --t007-dialog-background: rgb(20, 20, 20);
-  --t007-dialog-gap: 0.8rem;
-  --t007-dialog-width: 26.5rem;
   --t007-dialog-height: fit-content;
   --t007-dialog-max-width: 90%;
-  --t007-dialog-max-height: 30rem;
-  --t007-dialog-max-content-height: 12rem;
-  --t007-dialog-padding: 1rem;
-  --t007-dialog-content-padding-block: 1.5rem;
-  --t007-dialog-border-radius: 1rem;
-  --t007-dialog-border: 0.05rem solid rgba(255, 255, 255, 0.25);
+  --t007-dialog-border: 0.8px solid rgba(255, 255, 255, 0.25);
   --t007-dialog-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5), -2px -2px 6px rgba(0, 0, 0, 0.5);
   --t007-dialog-backdrop-background: rgba(0, 0, 0, 0.2);
   --t007-dialog-backdrop-filter: blur(6px);
   --t007-dialog-message-color: whitesmoke;
-  --t007-dialog-message-font-size: 0.9rem;
-  --t007-dialog-button-font-size: 0.85rem;
   --t007-dialog-button-text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-  --t007-dialog-button-min-width: 4.5rem;
   --t007-dialog-button-width: unset;
   --t007-dialog-button-max-width: unset;
-  --t007-dialog-button-min-height: 2.3rem;
   --t007-dialog-button-height: unset;
   --t007-dialog-button-max-height: unset;
-  --t007-dialog-button-padding-inline: 1rem;
-  --t007-dialog-button-padding-block: 0.5rem;
-  --t007-dialog-button-border-radius: 1.25rem;
-  --t007-dialog-button-gap: 0.65rem;
-  --t007-button-outline-width: 0.15rem;
+  --t007-button-outline-width: 2px;
   --t007-button-outline-style: solid;
   /* animation styles */
-  --t007-dialog-start-duration: 150ms;
-  --t007-dialog-start-transform: translateY(-100%);
-  --t007-dialog-start-opacity: 0;
+  --t007-dialog-entry-duration: 150ms;
+  --t007-dialog-starting-transform: translateY(-100%);
+  --t007-dialog-starting-opacity: 0;
 }
 
 :where(:root, .t007-dialog) {
+  /* sizing */
+  --t007-dialog-unit: 1rem;
+  --t007-dialog-gap: calc(var(--t007-dialog-unit) * 0.8);
+  --t007-dialog-width: calc(var(--t007-dialog-unit) * 26.5);
+  --t007-dialog-max-height: min(calc(var(--t007-dialog-unit) * 30), 90%);
+  --t007-dialog-max-content-height: calc(var(--t007-dialog-unit) * 12);
+  --t007-dialog-padding: var(--t007-dialog-unit);
+  --t007-dialog-content-padding-block: calc(var(--t007-dialog-unit) * 1.5);
+  --t007-dialog-border-radius: var(--t007-dialog-unit);
+  --t007-dialog-message-font-size: calc(var(--t007-dialog-unit) * 0.9);
+  --t007-dialog-button-font-size: calc(var(--t007-dialog-unit) * 0.85);
+  --t007-dialog-button-min-width: calc(var(--t007-dialog-unit) * 4.5);
+  --t007-dialog-button-min-height: calc(var(--t007-dialog-unit) * 2.3);
+  --t007-dialog-button-padding-inline: var(--t007-dialog-unit);
+  --t007-dialog-button-padding-block: calc(var(--t007-dialog-unit) * 0.5);
+  --t007-dialog-button-border-radius: calc(var(--t007-dialog-unit) * 1.25);
+  --t007-dialog-button-gap: calc(var(--t007-dialog-unit) * 0.65);
+  /* colors */
   --t007-confirm-button-color: grey;
   --t007-confirm-button-background: var(--t007-cancel-button-color);
   --t007-cancel-button-color: greenyellow;
@@ -92,31 +94,31 @@
   filter: brightness(1.15);
 }
 
-:is(html, body):has(.t007-dialog[open]) {
+:is(html, body):has(.t007-dialog) {
   overflow: hidden;
 }
-body:has(.t007-dialog[open]) {
+body:has(.t007-dialog) {
   overflow-y: visible; /* incase anyone has sticky content */
 }
 
-*:where(:has(> .t007-dialog.t007-dialog-scoped[open])) {
+*:where(:has(> .t007-dialog.t007-dialog-scoped)) {
   position: relative;
   overflow: hidden !important;
 }
 
 .t007-dialog,
 .t007-dialog::backdrop,
-.t007-dialog.t007-dialog-scoped::before {
+.t007-dialog-backdrop {
   position: fixed;
   inset: 0;
   margin: auto;
   display: none;
   transition-property: display, transform, opacity, backdrop-filter;
-  transition-duration: var(--t007-dialog-start-duration);
+  transition-duration: var(--t007-dialog-entry-duration);
   transition-behavior: allow-discrete;
 }
 .t007-dialog.t007-dialog-scoped,
-.t007-dialog.t007-dialog-scoped::before {
+.t007-dialog-backdrop {
   position: absolute;
 }
 
@@ -136,10 +138,8 @@ body:has(.t007-dialog[open]) {
   border: var(--t007-dialog-border);
   border-radius: var(--t007-dialog-border-radius);
   box-shadow: var(--t007-dialog-box-shadow);
-  opacity: var(--t007-dialog-start-opacity);
-  transform: var(--t007-dialog-start-transform);
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
+  opacity: var(--t007-dialog-starting-opacity);
+  transform: var(--t007-dialog-starting-transform);
 }
 .t007-dialog.t007-dialog-scoped {
   z-index: 2147483647;
@@ -152,34 +152,29 @@ body:has(.t007-dialog[open]) {
 }
 @starting-style {
   .t007-dialog[open] {
-    opacity: var(--t007-dialog-start-opacity);
-    transform: var(--t007-dialog-start-transform);
+    opacity: var(--t007-dialog-starting-opacity);
+    transform: var(--t007-dialog-starting-transform);
   }
 }
 
 .t007-dialog::backdrop,
-.t007-dialog.t007-dialog-scoped::before {
+.t007-dialog-backdrop {
   background-color: transparent;
 }
-.t007-dialog.t007-dialog-scoped::before {
-  content: "";
-  top: -100lvh;
-  left: -100lvw;
-  width: 200lvw;
-  height: 200lvh;
-  transform: translateZ(-1px);
+.t007-dialog-backdrop {
+  z-index: 2147483646;
 }
 
 .t007-dialog[open]::backdrop,
-.t007-dialog.t007-dialog-scoped[open]::before {
+.t007-dialog.t007-dialog-scoped[open] + .t007-dialog-backdrop {
   display: block;
   background-color: var(--t007-dialog-backdrop-background);
-  -webkit-backdrop-filter: var(--t007-dialog-backdrop-blur);
-  backdrop-filter: var(--t007-dialog-backdrop-blur);
+  -webkit-backdrop-filter: var(--t007-dialog-backdrop-filter);
+  backdrop-filter: var(--t007-dialog-backdrop-filter);
 }
 @starting-style {
   .t007-dialog[open]::backdrop,
-  .t007-dialog.t007-dialog-scoped[open]::before {
+  .t007-dialog.t007-dialog-scoped[open] + .t007-dialog-backdrop {
     background-color: transparent;
   }
 }

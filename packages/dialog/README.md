@@ -130,7 +130,7 @@ async function triggerPrompt() {
 
 ### CDN / Browser (Global)
 
-If you are not using a bundler, the IIFE build automatically injects the dialogs into the global `t007` object and provides convenient capitalized window fallbacks (`window.Alert`, `window.Confirm`, `window.Prompt`).
+If you are not using a bundler, the IIFE build automatically injects the dialogs into the global `t007` object and provides convenient capitalized window fallbacks (`window.Alert`, `window.Confirm`, `window.Prompt`), reassign if desired.
 
 ```html
 <!DOCTYPE html>
@@ -145,7 +145,7 @@ If you are not using a bundler, the IIFE build automatically injects the dialogs
   <script>
     // The library automatically maps to window.Confirm!
     document.getElementById('deleteBtn').addEventListener('click', async () => {
-      const proceed = await Confirm("Proceed with formatting?"); // or use `t007.confirm()`
+      const proceed = await Confirm("Proceed with formatting?"); // or use `t007.confirm()`, `t007.dialog` contains the whole API
       if(proceed) doFormat();
     });
   </script>
@@ -178,9 +178,7 @@ Displays a question with confirm and cancel buttons.
       - `options.id` *(String)*: Unique identifier for the dialog for programmatic dismissal.
       - `options.confirmText` *(String)*: Custom text for the confirm button (Default: `"OK"`).
       - `options.cancelText` *(String)*: Custom text for the cancel button (Default: `"Cancel"`).
-      - `options.closedBy` *(String)*: Browser behavior for handling dialog closure.
-      - `options.rootElement` *(HTMLElement)*: Render dialog inside this element.
-      - `options.scoped` *(Boolean)*: Whether to restrict interactions to `rootElement` if provided. Defaults to `true`.
+      - *Last 3 in `alert()` apply here as well...*
   - **Returns**: `Promise<boolean>` (`true` if confirmed, `false` if cancelled).
 
 ### `prompt(question, defaultValue, options)`
@@ -193,10 +191,8 @@ Displays an input field to collect data from the user. Note: This automatically 
       - `options.id` *(String)*: Unique identifier for the dialog for programmatic dismissal, also used as the input's ID.
       - `options.confirmText` *(String)*: Custom text for the submit button.
       - `options.cancelText` *(String)*: Custom text for the cancel button.
-      - `options.closedBy` *(String)*: Browser behavior for handling dialog closure.
-      - `options.rootElement` *(HTMLElement)*: Render dialog inside this element.
       - *Accepts standard HTML input attributes (type, required, placeholder, etc.)*
-      - `options.scoped` *(Boolean)*: Whether to restrict interactions to `rootElement` if provided. Defaults to `true`.
+      - *Last 3 in `alert()` apply here as well...*
   - **Returns**: `Promise<String | null>` (Returns the string value, or `null` if cancelled).
 
 ### `dismiss(id, response)`
@@ -205,10 +201,18 @@ Programatically dismiss a dialog by id or all dialogs when no id is provided.
   - **`id`** *(String)*: Optional unique identifier of the dialog to dismiss. If not provided, all dialogs will be dismissed.
   - **`response`** *(Any)*: Optional value to resolve the dialog's promise with. If not provided, defaults to `true` for confirm and alert dialogs, and `null` for prompt dialogs.
 
+### `isActive(id)`
+Check if a dialog is currently active. Optionally check for a specific dialog by id.
+  - **`id`** *(String)*: Optional unique identifier of the dialog to check. If not provided, checks if any dialog is active.
+  - **Returns**: `boolean` (`true` if the specified dialog or any dialog is active, otherwise `false`).
+
 #### Backdrop behavior
 
 - Default mode uses native `<dialog>.showModal()` and native `::backdrop`.
 - Scoped mode (`rootElement`) uses `<dialog>.show()` with a pseudo backdrop.
+- 
+ 
+*NOTE: Scoped mode only restricts interactions within the specified root and top layer, while default mode is truly modal and blocks all interactions until dismissed. Choose based on your application's needs, you might need to gate some business logic depending on the mode.*
 
 -----
 
@@ -230,6 +234,9 @@ The dialogs are built with semantic, easily targetable CSS classes. You can easi
 
 ```css
 :root {
+  --app-theme-color: white;
+  --app-brand-color: red;
+  --app-brand-accent-color: orangered;
   --t007-dialog-backdrop-background: rgba(0, 0, 0, 0.6);
   --t007-dialog-backdrop-filter: none;
   --t007-cancel-button-color: dodgerblue;
@@ -237,6 +244,11 @@ The dialogs are built with semantic, easily targetable CSS classes. You can easi
 }
 .t007-dialog {
   margin-top: 0;
+  /* advised override variables */
+  --t007-dialog-unit: 0.9rem;
+  --t007-dialog-message-color: var(--app-theme-color);
+  --t007-dialog-confirm-button-color: var(--app-brand-accent-color);
+  --t007-dialog-cancel-button-color: var(--app-brand-color);
 }
 ```
 
@@ -244,7 +256,7 @@ The dialogs are built with semantic, easily targetable CSS classes. You can easi
 
 - Start with `:root` for shared dialog tokens.
 - If a token does not apply, override directly on `.t007-dialog`.
-- For targeted styling, use child selectors like `.t007-dialog-question`, `.t007-dialog-confirm-button`, and `.t007-dialog-cancel-button`.
+- For sizing/layout variables, override `.t007-dialog` (unit, width, icon size, margins).
 - For strong app themes (e.g. `html[data-theme="dark"]`), use equal/stronger selectors like `html[data-theme="dark"] .t007-dialog`.
 - Check source code for more details.
 

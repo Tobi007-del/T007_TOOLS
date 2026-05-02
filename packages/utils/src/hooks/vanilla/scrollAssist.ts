@@ -33,10 +33,10 @@ export function initScrollAssist(el: HTMLElement, { pxPerSecond = 80, assistClas
   const parent = el?.parentElement,
     existing = (t007._scrollers ??= new WeakMap<HTMLElement, ScrollAssistHandle>()).get(el);
   if (!parent || existing) return existing ? existing : undefined;
-  t007._scroller_r_observer ??= new ResizeObserver((entries) => {
+  t007._scrollers_r_observer ??= new ResizeObserver((entries) => {
     for (const { target } of entries) t007._scrollers!.get(target as HTMLElement)?.update();
   });
-  t007._scroller_m_observer ??= new MutationObserver((entries) => {
+  t007._scrollers_m_observer ??= new MutationObserver((entries) => {
     const els = new Set<HTMLElement>();
     for (const entry of entries) {
       let node: Element | null = entry.target instanceof Element ? entry.target : null;
@@ -97,12 +97,12 @@ export function initScrollAssist(el: HTMLElement, { pxPerSecond = 80, assistClas
     update,
     destroy() {
       stop(), el.removeEventListener("scroll", update);
-      t007._scroller_r_observer!.unobserve(el), t007._scrollers!.delete(el);
+      t007._scrollers_r_observer!.unobserve(el), t007._scrollers!.delete(el);
       for (const a of Object.values(assist)) a.remove();
     },
   };
   update(), el.addEventListener("scroll", update);
-  t007._scroller_r_observer!.observe(el), t007._scroller_m_observer!.observe(el, { childList: true, subtree: true, characterData: true });
+  t007._scrollers_r_observer!.observe(el), t007._scrollers_m_observer!.observe(el, { childList: true, subtree: true, characterData: true });
   return t007._scrollers.set(el, handle), handle;
 }
 

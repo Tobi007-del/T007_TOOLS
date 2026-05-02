@@ -6,7 +6,7 @@ import { createEl, assignEl } from "sia-reactor/utils";
 export { createEl, assignEl };
 
 /** Exhaustive Selector used for interactive, tabbable UI controls. */
-export const INTERACTIVE_SELECTOR = 'button,[href],input,label,select,textarea,details>summary,[contenteditable],iframe,audio[controls],video[controls],[tabindex]:not([tabindex="-1"])';
+export const INTERACTIVE_SELECTOR = ":is(button,[href],input:not([type='hidden']),select,textarea,details>summary,[contenteditable='true'],iframe,audio[controls],video[controls],[tabindex]):not([disabled],[tabindex='-1'],[data-focus-guard],[inert],[inert] *)";
 /** Check whether an event target points to an interactive element. */
 export const isInteractive = (target: EventTarget | null): target is HTMLElement => target instanceof HTMLElement && target.matches(INTERACTIVE_SELECTOR);
 
@@ -73,11 +73,4 @@ export function loadResource(req: string | symbol, type: ResourceType = "style",
   return w.t007._resourceCache[src];
 }
 
-/** Get the currently active element, traversing into shadow roots if necessary.
- * @param root Root node to start searching from, defaults to the main document.
- * @returns The active element or null if none found.
- */
-export function getActiveElement(root: Document | ShadowRoot = document): Element | null {
-  const activeEl = root.activeElement;
-  return !activeEl ? null : activeEl.shadowRoot ? getActiveElement(activeEl.shadowRoot) : activeEl;
-}
+export { getActiveEl } from "sia-reactor/utils";

@@ -1,5 +1,26 @@
 # @t007/toast
 
+## 0.0.27
+
+### Patch Changes
+
+- @t007/utils@0.0.29
+
+## 0.0.26
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.28
+
+## 0.0.25
+
+### Patch Changes
+
+- Bug fixes all round and better cross realm support
+- Updated dependencies
+  - @t007/utils@0.0.27
+
 ## 0.0.24
 
 ### Patch Changes

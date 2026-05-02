@@ -19,6 +19,11 @@ export interface DialogOptions {
 
 // BUNDLE EXPORTS & GLOBAL DECLARATIONS
 
+/** Check if a dialog is currently active. Optionally check for a specific dialog by id.
+ * @param id Optional unique identifier of the dialog to check.
+ * @return `true` if the specified dialog (or any dialog when no id is provided) is active, otherwise `false`.
+ */
+export function isActive(id?: string): boolean;
 /** Show an alert dialog and resolve when the user confirms.
  * @param message Message shown in the dialog body.
  * @param options Optional dialog configuration.
@@ -44,6 +49,14 @@ export function prompt(question: string, defaultValue?: string, options?: Dialog
  */
 export function dismiss(id?: string, response?: any): void;
 
+interface Dialog {
+  isActive(id?: string): boolean;
+  alert(message: string, options?: DialogOptions): Promise<boolean>;
+  confirm(question: string, options?: DialogOptions): Promise<boolean>;
+  prompt(question: string, defaultValue?: string, options?: DialogOptions & FieldOptions): Promise<string | null>;
+  dismiss(id?: string, response?: any): void;
+}
+
 declare global {
   interface T007Namespace {
     /** Browser alert helper. */
@@ -52,13 +65,12 @@ declare global {
     confirm: typeof Confirm;
     /** Browser prompt helper. */
     prompt: typeof Prompt;
-    /** Dismisses a dialog by id or all dialogs when no id is provided. */
-    dismiss: (id?: string, res?: any) => void;
+    /** Dialog management object. */
+    dialog: Dialog;
   }
   interface Window {
     Alert?: T007Namespace["alert"];
     Confirm?: T007Namespace["confirm"];
     Prompt?: T007Namespace["prompt"];
-    Dismiss?: T007Namespace["dismiss"];
   }
 }

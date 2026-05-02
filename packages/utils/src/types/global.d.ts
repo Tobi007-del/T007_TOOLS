@@ -8,10 +8,12 @@ declare global {
     _resourceCache: Partial<Record<string, Promise<HTMLElement | void>>>;
     _ftrappers?: WeakMap<HTMLElement, () => void>;
     _outsiders?: WeakMap<HTMLElement, () => void>;
-    _ashooters?: WeakMap<HTMLElement, ArrowNavigationHandle>;
+    _arrownavs?: WeakMap<HTMLElement, ArrowNavigationHandle>;
     _scrollers?: WeakMap<HTMLElement, ScrollAssistHandle>;
-    _scroller_r_observer?: ResizeObserver;
-    _scroller_m_observer?: MutationObserver;
+    _ftrappers_stacks?: WeakMap<EventTarget, HTMLElement[]>;
+    _outsiders_stacks?: WeakMap<EventTarget, HTMLElement[]>;
+    _scrollers_r_observer?: ResizeObserver;
+    _scrollers_m_observer?: MutationObserver;
   }
   interface Window {
     /** Shared T007 namespace. */

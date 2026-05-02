@@ -284,9 +284,8 @@ class T007_Toast {
 }
 
 export const toasting = {
-  isActive(_, id) {
-    const toast = t007.toasts.get(id);
-    return !!toast && !toast.inactive;
+  isActive(_, id, _toast = t007.toasts.get(id)) {
+    return isDef(id) ? !!_toast && !_toast.inactive : t007.toasts.size > 0 && [...t007.toasts.values()].some((toast) => !toast.inactive);
   },
   update(base, id, options, _toast) {
     const toast = _toast ?? t007.toasts.get(id);
@@ -364,9 +363,7 @@ const toast = toaster();
 export default toast;
 
 if ("undefined" !== typeof window) {
-  t007.toast = toast;
-  t007.toasting = toasting;
-  t007.toaster = toaster;
+  (t007.toast = toast), (t007.toasting = toasting), (t007.toaster = toaster);
   t007.toasts = new Map();
   (t007.TOAST_DEFAULT_OPTIONS ??= {}), (t007.TOAST_DURATIONS ??= {}), (t007.TOAST_VIBRATIONS ??= {}), (t007.TOAST_ICONS ??= {});
   t007.TOAST_DEFAULT_OPTIONS.render ??= "";
