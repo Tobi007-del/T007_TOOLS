@@ -1,4 +1,4 @@
-import "../css/index.css";
+import "../css/index.scss";
 import { isArr, isStr, createEl, loadResource, formatSize as formatFileSize } from "@t007/utils";
 import { initScrollAssist } from "@t007/utils/hooks/vanilla";
 import { violationKeys, nativeIconTypes } from "../ts/utils/consts";
@@ -59,7 +59,7 @@ var formManager = {
       });
     if (floatingLabel) floatingLabel.ontransitionend = () => floatingLabel.classList.remove("t007-input-shake");
     if (eyeOpen && eyeClosed) eyeOpen.onclick = eyeClosed.onclick = () => t007.FM.togglePasswordType(input);
-    initScrollAssist(field.querySelector(".t007-input-helper-text-wrapper"), { vertical: false, assistClassName: "t007-input-scroll-assist" });
+    initScrollAssist(field.querySelector(".t007-input-helper-text-wrapper"), { vertical: false });
   },
   setUpField(field) {
     if (field.dataset.setUp) return;

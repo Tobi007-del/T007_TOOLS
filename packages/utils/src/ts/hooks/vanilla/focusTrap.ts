@@ -34,10 +34,10 @@ export function initFocusTrap(el: HTMLElement, { enabled = false, initialSelecto
       if (rt.hasAttribute("tabindex")) return rt.focus(); // If root is programmatically focusable, fallback and restore natural order.
       const items = getFocusable();
       if (!items.length) return resetFocus(0, null); // el can catch focus if it's empty
-      const ceiling = (document.fullscreenElement || document.querySelector("dialog:modal") || document.body) as HTMLElement; // obeying the top layer
-      let p = rt.parentElement || ceiling,
+      const ceil = (document.fullscreenElement || document.querySelector("dialog:modal") || document.body) as HTMLElement; // obeying the top layer
+      let p = rt.parentElement || ceil,
         all = getFocusable(p);
-      while (p !== ceiling && (!all.length || (rt.contains(all[0]) && rt.contains(all.at(-1)!)))) all = getFocusable((p = p.parentElement || ceiling));
+      while (p !== ceil && (!all.length || (pre ? rt.contains(all[0]) : rt.contains(all.at(-1)!)))) all = getFocusable((p = p.parentElement || ceil));
       for (let target, len = all.length, i = all.indexOf(items[pre ? 0 : items.length - 1]) + (pre ? -1 : 1); pre ? i >= 0 : i < len; pre ? i-- : i++) if (!rt.contains((target = all[i]))) return target.focus();
       (pre ? first : last).blur(); // If no focusable items, blur the guard to block visible focus.
     },

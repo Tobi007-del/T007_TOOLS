@@ -151,10 +151,10 @@ All defaults are exposed as root-level, `t007`-prefixed variables:
   /** default scroll assist values */
   --t007-scroll-assist-color: rgb(0 0 0 / 1);
   --t007-scroll-assist-opacity: 0.07;
-  --t007-scroll-assist-min-width: 2rem;
+  --t007-scroll-assist-width: 2rem;
   --t007-scroll-assist-height: 2rem;
-  --t007-scroll-assist-inline-offset: -0.35rem;
-  --t007-scroll-assist-block-offset: 0;
+  --t007-scroll-assist-inset-x: -0.35rem;
+  --t007-scroll-assist-inset-y: 0;
 }
 
 /** custom pre-requisites */

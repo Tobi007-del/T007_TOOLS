@@ -36,7 +36,7 @@ export function pxToRem(px: number, el: HTMLElement = document.documentElement):
  * @param time The CSS time string to parse.
  * @returns The equivalent time in milliseconds.
  */
-export function parseCSSTime(time: string): number {
+export function parseCSSTime(time: any): number {
   return time?.endsWith?.("ms") ? parseFloat(time) : parseFloat(time) * 1000;
 }
 
@@ -45,7 +45,7 @@ export function parseCSSTime(time: string): number {
  * @param el The element to use for rem reference if needed. Defaults to the root element.
  * @returns The equivalent value in pixels.
  */
-export function parseCSSSize(size: string, el?: HTMLElement): number {
+export function parseCSSSize(size: any, el?: HTMLElement): number {
   return size?.endsWith?.("px") ? parseFloat(size) : remToPx(parseFloat(size), el);
 }
 

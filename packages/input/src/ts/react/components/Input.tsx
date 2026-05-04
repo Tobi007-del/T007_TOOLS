@@ -108,7 +108,7 @@ export const Input = React.forwardRef<t007InputElement, InputProps>(function Inp
 
   useEffect(() => void fireInput(inputRef.current), []);
   useEffect(() => inputRef.current?.setAttribute("custom", custom), [custom]);
-  useScrollAssist(helperTextWrapperRef, { pxPerSecond: 80, assistClassName: "t007-input-scroll-assist" });
+  useScrollAssist(helperTextWrapperRef, { pxPerSecond: 80 });
   useImperativeHandle(ref, () => inputRef.current as t007InputElement);
 
   const Wrapper = isWrapper ? "div" : "label";

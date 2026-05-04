@@ -1,6 +1,6 @@
 {
   "name": "@t007/toast",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "A lightweight, pure JS toast system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -54,6 +54,9 @@
     "promise"
   ],
   "dependencies": {
-    "@t007/utils": "^0.0.29"
+    "@t007/utils": "^0.0.30"
+  },
+  "devDependencies": {
+    "esbuild-sass-plugin": "^3.7.0"
   }
 }

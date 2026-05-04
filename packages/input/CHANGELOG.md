@@ -1,5 +1,13 @@
 # @t007/input
 
+## 0.0.28
+
+### Patch Changes
+
+- Bug fixes and code optimizations
+- Updated dependencies
+  - @t007/utils@0.0.30
+
 ## 0.0.27
 
 ### Patch Changes

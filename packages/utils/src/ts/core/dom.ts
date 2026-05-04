@@ -74,3 +74,11 @@ export function loadResource(req: string | symbol, type: ResourceType = "style",
 }
 
 export { getActiveEl } from "sia-reactor/utils";
+
+/** Get the window object associated with a given element.
+ * @param el The element to get the window for, defaults to the main window.
+ * @returns The window object or undefined if none found.
+ */
+export function getWindow(el: any = window): (Window & typeof globalThis) | undefined {
+  return (el instanceof Window ? el : el instanceof Document ? el?.defaultView : el?.ownerDocument?.defaultView) ?? undefined;
+}

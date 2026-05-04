@@ -1,0 +1,44 @@
+:root {
+  --t007-scroll-assist-color: black;
+  --t007-scroll-assist-opacity: 0.5;
+  --t007-scroll-assist-width: 2rem;
+  --t007-scroll-assist-height: var(--t007-scroll-assist-width);
+  --t007-scroll-assist-inset-x: calc(var(--t007-scroll-assist-width) * -0.25);
+  --t007-scroll-assist-inset-y: 0;
+}
+
+.t007-scroll-assist {
+  --t007-gradient-dir: to right;
+  position: absolute;
+  min-width: var(--t007-scroll-assist-width);
+  height: 100%;
+  opacity: var(--t007-scroll-assist-opacity);
+  background: linear-gradient(var(--t007-gradient-dir), transparent 0, var(--t007-scroll-assist-color) 30%, transparent);
+  z-index: 2;
+}
+
+.t007-scroll-assist[data-scroll-direction="left"] {
+  --t007-gradient-dir: to right;
+  top: 0;
+  left: var(--t007-scroll-assist-inset-x);
+}
+
+.t007-scroll-assist[data-scroll-direction="right"] {
+  --t007-gradient-dir: to left;
+  top: 0;
+  right: var(--t007-scroll-assist-inset-x);
+}
+
+.t007-scroll-assist[data-scroll-direction="up"] {
+  --t007-gradient-dir: to bottom;
+  top: var(--t007-scroll-assist-inset-y);
+  height: var(--t007-scroll-assist-height);
+  width: 100%;
+}
+
+.t007-scroll-assist[data-scroll-direction="down"] {
+  --t007-gradient-dir: to top;
+  bottom: var(--t007-scroll-assist-inset-y);
+  height: var(--t007-scroll-assist-height);
+  width: 100%;
+}

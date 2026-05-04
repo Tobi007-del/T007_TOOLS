@@ -1,9 +1,9 @@
+@use "@t007/utils/styles/scroll-assist.css" as *;
+
 :where(:root) {
   --t007-input-dark-error-color: #f44336;
   --t007-input-font-family: inherit;
   --t007-input-width: 100%;
-  --t007-input-height: 3rem;
-  --t007-input-font-size: 1rem;
   --t007-input-floating-label-scale: 0.85;
   --t007-input-border-width: 1px;
   --t007-input-focused-border-width: 2px;
@@ -63,20 +63,28 @@
   /* icon */
   --t007-input-icon-fill: var(--t007-input-color);
   --t007-input-icon-stroke: unset;
+  /* sizes */
+  --t007-input-unit: 1rem;
+  --t007-input-height: calc(var(--t007-input-unit) * 3);
+  --t007-input-font-size: var(--t007-input-unit);
   /* derived */
   --t007-input-padding: calc(var(--t007-input-height) / 4);
-  --t007-input-floating-label-font-size: calc(var(--t007-input-font-size) * var(--t007-input-floating-label-scale));
-  --t007-input-helper-font-size: calc(var(--t007-input-font-size) * var(--t007-input-floating-label-scale));
+  --t007-input-floating-label-font-size: calc(var(--t007-input-unit) * var(--t007-input-floating-label-scale));
+  --t007-input-helper-font-size: calc(var(--t007-input-unit) * var(--t007-input-floating-label-scale));
   --t007-input-border-radius: calc(var(--t007-input-height) / 12);
-  --t007-input-p-meter-font-size: calc(var(--t007-input-font-size) * var(--t007-input-floating-label-scale));
-  --t007-input-p-meter-gap: calc(var(--t007-input-font-size) * 0.25);
-  --t007-input-p-meter-height: calc(var(--t007-input-font-size) * 0.25);
-  --t007-input-checkbox-font-size: calc(var(--t007-input-font-size) * 0.9);
-  --t007-input-checkbox-gap: calc(var(--t007-input-font-size) * 0.5);
-  --t007-input-checkbox-size: calc(var(--t007-input-font-size) * 0.85);
-  --t007-input-radio-font-size: calc(var(--t007-input-font-size) * 0.9);
-  --t007-input-radio-gap: calc(var(--t007-input-font-size) * 0.5);
-  --t007-input-radio-size: calc(var(--t007-input-font-size) * 0.85);
+  --t007-input-p-meter-font-size: calc(var(--t007-input-unit) * var(--t007-input-floating-label-scale));
+  --t007-input-p-meter-gap: calc(var(--t007-input-unit) * 0.25);
+  --t007-input-p-meter-height: calc(var(--t007-input-unit) * 0.25);
+  --t007-input-checkbox-font-size: calc(var(--t007-input-unit) * 0.9);
+  --t007-input-checkbox-gap: calc(var(--t007-input-unit) * 0.5);
+  --t007-input-checkbox-size: calc(var(--t007-input-unit) * 0.85);
+  --t007-input-radio-font-size: calc(var(--t007-input-unit) * 0.9);
+  --t007-input-radio-gap: calc(var(--t007-input-unit) * 0.5);
+  --t007-input-radio-size: calc(var(--t007-input-unit) * 0.85);
+  /* overrides */
+  --t007-scroll-assist-width: calc(var(--t007-input-unit) * 2);
+  --t007-scroll-assist-inset-x: calc(var(--t007-input-unit) * -0.25);
+  --t007-scroll-assist-opacity: 0.4;
 }
 
 /* checkbox input state variables */
@@ -88,7 +96,7 @@
   --t007-input-checkbox-border-color: #707070;
   --t007-input-checkbox-checked-border-color: black;
   --t007-input-checkbox-border-width: 1px;
-  --t007-input-checkbox-border-radius: 0.2rem;
+  --t007-input-checkbox-border-radius: calc(var(--t007-input-unit) * 0.2);
 }
 
 /* radio input state variables */
@@ -245,7 +253,7 @@
 }
 
 .t007-input-outline-leading {
-  width: max(0.75rem, var(--t007-input-border-radius));
+  width: max(calc(var(--t007-input-unit) * 0.75), var(--t007-input-border-radius));
   border-top-left-radius: inherit;
   border-top-right-radius: 0;
   border-bottom-left-radius: inherit;
@@ -267,14 +275,14 @@
   flex: 0 0 auto;
   position: relative;
   width: fit-content;
-  max-width: calc(100% - 0.75rem);
+  max-width: calc(100% - (var(--t007-input-unit) * 0.75));
   border-left: none !important;
   border-right: none !important;
   transition-property: border-bottom, transform, filter, background-color, color, right, left, top, bottom, width, height, font-size, scale;
 }
 
 .t007-input-field:has(.t007-input-icon) .t007-input-outline-notch {
-  max-width: calc(100% - 3.75rem);
+  max-width: calc(100% - (var(--t007-input-unit) * 3.75));
 }
 
 .t007-input-field.t007-input-is-wrapper .t007-input-outline-notch,
@@ -288,7 +296,7 @@
   top: calc(var(--t007-input-height) / 2);
   display: flex;
   align-items: center;
-  gap: calc(var(--t007-input-font-size) / 3);
+  gap: calc(var(--t007-input-unit) / 3);
   max-width: 100%;
   transform: translateY(-50%);
   color: var(--t007-input-current-label-color);
@@ -304,13 +312,13 @@
 }
 
 .t007-input-floating-label:not(:empty) {
-  margin-inline: 0.25rem;
+  margin-inline: calc(var(--t007-input-unit) * 0.25);
 }
 
 .t007-input-field.t007-input-is-wrapper .t007-input-floating-label,
 .t007-input-field:has(.t007-input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .t007-input-floating-label,
 .t007-input-field:has(.t007-input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .t007-input-floating-label {
-  transform: translateY(calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2))));
+  transform: translateY(calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 1.7)))); // so it's not bottom heavy
   font-size: var(--t007-input-floating-label-font-size);
   opacity: 1;
   right: auto;
@@ -320,7 +328,7 @@
 .t007-input-field.t007-input-is-wrapper .t007-input-floating-label.t007-input-shake,
 .t007-input-field:has(.t007-input:is([data-filled], :focus, :-webkit-autofill, :not(:placeholder-shown):where(:not(select):not([type="date"]):not([type="time"]):not([type="datetime-local"]):not([type="month"]):not([type="week"]):not([type="color"]):not([type="range"]):not([type="file"])))) .t007-input-floating-label.t007-input-shake,
 .t007-input-field:has(.t007-input:is(select, :not([placeholder=""]), [type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"], [type="color"], [type="range"], [type="file"])) .t007-input-floating-label.t007-input-shake {
-  transform: translateY(calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 2)))) translateX(0.25rem);
+  transform: translateY(calc(-1 * ((var(--t007-input-height) / 2) + (var(--t007-input-font-size) / 1.7)))) translateX(calc(var(--t007-input-unit) * 0.25));
 }
 
 .t007-input {
@@ -371,7 +379,7 @@
 .t007-input-field:has(.t007-input[type="file"]) {
   /* computed values for the selector button */
   --t007-input-sb-active-margin: calc((var(--t007-input-floating-label-font-size) * 1.3) / 2);
-  --t007-input-sb-padding-inline: calc(var(--t007-input-font-size) / 3.5);
+  --t007-input-sb-padding-inline: calc(var(--t007-input-unit) / 3.5);
   --t007-input-sb-padding-block: calc(((var(--t007-input-height) / 2) - ((var(--t007-input-font-size) / 1.25) / 2)) - ((var(--t007-input-floating-label-font-size) * 1.3) / 2) - 1px);
 }
 
@@ -383,8 +391,8 @@
 :where(.t007-input[type="file"])::file-selector-button {
   font-family: inherit;
   font-weight: bold;
-  font-size: calc(var(--t007-input-font-size) / 1.25);
-  margin-right: calc(var(--t007-input-font-size) / 2.5);
+  font-size: calc(var(--t007-input-unit) / 1.25);
+  margin-right: calc(var(--t007-input-unit) / 2.5);
   border-top: none;
   padding-inline: var(--t007-input-sb-padding-inline);
   padding-block: calc(var(--t007-input-sb-padding-block) - 1px);
@@ -406,10 +414,7 @@
 }
 
 :where(.t007-input[type="file"].t007-input-image-selected)::file-selector-button {
-  background:
-    center/contain no-repeat var(--t007-input-image-src),
-    linear-gradient(black, black),
-    black;
+  background: center/contain no-repeat var(--t007-input-image-src), linear-gradient(black, black), black;
   color: transparent;
   padding-block: var(--t007-input-sb-padding-block);
   border: none;
@@ -428,7 +433,7 @@
   background: none;
   border: none;
   border-radius: 50%;
-  padding: 0.5rem;
+  padding: calc(var(--t007-input-unit) * 0.5);
   align-self: center;
   cursor: pointer;
   display: flex;
@@ -468,7 +473,8 @@
 
 .t007-input-helper-line {
   position: relative;
-  margin-inline: 1rem;
+  top: 1px;
+  margin-inline: var(--t007-input-unit);
   height: calc(var(--t007-input-helper-font-size) * 1.4);
   color: var(--t007-input-current-helper-color);
 }
@@ -486,29 +492,8 @@
   display: none;
 }
 
-.t007-input-scroll-assist {
-  position: absolute;
-  top: 1px;
-  min-width: 2rem;
-  height: 100%;
-  opacity: 0.075;
-  background: linear-gradient(var(--gradient-dir), transparent 0, currentColor 30%, transparent);
-  z-index: 2;
-}
-
-.t007-input-scroll-assist[data-scroll-direction="left"] {
-  left: -0.25rem;
-  --gradient-dir: to right;
-}
-
-.t007-input-scroll-assist[data-scroll-direction="right"] {
-  right: -0.25rem;
-  --gradient-dir: to left;
-}
-
 .t007-input-helper-text {
   position: absolute;
-  top: 2px;
   font-size: var(--t007-input-helper-font-size);
   opacity: 0;
   line-height: 1.2;
@@ -521,14 +506,14 @@
 }
 
 .t007-input-helper-line:has(.t007-input-show) [data-violation="none"],
-.t007-input-helper-line:not(:has(.t007-input-show, [data-violation="none"])) .t007-input-scroll-assist {
+.t007-input-helper-line:not(:has(.t007-input-show, [data-violation="none"])) .t007-scroll-assist {
   opacity: 0;
 }
 
 .t007-input-password-meter {
   --t007-input-p-meter-current-color: var(--t007-input-p-meter-color-weak);
   display: none;
-  margin-top: 0.75rem;
+  margin-top: calc(var(--t007-input-unit) * 0.75);
 }
 
 .t007-input-field:has(.t007-input:is([type="password"], [type="text"]):is([data-filled], :-webkit-autofill, :not(:placeholder-shown))) .t007-input-password-meter {
@@ -554,7 +539,7 @@
   display: block;
   text-align: right;
   font-size: var(--t007-input-p-meter-font-size);
-  margin-top: 0.75rem;
+  margin-top: calc(var(--t007-input-unit) * 0.75);
   color: var(--t007-input-p-meter-current-color);
   line-height: normal;
 }

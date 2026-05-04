@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import type { t007InputElement, WordsInputProps, CE, WordsInputLenientModeProps as LMP } from "../types";
 import { Input } from "./Input";

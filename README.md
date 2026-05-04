@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A high-performance, zero-dependency vanilla JavaScript UI ecosystem and state management engine.
+A high-performance, vanilla JavaScript UI ecosystem and state management engine.
 
 Built for speed, modularity, and seamless developer experience, `t007-tools` provides enterprise-grade UI components and architecture without the bloat of heavy frameworks. In other words: Just a couple of tools for the web to help you where they can...
 
