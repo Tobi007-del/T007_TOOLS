@@ -8,10 +8,10 @@ class T007_Dialog {
     this.resolve = resolve;
     t007.dialogs.set((this.id = id ?? uid("t007_dialog_")), this);
     (this.rootElement = root?.isConnected ? root : document.body), (this.rootScoped = this.rootElement !== document.body), (this.scoped = this.rootScoped && scoped);
-    this.rootElement.append((this.dialog = createEl("dialog", { closedBy: by || (this.rootScoped ? "none" : "any"), className: `t007-dialog${this.rootScoped ? " t007-dialog-scoped" : ""}`, id: this.id })), this.rootScoped ? (this.backdrop = createEl("div", { className: "t007-dialog-backdrop", id: `${this.id}_backdrop` })) : null);
+    this.rootElement.append((this.dialog = createEl("dialog", { closedBy: by || (this.rootScoped ? "none" : "any"), className: `t007-dialog${this.rootScoped ? " t007-dialog-scoped" : ""}`, id: this.id })), this.rootScoped ? (this.backdrop = createEl("div", { className: "t007-dialog-backdrop", id: `${this.id}_backdrop` })) : "");
     this.dialog.addEventListener("cancel", this.cancel);
     initArrowNavigation(this.dialog, { enabled: true, rovingTab: false });
-    this.rootScoped && !by && initOutsideClick(this.dialog, { enabled: true, onOutsideClick: this.cancel, root: this.rootElement, scoped: this.scoped });
+    this.rootScoped && !by && initOutsideClick(this.dialog, { enabled: true, onOutside: this.cancel, root: this.rootElement, scoped: this.scoped });
   }
   show() {
     this.dialog[this.rootScoped ? "show" : "showModal"]();
@@ -40,7 +40,7 @@ class T007_Alert_Dialog extends T007_Dialog {
         <div class="t007-dialog-question">${message}</div>
       </div>
       <div class="t007-dialog-bottom-section">
-        <button type="button" data-autofocus data-arrow-item class="t007-dialog-confirm-button">${options.confirmText || "OK"}</button>
+        <button type="button" autofocus data-arrow-item class="t007-dialog-confirm-button">${options.confirmText || "OK"}</button>
       </div>
     `;
     this.dialog.querySelector(".t007-dialog-confirm-button").addEventListener("click", this.confirm);
@@ -58,7 +58,7 @@ class T007_Confirm_Dialog extends T007_Dialog {
         <div class="t007-dialog-question">${question}</div>
       </div>
       <div class="t007-dialog-bottom-section">
-        <button type="button" data-autofocus data-arrow-item class="t007-dialog-confirm-button">${options.confirmText || "OK"}</button>
+        <button type="button" autofocus data-arrow-item class="t007-dialog-confirm-button">${options.confirmText || "OK"}</button>
         <button type="button" data-arrow-item class="t007-dialog-cancel-button">${options.cancelText || "Cancel"}</button>
       </div>
     `;
@@ -73,7 +73,7 @@ class T007_Prompt_Dialog extends T007_Dialog {
     super(resolve, options), this.render(question, defaultValue, options);
   }
   async render(question, defaultValue, options) {
-    options = { ...options, value: defaultValue };
+    options = { autofocus: true, ...options, value: defaultValue };
     await loadResource(window.T007_INPUT_JS_SRC, "script");
     this.dialog.innerHTML = `
       <form class="t007-input-form" ${t007.field ? "novalidate" : ""}>

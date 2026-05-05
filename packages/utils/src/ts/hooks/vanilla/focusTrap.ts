@@ -4,9 +4,9 @@ import { NIL } from "sia-reactor";
 export interface FocusTrapConfig {
   /** Enables or disables the focus trap. Defaults to `false`. */
   enabled?: boolean;
-  /** The preferred initial focus target selector within the element. Defaults to `[data-autofocus]`. */
+  /** The preferred initial focus target selector within the element, overrides whatever was focused. Try `autofocus` attribute if working with dialogs before this. Defaults to `[data-autofocus]`. */
   initialSelector?: string;
-  /** The class name for the initial focus ring since programmatic focus is not always visible. Defaults to `"focus-outline"`. */
+  /** The class name for the initial focus ring since programmatic focus is not always visible, `autofocus` attribute in dialogs might work fine as an alternative. Defaults to `"focus-outline"`. */
   ringClassName?: string;
   /** Optional root used to scope focus listeners to an element instead of the window. Defaults to `window`. */
   root?: HTMLElement | Document | Window;
@@ -50,7 +50,7 @@ export function initFocusTrap(el: HTMLElement, { enabled = false, initialSelecto
   first.addEventListener("focus", (e) => (el.contains(e.relatedTarget as Node) ? edgeFocus(true) : resetFocus()), capture), el.prepend(first);
   last.addEventListener("focus", (e) => (el.contains(e.relatedTarget as Node) ? edgeFocus() : resetFocus(-1)), capture), el.append(last);
   root.addEventListener("focusin", handleFocusIn, capture);
-  if (!el.querySelector(":focus")) !initial ? setTimeout(resetFocus) : setTimeout(() => (initial.classList.add(ringClassName), initial.focus(), initial.addEventListener("blur", handleInitialBlur, capture)));
+  if (initial || !el.contains(focused)) !initial ? setTimeout(resetFocus) : setTimeout(() => (initial.classList.add(ringClassName), initial.focus(), initial.addEventListener("blur", handleInitialBlur, capture)));
   if (!stack.includes(el)) stack.push(el), stacks.set(root, stack);
 
   const destroy = () => {

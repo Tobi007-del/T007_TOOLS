@@ -20,7 +20,7 @@ window.playGame = async function () {
     await alert(message, { ...options, rootElement });
   }
   (async function init() {
-    let userChoice = await prompt("🎮 Would you like to play a game of Rock, Paper, Scissors? ✊ ✋ ✌️", "", { placeholder: "'y' for YES, 'n' for NO", required: true, rootElement });
+    let userChoice = await prompt("🎮 Would you like to play a game of Rock, Paper, Scissors? ✊ ✋ ✌️", "", { label: "Huh?", placeholder: "'y' for YES, 'n' for NO", required: true, rootElement });
     if (userChoice?.toLowerCase?.() === "y" || userChoice?.toUpperCase?.() === "YES") {
       await log("🔥 There are three rounds!!! 🔥");
       await playGame();
